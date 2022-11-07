@@ -9,7 +9,7 @@ RUN mvn -DskipTests -f /home/putaspelotas/pom.xml clean package
 #
 # Package stage
 #
-FROM openjdk:11-jre-slim
+FROM openjdk:8-jre-slim
 COPY --from=build /home/putaspelotas/target/putaspelotas-wc22-1.0.0.jar /usr/local/lib/putaspelotas-wc22.jar
 EXPOSE 8080
 ENTRYPOINT ["java","-Dspring.profiles.active=pro", "-jar","/usr/local/lib/putaspelotas-wc22.jar"]
