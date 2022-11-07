@@ -1,3 +1,4 @@
+# syntax = docker/dockerfile:1.2
 #
 # Build stage
 #
@@ -10,6 +11,7 @@ RUN mvn -DskipTests -f /home/putaspelotas/pom.xml clean package
 # Package stage
 #
 FROM openjdk:8-jre-slim
+RUN --mount=type=secret,id=application-pro.properties,dst=/src/main/resources/application-pro.properties
 COPY --from=build /home/putaspelotas/target/putaspelotas-wc22-1.0.0.jar /usr/local/lib/putaspelotas-wc22.jar
 EXPOSE 8080
-ENTRYPOINT ["java","-Dspring.profiles.active=pro", "-jar","/usr/local/lib/putaspelotas-wc22.jar", "--spring.config.additional-location=optional:/etc/secrets/application-pro.properties"]
+ENTRYPOINT ["java","-Dspring.profiles.active=pro", "-jar","/usr/local/lib/putaspelotas-wc22.jar"]
