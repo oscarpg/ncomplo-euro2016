@@ -1,6 +1,5 @@
 package org.jgayoso.ncomplo.web.controller;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jgayoso.ncomplo.business.entities.ForgotPasswordToken;
@@ -120,7 +119,23 @@ public class AuthController {
             redirectAttributes.addFlashAttribute("error", "Invalid invitation");
             return "redirect:/login?error";
     	}
-		
+
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (!(authentication instanceof AnonymousAuthenticationToken)) {
+			String currentPrincipalName = authentication.getName();
+
+			try {
+				User user = this.userService.registerLoggedUserFromInvitation(
+						invitation.getId(), currentPrincipalName, invitation.getLeague().getId());
+				if (user != null) {
+					return "redirect:/scoreboard";
+				}
+			} catch (final LeagueClosedException e) {
+				redirectAttributes.addFlashAttribute("error", "League is closed");
+				return "redirect:/login";
+			}
+		}
+
 		final UserInvitationBean userBean = new UserInvitationBean();
     	userBean.setEmail(invitation.getEmail());
     	userBean.setName(invitation.getName());
@@ -129,6 +144,35 @@ public class AuthController {
     	
     	return "invitation";
 		
+	}
+
+	@RequestMapping(method=RequestMethod.GET, value = "/authJoinLeague")
+	public String processInvitationGroupAuth(
+			@RequestParam("invitationId") final Integer invitationId,
+			final ModelMap model, final RedirectAttributes redirectAttributes) {
+
+		final Invitation invitation = this.invitationService.findById(invitationId);
+		if (invitation == null) {
+			logger.info("Invalid invitation " + invitationId);
+			redirectAttributes.addFlashAttribute("error", "Invalid invitation");
+			return "redirect:/login?error";
+		}
+
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication instanceof AnonymousAuthenticationToken) {
+			redirectAttributes.addFlashAttribute("error", "Authentication required");
+			return "redirect:/login";
+		}
+
+		try {
+			this.userService.registerLoggedUserFromInvitation(
+					invitation.getId(), authentication.getName(), invitation.getLeague().getId());
+		} catch (LeagueClosedException e) {
+			redirectAttributes.addFlashAttribute("error", "League is closed");
+			return "redirect:/login";
+		}
+
+		return "redirect:/scoreboard/"+invitation.getLeague().getId();
 	}
 	
 	@RequestMapping(method=RequestMethod.GET, value = "/invitation/{invitationId}/{leagueId}/{emailId}")
