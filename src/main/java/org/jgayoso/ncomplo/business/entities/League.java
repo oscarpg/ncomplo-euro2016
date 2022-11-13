@@ -63,6 +63,10 @@ public class League implements I18nNamedEntity {
 	@MapKey(name = "game")
 	private final Map<Game, LeagueGame> leagueGames = new LinkedHashMap<>();
 
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="GROUP_ID", nullable=true)
+	private LeagueGroup leagueGroup;
+
 	public League() {
 		super();
 	}
@@ -128,6 +132,14 @@ public class League implements I18nNamedEntity {
 
 	public Map<Game, LeagueGame> getLeagueGames() {
 		return this.leagueGames;
+	}
+
+	public LeagueGroup getLeagueGroup() {
+		return leagueGroup;
+	}
+
+	public void setLeagueGroup(LeagueGroup leagueGroup) {
+		this.leagueGroup = leagueGroup;
 	}
 
 }

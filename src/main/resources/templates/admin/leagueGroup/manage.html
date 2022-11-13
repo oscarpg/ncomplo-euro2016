@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+  <head th:substituteby="layout/header :: head"></head>
+  
+  <body>
+  
+    <header th:substituteby="layout/header :: header"></header>
+  
+    <div class="container">
+    
+        <header th:substituteby="layout/admin/header :: header"></header>
+  
+        <h1>Manage League Group</h1>
+        
+        <form th:action="@{save}" th:object="${leagueGroup}" method="post">
+        
+          <fieldset>
+            <input type="hidden" th:field="*{id}" />
+
+            <div>
+              <label for="nameInput">Name</label>
+              <input id="nameInput" type="text" th:field="*{name}" required="required" />
+            </div>
+          </fieldset>
+          
+          <fieldset>
+            <ul>
+              <li th:each="l : ${allLeagues}">
+                <input type="checkbox" th:field="*{leagueIds}" th:value="${l.id}" /><span th:text="${l.getName(#locale)}">League one</span>
+              </li>
+            </ul>
+          
+          </fieldset>
+          
+          <input type="submit" />
+          
+        </form>
+        
+        <a th:href="@{list}">Back to list of League Groups</a>
+        
+    </div>
+    
+  </body>
+  
+</html>
