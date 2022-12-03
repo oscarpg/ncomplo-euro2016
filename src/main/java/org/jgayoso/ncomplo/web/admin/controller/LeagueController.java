@@ -174,7 +174,7 @@ public class LeagueController {
 
 		this.leagueService.recomputeScores(leagueId);
 
-		if (toScoreboard) {
+		if (Boolean.TRUE.equals(toScoreboard)) {
 			return "redirect:/scoreboard/"+leagueId;
 		}
 		return "redirect:list";
