@@ -174,10 +174,16 @@ public class LeagueService {
 				gamesByRound.get(game.getRound()).add(game);
 			}
 		}
-		
+
+		Map<Game, LeagueGame> leagueGames = league.getLeagueGames();
 		for (final Entry<Round, List<Game>> roundGamesEntry: gamesByRound.entrySet()) {
 			final List<Game> games = roundGamesEntry.getValue();
-			final BetType betType = games.get(0).getDefaultBetType();
+			final BetType betType;
+			if (leagueGames.containsKey(games.get(0))) {
+				betType = leagueGames.get(games.get(0)).getBetType();
+			} else {
+				betType = games.get(0).getDefaultBetType();
+			}
 			TodayRoundGamesAndBetsView betView = null;
 			if (betType.isScoreMatter()) {
 				betView = this.processScoreMattersGames(leagueId, roundGamesEntry.getKey(), games);
