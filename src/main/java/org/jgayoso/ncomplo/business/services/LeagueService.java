@@ -160,9 +160,9 @@ public class LeagueService {
 	}
 
 	public TodayEventsView getTodayInformation(final Integer leagueId) {
-		
+
+		final League league = this.find(leagueId);
 		final List<TodayRoundGamesAndBetsView> roundsInfo = new ArrayList<>();
-		
 		final List<Game> todayGames = this.gameService.findNextGames(leagueId);
 		
 		final Map<Round, List<Game>> gamesByRound = new HashMap<Round, List<Game>>();
