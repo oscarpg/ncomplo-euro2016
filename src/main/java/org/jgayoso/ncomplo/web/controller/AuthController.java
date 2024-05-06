@@ -7,6 +7,7 @@ import org.jgayoso.ncomplo.business.entities.Invitation;
 import org.jgayoso.ncomplo.business.entities.User;
 import org.jgayoso.ncomplo.business.services.InvitationService;
 import org.jgayoso.ncomplo.business.services.UserService;
+import org.jgayoso.ncomplo.exceptions.InvalidLoginException;
 import org.jgayoso.ncomplo.exceptions.LeagueClosedException;
 import org.jgayoso.ncomplo.web.admin.beans.UserInvitationBean;
 import org.jgayoso.ncomplo.web.beans.ResetPasswordBean;
@@ -225,7 +226,11 @@ public class AuthController {
 		} catch (final LeagueClosedException e) {
 			redirectAttributes.addFlashAttribute("error", "League is closed");
 			return "redirect:/login";
+		} catch (final InvalidLoginException e) {
+			redirectAttributes.addFlashAttribute("error", "Invalid login");
+			return "redirect:/login";
 		}
+
 		redirectAttributes.addFlashAttribute("message", "You have joined to the league successfully");
 		return "redirect:/login";
 	}
@@ -252,8 +257,11 @@ public class AuthController {
 		} catch (final LeagueClosedException e) {
 			redirectAttributes.addFlashAttribute("error", "League is closed");
 			return "redirect:/login";
+		} catch (InvalidLoginException e) {
+			redirectAttributes.addFlashAttribute("error", "Invalid login");
+			return "redirect:/joinLeague/"+invitation.getToken();
 		}
-		
+
 		return "redirect:/login";
 	}
 

@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
@@ -19,6 +20,7 @@ import org.jgayoso.ncomplo.business.entities.repositories.LeagueRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.UserRepository;
 import org.jgayoso.ncomplo.business.util.IterableUtils;
 import org.jgayoso.ncomplo.exceptions.InternalErrorException;
+import org.jgayoso.ncomplo.exceptions.InvalidLoginException;
 import org.jgayoso.ncomplo.exceptions.LeagueClosedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +54,8 @@ public class UserService {
 
     @Value("${ncomplo.server.url}")
     private String baseUrl;
+
+    private static final Pattern loginPatter = Pattern.compile("^(?!none|others)[a-zA-Z0-9]*$");
     
     
     public UserService() {
@@ -101,7 +105,7 @@ public class UserService {
 
 	@Transactional
 	public User registerFromInvitation(final Integer invitationId, final String login, final String name, final String email,
-			final Integer leagueId, final String password) throws LeagueClosedException {
+			final Integer leagueId, final String password) throws LeagueClosedException, InvalidLoginException {
 		
 		final User existentUser = this.find(login);
 		
@@ -114,9 +118,15 @@ public class UserService {
 			this.acceptInvitation(invitationId, leagueId, existentUser);
 			return existentUser;
 		}
+
+		if (!loginPatter.matcher(login).matches()) {
+		    logger.warn("Invalid login "+ login);
+		    throw new InvalidLoginException(login);
+        }
+
 		final String hashedNewPassword = 
 				this.passwordEncryptor.encryptPassword(password);
-        
+
 		final User user = new User();
         user.setLogin(login);
         user.setName(name);
@@ -125,7 +135,6 @@ public class UserService {
         user.setActive(true);
         user.setPassword(hashedNewPassword);
         final User newUser = this.userRepository.save(user);
-
 
         newUser.getLeagues().add(league);
         league.getParticipants().add(newUser);
@@ -136,7 +145,7 @@ public class UserService {
         }
         return newUser;
 	}
-	
+
 	@Transactional
     public void acceptInvitation(final Integer invitationId, final Integer leagueId, final User user) {
 	    
@@ -165,6 +174,7 @@ public class UserService {
                 (!userExists? new User() : this.userRepository.findOne(login));
         
         user.setLogin(login);
+
         user.setName(name);
         user.setEmail(email);
         user.setAdmin(admin);

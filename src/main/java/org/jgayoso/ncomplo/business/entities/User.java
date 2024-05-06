@@ -13,7 +13,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 
-
 @Entity
 @Table(name="USER_DATA")
 public class User {
