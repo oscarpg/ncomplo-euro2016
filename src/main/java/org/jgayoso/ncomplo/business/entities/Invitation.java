@@ -97,6 +97,15 @@ public class Invitation {
 	public void setToken(final String token) {
 		this.token = token;
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return "Invitation{" +
+				"league=" + league +
+				", email='" + email + '\'' +
+				", name='" + name + '\'' +
+				", token='**********'" +
+				", adminLogin='" + adminLogin + '\'' +
+				'}';
+	}
 }

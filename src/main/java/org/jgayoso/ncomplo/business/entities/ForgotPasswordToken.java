@@ -54,4 +54,14 @@ public class ForgotPasswordToken {
     public void setToken(String token) {
         this.token = token;
     }
+
+    @Override
+    public String toString() {
+        return "ForgotPasswordToken{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", login='" + login + '\'' +
+                ", token='********'" +
+                '}';
+    }
 }

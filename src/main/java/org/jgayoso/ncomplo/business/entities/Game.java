@@ -214,11 +214,16 @@ public class Game implements DatedAndNamedEntity {
         return I18nUtils.getTextForLocale(locale, this.namesByLang, this.name);
     }
 
-
-
-
-
-
+    @Override
+    public String toString() {
+        return "Game{" +
+                "id=" + id +
+                ", round=" + round +
+                ", name='" + name + '\'' +
+                ", gameSideA=" + gameSideA +
+                ", gameSideB=" + gameSideB +
+                '}';
+    }
 
     public boolean isDateDefined() {
         return (this.date != null);
