@@ -21,20 +21,14 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 public class CompetitionController {
 
     private static final String VIEW_BASE = "admin/competition/";
-    
-    
+
     @Autowired
     private CompetitionService competitionService;
 
-    
-    
     public CompetitionController() {
         super();
     }
-    
 
-    
-    
     @RequestMapping("/list")
     public String list(final HttpServletRequest request, final ModelMap model) {
         final List<Competition> competitions =
@@ -43,8 +37,6 @@ public class CompetitionController {
         return VIEW_BASE + "list";
     }
 
-    
-    
     @RequestMapping("/manage")
     public String manage(
             @RequestParam(value="id",required=false)
@@ -72,8 +64,6 @@ public class CompetitionController {
         
     }
 
-    
-    
     @RequestMapping("/save")
 	public String save(final CompetitionBean competitionBean, final BindingResult bindingResult) {
 
@@ -85,8 +75,6 @@ public class CompetitionController {
         
     }
 
-    
-    
     @RequestMapping("/delete")
     public String delete(
             @RequestParam(value="id")

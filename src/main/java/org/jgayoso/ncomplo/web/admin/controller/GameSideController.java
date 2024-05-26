@@ -30,19 +30,11 @@ public class GameSideController {
     
     @Autowired
     private GameSideService gameSideService;
-
-    
-    
     
     public GameSideController() {
         super();
     }
-    
 
-
-
-    
-    
     @RequestMapping("/list")
     public String list(
             @PathVariable("competitionId") final Integer competitionId, 
@@ -58,8 +50,6 @@ public class GameSideController {
         return VIEW_BASE + "list";
         
     }
-
-    
     
     @RequestMapping("/manage")
     public String manage(
@@ -87,18 +77,11 @@ public class GameSideController {
         
     }
 
-    
-    
     @RequestMapping("/save")
-    public String save(
-            final GameSideBean gameSideBean,
-            final BindingResult bindingResult,
-            @PathVariable("competitionId")
-            final Integer competitionId) {
+    public String save(final GameSideBean gameSideBean, final BindingResult bindingResult) {
 
         this.gameSideService.save(
                 gameSideBean.getId(),
-                competitionId,
                 gameSideBean.getName(),
                 LangBean.mapFromList(gameSideBean.getNamesByLang()),
                 gameSideBean.getCode());

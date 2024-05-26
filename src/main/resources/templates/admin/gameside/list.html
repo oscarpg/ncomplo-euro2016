@@ -11,7 +11,7 @@
   
         <header th:substituteby="layout/admin/header :: header"></header>
   
-        <h1>Teams/Players for competition "<span th:text="${competition.getName(#locale)}">competition</span>"</h1>
+        <h1>Teams</h1>
         
         <a th:href="@{manage}">Create new</a>
         <table class="table table-striped table-bordered">
@@ -21,8 +21,8 @@
             <td><a th:href="@{delete(id=${gs.id})}" onclick="return confirm('Sure?');">delete team/player</a></td>
           </tr>
         </table>
-        
-        <a th:href="@{../../list}">Back to list of Competitions</a>
+
+        <a th:href="@{..}">Back to Admin Home</a>
         
     </div> 
 

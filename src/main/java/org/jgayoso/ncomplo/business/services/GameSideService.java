@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.jgayoso.ncomplo.business.entities.Competition;
 import org.jgayoso.ncomplo.business.entities.GameSide;
 import org.jgayoso.ncomplo.business.entities.repositories.CompetitionRepository;
@@ -14,7 +15,6 @@ import org.jgayoso.ncomplo.business.util.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 
 @Service
@@ -48,46 +48,63 @@ public class GameSideService {
         Collections.sort(gameSides, new I18nNamedEntityComparator(locale));
         return gameSides;
     }
-
     
     @Transactional
     public GameSide save(
             final Integer id,
-            final Integer competitionId,
             final String name,
             final Map<String,String> namesByLang,
             final String code) {
 
-        final Competition competition = 
-                this.competitionRepository.findOne(competitionId);
-                
         final GameSide gameSide =
                 (id == null? new GameSide() : this.gameSideRepository.findOne(id));
-        
-        gameSide.setCompetition(competition);
+
         gameSide.setName(name);
         gameSide.getNamesByLang().clear();
         gameSide.getNamesByLang().putAll(namesByLang);
         gameSide.setCode(code);
         
         if (id == null) {
-            competition.getGameSides().add(gameSide);
             return this.gameSideRepository.save(gameSide);
         }
         return gameSide;
-        
     }
-    
-    
-    
+
+    @Transactional
+    public GameSide addCompetition(final Integer id, final Competition competition) {
+
+        final GameSide gameSide = this.gameSideRepository.findOne(id);
+        if (gameSide == null) {
+            return null;
+        }
+
+        gameSide.getCompetitions().add(competition);
+        return this.gameSideRepository.save(gameSide);
+    }
+
+    @Transactional
+    public GameSide removeCompetition(final Integer id, final Competition competition) {
+
+        final GameSide gameSide = this.gameSideRepository.findOne(id);
+        if (gameSide == null) {
+            return null;
+        }
+
+        gameSide.getCompetitions().remove(competition);
+        return this.gameSideRepository.save(gameSide);
+    }
+
     @Transactional
     public void delete(final Integer gameSideId) {
         
-        final GameSide gameSide = 
-                this.gameSideRepository.findOne(gameSideId);
-        final Competition competition = gameSide.getCompetition();
+        final GameSide gameSide = this.gameSideRepository.findOne(gameSideId);
+        if (CollectionUtils.isNotEmpty(gameSide.getCompetitions())) {
+            return;
+        }
+
+        this.gameSideRepository.delete(gameSideId);
         
-        competition.getRounds().remove(gameSide);
+
         
     }
 

@@ -11,7 +11,7 @@
   
         <header th:substituteby="layout/admin/header :: header"></header>
 
-        <h1>Manage Team/Player in competition "<span th:text="${competition.getName(#locale)}">One Competition</span>"</h1>
+        <h1>Manage Team</h1>
         
         <form th:action="@{save}" th:object="${gameSide}">
         
@@ -40,13 +40,13 @@
               <label for="codeInput">Code</label>
               <input id="codeInput" type="text" th:field="*{code}" required="required" />
             </div>
-            
+
           </fieldset>
           
           <input type="submit" />
           
         </form>
-        
+
         <a th:href="@{list}">Back to list of Game Sides</a>
         
     </div>

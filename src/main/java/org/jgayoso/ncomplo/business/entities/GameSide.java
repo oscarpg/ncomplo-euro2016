@@ -1,21 +1,8 @@
 package org.jgayoso.ncomplo.business.entities;
 
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.jgayoso.ncomplo.business.util.I18nUtils;
 
@@ -24,16 +11,13 @@ import org.jgayoso.ncomplo.business.util.I18nUtils;
 @Table(name="GAME_SIDE")
 public class GameSide implements I18nNamedEntity {
 
-    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    
     @Column(name="NAME",nullable=false,length=200)
     private String name;
-    
-    
+
     @ElementCollection(fetch=FetchType.LAZY,targetClass=java.lang.String.class)
     @CollectionTable(name="GAME_SIDE_NAME_I18N",joinColumns=@JoinColumn(name="GAME_SIDE_ID"))
     @MapKeyColumn(name="LANG",nullable=false,length=20)
@@ -42,49 +26,34 @@ public class GameSide implements I18nNamedEntity {
     
     @Column(name="CODE", nullable=false, length=5, unique=true)
     private String code;
-    
-    @ManyToOne
-    @JoinColumn(name="COMPETITION_ID",nullable=false)
-    private Competition competition;
 
+    @ManyToMany(mappedBy="gameSides")
+    private Set<Competition> competitions = new LinkedHashSet<>();
 
-    
     public GameSide() {
         super();
     }
-
-
 
     @Override
     public String getName() {
         return this.name;
     }
 
-
-
     public void setName(final String name) {
         this.name = name;
     }
 
-
-
-    public Competition getCompetition() {
-        return this.competition;
+    public Set<Competition> getCompetitions() {
+        return this.competitions;
     }
 
-
-
-    public void setCompetition(final Competition competition) {
-        this.competition = competition;
+    public void setCompetitions(final Set<Competition> competitions) {
+        this.competitions = competitions;
     }
-
-
 
     public Integer getId() {
         return this.id;
     }
-
-
 
     @Override
     public Map<String, String> getNamesByLang() {
@@ -107,8 +76,6 @@ public class GameSide implements I18nNamedEntity {
 
     @Override
     public String toString() {
-        return "GameSide{" +
-                "name='" + name + '\'' +
-                '}';
+        return "GameSide{name='" + name + "\' }";
     }
 }
