@@ -5,9 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 
-import org.apache.poi.hssf.util.CellReference;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jgayoso.ncomplo.business.entities.Bet;
@@ -22,6 +19,7 @@ import org.jgayoso.ncomplo.business.entities.repositories.GameRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.GameSideRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.LeagueRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.UserRepository;
+import org.jgayoso.ncomplo.business.util.ExcelProcessor;
 import org.jgayoso.ncomplo.business.views.BetView;
 import org.jgayoso.ncomplo.exceptions.InternalErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,7 +162,8 @@ public class BetService {
         // Groups games
         int matchNumber = 1;
         for (int rowIndex = 7; rowIndex < 55; rowIndex++) {
-            final BetView betView = this.processGroupsGameBet(sheet, rowIndex, matchNumber, gamesByOrder, betViewssByGameId);
+            final BetView betView = ExcelProcessor.processGroupsGameBet(sheet, rowIndex, matchNumber,
+                    this.groupsFirstColumnName, gamesByOrder, betViewssByGameId);
             // If betId is not null, update the current bet instance
             final Integer betId = betIdsByGameId.get(betView.getGameId());
 
@@ -175,8 +174,8 @@ public class BetService {
 
         // Second round
         for (int rowIndex = 10; rowIndex < 40; rowIndex += 4) {
-            final BetView betView = this.processPlayOffGameBet(sheet, rowIndex, matchNumber, this.secondRoundColumnName,
-                    gamesByOrder, betViewssByGameId, gameSidesByName);
+            final BetView betView = ExcelProcessor.processPlayOffGameBet(sheet, rowIndex, matchNumber,
+                    this.secondRoundColumnName, gamesByOrder, betViewssByGameId, gameSidesByName);
             // If betId is not null, update the current bet instance
             final Integer betId = betIdsByGameId.get(betView.getGameId());
             this.save(betId, leagueId, login, betView.getGameId(), betView.getGameSideAId(),
@@ -186,7 +185,7 @@ public class BetService {
 
         // Quarter final round
         for (int rowIndex = 12; rowIndex < 40; rowIndex += 8) {
-            final BetView betView = this.processPlayOffGameBet(sheet, rowIndex, matchNumber, this.quarterFinalsColumnName,
+            final BetView betView = ExcelProcessor.processPlayOffGameBet(sheet, rowIndex, matchNumber, this.quarterFinalsColumnName,
                     gamesByOrder, betViewssByGameId, gameSidesByName);
             // If betId is not null, update the current bet instance
             final Integer betId = betIdsByGameId.get(betView.getGameId());
@@ -196,7 +195,7 @@ public class BetService {
         }
         // Semifinal round
         for (int rowIndex = 16; rowIndex < 40; rowIndex += 16) {
-            final BetView betView = this.processPlayOffGameBet(sheet, rowIndex, matchNumber, this.semisColumnName,
+            final BetView betView = ExcelProcessor.processPlayOffGameBet(sheet, rowIndex, matchNumber, this.semisColumnName,
                     gamesByOrder, betViewssByGameId, gameSidesByName);
             // If betId is not null, update the current bet instance
             final Integer betId = betIdsByGameId.get(betView.getGameId());
@@ -206,7 +205,7 @@ public class BetService {
         }
 
         // Final
-        final BetView betView = this.processPlayOffGameBet(sheet, 23, matchNumber, this.finalColumnName,
+        final BetView betView = ExcelProcessor.processPlayOffGameBet(sheet, 23, matchNumber, this.finalColumnName,
                 gamesByOrder, betViewssByGameId, gameSidesByName);
         // If betId is not null, update the current bet instance
         final Integer betId = betIdsByGameId.get(betView.getGameId());
@@ -214,75 +213,7 @@ public class BetService {
                 betView.getGameSideBId(), betView.getScoreA(), betView.getScoreB());
     }
 
-    private BetView processGroupsGameBet(final XSSFSheet sheet, final int rowIndex, final int matchNumber,
-            final Map<Integer, Game> gamesByOrder,
-            final Map<Integer, BetView> betsByGameId) {
-        
-        final CellReference cellReference = new CellReference(this.groupsFirstColumnName + rowIndex);
-        final Row row = sheet.getRow(cellReference.getRow());
-        final Cell homeResultCell = row.getCell(cellReference.getCol() + 1);
-        final Cell awayResultCell = row.getCell(cellReference.getCol() + 2);
-        
-        final int homeResult = Double.valueOf(homeResultCell.getNumericCellValue()).intValue();
-        final int awayResult = Double.valueOf(awayResultCell.getNumericCellValue()).intValue();
-        
-        final Game game = gamesByOrder.get(Integer.valueOf(matchNumber));
-        final BetView betView = betsByGameId.get(game.getId());
-        betView.setScoreA(Integer.valueOf(homeResult));
-        betView.setScoreB(Integer.valueOf(awayResult));
-        return betView;
-    }
-    
-    private BetView processPlayOffGameBet(final XSSFSheet sheet, final int rowIndex, final int matchNumber,
-            final String columnName, final Map<Integer, Game> gamesByOrder,
-            final Map<Integer, BetView> betsByGameId,
-            final Map<String, GameSide> gameSidesByName) {
-    	
-    	final CellReference homeCellReference = new CellReference(columnName + rowIndex);
-    	final Row homeRow = sheet.getRow(homeCellReference.getRow());
-    	final Cell homeTeamCell = homeRow.getCell(homeCellReference.getCol());
-    	final Cell homeResultCell = homeRow.getCell(homeCellReference.getCol() + 1);
-        final Cell extraTimeHomeResultCell = homeRow.getCell(homeCellReference.getCol() + 2);
-        final Cell penaltiesHomeResultCell = homeRow.getCell(homeCellReference.getCol() + 3);
-    	final String homeTeamName = homeTeamCell.getStringCellValue();
-    	int homeResult = Double.valueOf(homeResultCell.getNumericCellValue()).intValue();
-    	final int extraTimeHomeResult = Double.valueOf(extraTimeHomeResultCell.getNumericCellValue()).intValue();
-        final int penaltiesHomeResult = Double.valueOf(penaltiesHomeResultCell.getNumericCellValue()).intValue();
-    	
-    	final CellReference awayCellReference = new CellReference(columnName + (rowIndex + 1));
-    	final Row awayRow = sheet.getRow(awayCellReference.getRow());
-    	final Cell awayTeamCell = awayRow.getCell(awayCellReference.getCol());
-    	final Cell awayResultCell = awayRow.getCell(awayCellReference.getCol() + 1);
-        final Cell extraTimeAwayResultCell = awayRow.getCell(homeCellReference.getCol() + 2);
-        final Cell penaltiesAwayResultCell = awayRow.getCell(homeCellReference.getCol() + 3);
-    	final String awayTeamName = awayTeamCell.getStringCellValue();
-    	int awayResult = Double.valueOf(awayResultCell.getNumericCellValue()).intValue();
-        final int extraTimeAwayResult = Double.valueOf(extraTimeAwayResultCell.getNumericCellValue()).intValue();
-        final int penaltiesAwayResult = Double.valueOf(penaltiesAwayResultCell.getNumericCellValue()).intValue();
-    	
-        final Integer gameSideAId =
-                gameSidesByName.get(homeTeamName) == null ? null : gameSidesByName.get(homeTeamName).getId();
-        final Integer gameSideBId =
-                gameSidesByName.get(awayTeamName) == null ? null : gameSidesByName.get(awayTeamName).getId();
-    	
-    	final Game game = gamesByOrder.get(Integer.valueOf(matchNumber));
-    	final BetView betView = betsByGameId.get(game.getId());
-    	betView.setGameSideAId(gameSideAId);
-    	betView.setGameSideBId(gameSideBId);
 
-    	if (homeResult == awayResult) {
-    	    // We need to parse the extra time and maybe penalties results
-            if (extraTimeHomeResult == extraTimeAwayResult) {
-                // Penalties
-                homeResult = penaltiesHomeResult > penaltiesAwayResult ? 1 : 0;
-                awayResult = homeResult == 1 ? 0 : 1;
-            }
-        }
-
-    	betView.setScoreA(Integer.valueOf(homeResult));
-    	betView.setScoreB(Integer.valueOf(awayResult));
-    	return betView;
-    }
     
     @Transactional
     public Bet save(

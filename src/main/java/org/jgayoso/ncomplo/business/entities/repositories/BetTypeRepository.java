@@ -12,6 +12,7 @@ public interface BetTypeRepository
         extends PagingAndSortingRepository<BetType,Integer> {
     
     public List<BetType> findByCompetitionId(final Integer competitionId);
+    public BetType findByCompetitionIdAndName(final Integer competitionId, final String name);
     
 }
     

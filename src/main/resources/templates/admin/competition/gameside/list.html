@@ -14,6 +14,14 @@
         <h1>Teams/Players for competition "<span th:text="${competition.getName(#locale)}">competition</span>"</h1>
         
         <a th:href="@{manage}">Create new</a>
+
+        <section>
+            <form method="POST" enctype="multipart/form-data" th:action="@{upload}">
+                <input type="hidden" th:value="${competition.id}" name="id" />
+                <span><input type="file" name="file" /></span>
+                <p><input type="submit" class="btn btn-primary" value="Upload Teams from Excel" /></p>
+            </form>
+        </section>
         <table class="table table-striped table-bordered">
           <tr th:each="gs : ${allGameSides}">
             <td th:text="${gs.getName(#locale)}">name of team/player</td>
@@ -21,7 +29,14 @@
             <td><a th:href="@{delete(id=${gs.id})}" onclick="return confirm('Sure?');">delete team/player</a></td>
           </tr>
         </table>
-        
+
+        <section>
+            <form method="POST" th:action="@{deleteAll}">
+                <input type="hidden" th:value="${competition.id}" name="competitionId" />
+                <p><input type="submit" class="btn btn-primary" value="Delete All" onclick="return confirm('Sure?');" /></p>
+            </form>
+        </section>
+
         <a th:href="@{../../list}">Back to list of Competitions</a>
         
     </div> 
