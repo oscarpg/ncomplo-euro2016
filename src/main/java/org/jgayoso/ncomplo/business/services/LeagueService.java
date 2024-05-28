@@ -3,20 +3,8 @@ package org.jgayoso.ncomplo.business.services;
 import java.util.*;
 import java.util.Map.Entry;
 
-import org.jgayoso.ncomplo.business.entities.Bet;
-import org.jgayoso.ncomplo.business.entities.BetType;
-import org.jgayoso.ncomplo.business.entities.Competition;
-import org.jgayoso.ncomplo.business.entities.Game;
-import org.jgayoso.ncomplo.business.entities.GameSide;
-import org.jgayoso.ncomplo.business.entities.League;
-import org.jgayoso.ncomplo.business.entities.LeagueGame;
-import org.jgayoso.ncomplo.business.entities.Round;
-import org.jgayoso.ncomplo.business.entities.User;
-import org.jgayoso.ncomplo.business.entities.repositories.BetRepository;
-import org.jgayoso.ncomplo.business.entities.repositories.BetTypeRepository;
-import org.jgayoso.ncomplo.business.entities.repositories.CompetitionRepository;
-import org.jgayoso.ncomplo.business.entities.repositories.GameRepository;
-import org.jgayoso.ncomplo.business.entities.repositories.LeagueRepository;
+import org.jgayoso.ncomplo.business.entities.*;
+import org.jgayoso.ncomplo.business.entities.repositories.*;
 import org.jgayoso.ncomplo.business.util.I18nNamedEntityComparator;
 import org.jgayoso.ncomplo.business.util.IterableUtils;
 import org.jgayoso.ncomplo.business.views.ScoreMatterBetView;
@@ -47,6 +35,8 @@ public class LeagueService {
 
 	@Autowired
 	private BetRepository betRepository;
+	@Autowired
+	private InvitationRepository invitationRepository;
 	
 	@Autowired
 	private EmailService emailService;
@@ -128,6 +118,11 @@ public class LeagueService {
 
 	@Transactional
 	public void delete(final Integer leagueId) {
+		final League league = this.leagueRepository.findOne(leagueId);
+		if (league == null) {
+			return;
+		}
+		invitationRepository.deleteByLeagueId(leagueId);
 		this.leagueRepository.delete(leagueId);
 	}
 

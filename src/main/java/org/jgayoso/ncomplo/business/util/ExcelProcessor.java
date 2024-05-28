@@ -35,7 +35,6 @@ public class ExcelProcessor {
     public static final String GROUPS_NAME = "Groups";
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd,yyyy");
     public static final SimpleDateFormat PLAYOFF_DATE_FORMAT = new SimpleDateFormat("MMM dd, yyyy   HH:ss");
-//    Jul 1, 2024   21:00
 
     public static BetView processGroupsGameBet(final XSSFSheet sheet, final int rowIndex, final int matchNumber,
                                                final String columnName, final Map<Integer, Game> gamesByOrder,
