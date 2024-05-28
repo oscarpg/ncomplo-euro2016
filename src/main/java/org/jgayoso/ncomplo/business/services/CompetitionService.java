@@ -1,12 +1,17 @@
 package org.jgayoso.ncomplo.business.services;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.*;
 
-import org.jgayoso.ncomplo.business.entities.Competition;
+import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jgayoso.ncomplo.business.entities.*;
 import org.jgayoso.ncomplo.business.entities.repositories.CompetitionRepository;
+import org.jgayoso.ncomplo.business.util.ExcelProcessor;
 import org.jgayoso.ncomplo.business.util.I18nNamedEntityComparator;
 import org.jgayoso.ncomplo.business.util.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +22,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CompetitionService {
-    
-    
+
+    private static final Logger logger = Logger.getLogger(CompetitionService.class);
+
+
     @Autowired
     private CompetitionRepository competitionRepository;
+    @Autowired
+    private GameSideService gameSideService;
+
+    @Autowired
+    private GameService gameService;
+
+    @Autowired
+    private BetTypeService betTypeService;
+    @Autowired
+    private RoundService roundService;
     
     
     
@@ -66,12 +83,10 @@ public class CompetitionService {
         
     }
     
-
-    
     @Transactional
     public void delete(final Integer competitionId) {
         this.competitionRepository.delete(competitionId);
     }
 
-    
+
 }

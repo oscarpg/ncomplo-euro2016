@@ -1,5 +1,8 @@
 package org.jgayoso.ncomplo.web.admin.controller;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,13 +12,20 @@ import org.jgayoso.ncomplo.business.services.CompetitionService;
 import org.jgayoso.ncomplo.business.services.GameSideService;
 import org.jgayoso.ncomplo.web.admin.beans.GameSideBean;
 import org.jgayoso.ncomplo.web.admin.beans.LangBean;
+import org.jgayoso.ncomplo.web.admin.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 @Controller
@@ -107,7 +117,15 @@ public class GameSideController {
         
     }
 
-    
+    @RequestMapping("/deleteAll")
+    public String deleteAll(
+            @RequestParam(value="competitionId")
+            final Integer competitionId) {
+
+        this.gameSideService.deleteAll(competitionId);
+        return "redirect:list";
+
+    }
     
     @RequestMapping("/delete")
     public String delete(
@@ -118,6 +136,38 @@ public class GameSideController {
         return "redirect:list";
         
     }
-    
+
+    @RequestMapping(method = RequestMethod.POST, value = "/upload")
+    public String uploadGameSides(@RequestParam("file") final MultipartFile file,
+                                    @RequestParam(value="id") final Integer id,
+                                    final HttpServletRequest request,
+                                    final RedirectAttributes redirectAttributes){
+
+        final Authentication auth = SecurityContextHolder.getContext()
+                .getAuthentication();
+        if (auth instanceof AnonymousAuthenticationToken) {
+            return "error";
+        }
+        final String login = auth.getName();
+
+        File competitionFile = null;
+        try {
+            competitionFile = FileUtils.convert("gameside", file, login);
+            if (!competitionFile.exists() || competitionFile.length() == 0) {
+                redirectAttributes.addFlashAttribute("error", "Empty file");
+                return "redirect:list";
+            }
+            this.gameSideService.processFile(id, login, competitionFile);
+        } catch (final IOException e) {
+            redirectAttributes.addFlashAttribute("error", "Error processing game sides file");
+        } finally {
+            // delete file
+            if (competitionFile != null) {
+                competitionFile.delete();
+            }
+        }
+        redirectAttributes.addFlashAttribute("message", "Game sides processed successfully");
+        return "redirect:list";
+    }
     
 }

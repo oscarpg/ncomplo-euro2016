@@ -137,5 +137,12 @@ public class Competition implements I18nNamedEntity {
 	public void setUpdaterUri(final String updaterUri) {
 		this.updaterUri = updaterUri;
 	}
-    
+
+    @Override
+    public String toString() {
+        return "Competition{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

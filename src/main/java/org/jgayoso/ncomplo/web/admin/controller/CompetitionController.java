@@ -1,5 +1,8 @@
 package org.jgayoso.ncomplo.web.admin.controller;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +17,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 @Controller
@@ -71,8 +75,6 @@ public class CompetitionController {
         return VIEW_BASE + "manage";
         
     }
-
-    
     
     @RequestMapping("/save")
 	public String save(final CompetitionBean competitionBean, final BindingResult bindingResult) {
@@ -86,7 +88,6 @@ public class CompetitionController {
     }
 
     
-    
     @RequestMapping("/delete")
     public String delete(
             @RequestParam(value="id")
@@ -96,6 +97,5 @@ public class CompetitionController {
         return "redirect:list";
         
     }
-    
     
 }

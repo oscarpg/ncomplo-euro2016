@@ -130,4 +130,14 @@ public class League implements I18nNamedEntity {
 		return this.leagueGames;
 	}
 
+	@Override
+	public String toString() {
+		return "League{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", active=" + active +
+				", competition=" + competition +
+				", adminEmail='" + adminEmail + '\'' +
+				'}';
+	}
 }

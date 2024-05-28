@@ -12,6 +12,8 @@ public interface RoundRepository
         extends PagingAndSortingRepository<Round,Integer> {
     
     public List<Round> findByCompetitionId(final Integer competitionId);
+
+    public Round findByCompetitionIdAndName(final Integer competitionId, String name);
     
 }
     

@@ -166,7 +166,13 @@ public class BetType implements I18nNamedEntity {
     }
 
 
-    
-    
-    
+    @Override
+    public String toString() {
+        return "BetType{" +
+                "name='" + name + '\'' +
+                ", sidesMatter=" + sidesMatter +
+                ", scoreMatter=" + scoreMatter +
+                ", resultMatter=" + resultMatter +
+                '}';
+    }
 }

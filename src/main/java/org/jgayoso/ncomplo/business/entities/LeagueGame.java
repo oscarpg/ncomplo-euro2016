@@ -88,10 +88,18 @@ public class LeagueGame {
     public Integer getId() {
         return this.id;
     }
-    
-    
-    
-    
+
+
+    @Override
+    public String toString() {
+        return "LeagueGame{" +
+                "id=" + id +
+                ", league=" + league +
+                ", game=" + game +
+                ", betType=" + betType +
+                '}';
+    }
+
     public static final class LeagueGameComparator implements Comparator<LeagueGame> {
         
         

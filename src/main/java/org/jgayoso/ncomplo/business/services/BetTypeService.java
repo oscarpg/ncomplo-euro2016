@@ -39,6 +39,10 @@ public class BetTypeService {
     public BetType find(final Integer id) {
         return this.betTypeRepository.findOne(id);
     }
+
+    public BetType findByName(final Integer competitionId, String name) {
+        return this.betTypeRepository.findByCompetitionIdAndName(competitionId, name);
+    }
     
     
     @Transactional

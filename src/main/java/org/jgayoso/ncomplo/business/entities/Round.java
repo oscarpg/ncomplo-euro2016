@@ -119,5 +119,10 @@ public class Round implements Comparable<Round> {
 		return true;
 	}
 
-	
+	@Override
+	public String toString() {
+		return "Round{" +
+				"name='" + name + '\'' +
+				'}';
+	}
 }

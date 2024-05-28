@@ -3,6 +3,7 @@ package org.jgayoso.ncomplo.web.admin.beans;
 import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 public class UserInvitationBean implements Serializable {
 	
@@ -12,6 +13,7 @@ public class UserInvitationBean implements Serializable {
 	private Integer invitationId;
 	
 	@NotNull
+	@Pattern(regexp = "^(?!none|others)[a-zA-Z0-9]*$")
     private String login;
     
     @NotNull

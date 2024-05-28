@@ -13,7 +13,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 
-
 @Entity
 @Table(name="USER_DATA")
 public class User {
@@ -119,12 +118,19 @@ public class User {
     public void setActive(final boolean active) {
         this.active = active;
     }
-    
-    
-    
-    
-    
-    
+
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "login='" + login + '\'' +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", admin=" + admin +
+                ", active=" + active +
+                '}';
+    }
+
     public static final class UserComparator implements Comparator<User> {
         
         private final Locale locale;

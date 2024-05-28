@@ -7,6 +7,7 @@ import org.jgayoso.ncomplo.business.entities.Invitation;
 import org.jgayoso.ncomplo.business.entities.User;
 import org.jgayoso.ncomplo.business.services.InvitationService;
 import org.jgayoso.ncomplo.business.services.UserService;
+import org.jgayoso.ncomplo.exceptions.InvalidLoginException;
 import org.jgayoso.ncomplo.exceptions.LeagueClosedException;
 import org.jgayoso.ncomplo.web.admin.beans.UserInvitationBean;
 import org.jgayoso.ncomplo.web.beans.ResetPasswordBean;
@@ -145,6 +146,35 @@ public class AuthController {
     	return "invitation";
 		
 	}
+
+	@RequestMapping(method=RequestMethod.GET, value = "/authJoinLeague")
+	public String processInvitationGroupAuth(
+			@RequestParam("invitationId") final Integer invitationId,
+			final ModelMap model, final RedirectAttributes redirectAttributes) {
+
+		final Invitation invitation = this.invitationService.findById(invitationId);
+		if (invitation == null) {
+			logger.info("Invalid invitation " + invitationId);
+			redirectAttributes.addFlashAttribute("error", "Invalid invitation");
+			return "redirect:/login?error";
+		}
+
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication instanceof AnonymousAuthenticationToken) {
+			redirectAttributes.addFlashAttribute("error", "Authentication required");
+			return "redirect:/login";
+		}
+
+		try {
+			this.userService.registerLoggedUserFromInvitation(
+					invitation.getId(), authentication.getName(), invitation.getLeague().getId());
+		} catch (LeagueClosedException e) {
+			redirectAttributes.addFlashAttribute("error", "League is closed");
+			return "redirect:/login";
+		}
+
+		return "redirect:/scoreboard/"+invitation.getLeague().getId();
+	}
 	
 	@RequestMapping(method=RequestMethod.GET, value = "/invitation/{invitationId}/{leagueId}/{emailId}")
     public String processInvitation(
@@ -196,7 +226,11 @@ public class AuthController {
 		} catch (final LeagueClosedException e) {
 			redirectAttributes.addFlashAttribute("error", "League is closed");
 			return "redirect:/login";
+		} catch (final InvalidLoginException e) {
+			redirectAttributes.addFlashAttribute("error", "Invalid login");
+			return "redirect:/login";
 		}
+
 		redirectAttributes.addFlashAttribute("message", "You have joined to the league successfully");
 		return "redirect:/login";
 	}
@@ -223,8 +257,11 @@ public class AuthController {
 		} catch (final LeagueClosedException e) {
 			redirectAttributes.addFlashAttribute("error", "League is closed");
 			return "redirect:/login";
+		} catch (InvalidLoginException e) {
+			redirectAttributes.addFlashAttribute("error", "Invalid login");
+			return "redirect:/joinLeague/"+invitation.getToken();
 		}
-		
+
 		return "redirect:/login";
 	}
 

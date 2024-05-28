@@ -47,6 +47,11 @@ public class RoundService {
         return rounds;
     }
 
+    @Transactional
+    public Round findByCompetitionIdAndName(final Integer competitionId, final String name) {
+        return this.roundRepository.findByCompetitionIdAndName(competitionId, name);
+    }
+
     
     @Transactional
     public Round save(

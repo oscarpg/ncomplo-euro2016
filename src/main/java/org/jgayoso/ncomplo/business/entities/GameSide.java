@@ -105,4 +105,11 @@ public class GameSide implements I18nNamedEntity {
 		this.code = code;
 	}
 
+    @Override
+    public String toString() {
+        return "GameSide{" +
+                "name='" + name + '\'' +
+                " code='" + code + '\'' +
+                '}';
+    }
 }

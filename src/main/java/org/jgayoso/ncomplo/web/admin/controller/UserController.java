@@ -92,7 +92,12 @@ public class UserController {
     @RequestMapping("/save")
     public String save(
             final UserBean userBean,
-            @SuppressWarnings("unused") final BindingResult bindingResult) {
+            final BindingResult errors) {
+
+        if (errors.hasErrors()) {
+            errors.getAllErrors().forEach(System.out::println);
+            return "redirect:/error";
+        }
 
         this.userService.save(
                 userBean.getLogin(),

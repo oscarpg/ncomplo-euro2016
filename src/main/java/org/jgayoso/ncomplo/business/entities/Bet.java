@@ -347,8 +347,18 @@ public class Bet {
     }
 
 
-
-
+    @Override
+    public String toString() {
+        return "Bet{" +
+                "user=" + user +
+                ", league=" + league +
+                ", game=" + game +
+                ", gameSideA=" + gameSideA +
+                ", gameSideB=" + gameSideB +
+                ", scoreA=" + scoreA +
+                ", scoreB=" + scoreB +
+                '}';
+    }
 
     public void evaluate() {
         
