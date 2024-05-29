@@ -6,19 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.jgayoso.ncomplo.business.util.I18nUtils;
 
@@ -64,10 +52,10 @@ public class Competition implements I18nNamedEntity {
     
     @OneToMany(cascade=CascadeType.ALL,orphanRemoval=true,mappedBy="competition")
     private final Set<Game> games = new LinkedHashSet<>();
-    
-    
-    
-    
+
+    @OneToOne(mappedBy="competition", orphanRemoval=true)
+    private CompetitionParserProperties competitionParserProperties;
+
     public Competition() {
         super();
     }
@@ -137,6 +125,14 @@ public class Competition implements I18nNamedEntity {
 	public void setUpdaterUri(final String updaterUri) {
 		this.updaterUri = updaterUri;
 	}
+
+    public CompetitionParserProperties getCompetitionParserProperties() {
+        return competitionParserProperties;
+    }
+
+    public void setCompetitionParserProperties(CompetitionParserProperties competitionParserProperties) {
+        this.competitionParserProperties = competitionParserProperties;
+    }
 
     @Override
     public String toString() {

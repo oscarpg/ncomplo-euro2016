@@ -10,26 +10,18 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jgayoso.ncomplo.business.entities.BetType;
-import org.jgayoso.ncomplo.business.entities.Game;
-import org.jgayoso.ncomplo.business.entities.GameSide;
-import org.jgayoso.ncomplo.business.entities.Round;
+import org.jgayoso.ncomplo.business.entities.*;
 import org.jgayoso.ncomplo.business.services.GameService;
 import org.jgayoso.ncomplo.business.services.GameSideService;
 import org.jgayoso.ncomplo.business.views.BetView;
+import org.jgayoso.ncomplo.exceptions.CompetitionParserException;
 
 import java.text.SimpleDateFormat;
-import java.time.Year;
 import java.util.*;
 
 public class ExcelProcessor {
 
     private static final Logger logger = Logger.getLogger(ExcelProcessor.class);
-
-    private static final String TEAMS_SHEET_NAME = "Settings";
-    private static final String TEAMS_COLUMN = "B";
-    private static final int TEAMS_START_INDEX = 15;
-    private static final int NUMBER_OF_TEAMS = 24;
 
     private static final String GROUP_GAMES_COLUMN = "A";
     public static final String GROUPS_NAME = "Groups";
@@ -106,14 +98,36 @@ public class ExcelProcessor {
         return betView;
     }
 
-    public static Map<String, GameSide> processCompetitionGameSides(Integer competitionId, XSSFWorkbook book,
-                                                                    GameSideService gameSideService) {
-        final XSSFSheet teams = book.getSheet(TEAMS_SHEET_NAME);
-        final String teamsColumnName = TEAMS_COLUMN;
-        final int teamsStartIndex = TEAMS_START_INDEX;
-        final int numberOfTeams = NUMBER_OF_TEAMS;
+    public static Map<String, GameSide> processCompetitionGameSides(Competition competition, XSSFWorkbook book,
+                                                                    GameSideService gameSideService) throws CompetitionParserException {
 
-        Map<String, GameSide> gamesByName = new HashMap<>(NUMBER_OF_TEAMS);
+        CompetitionParserProperties properties = competition.getCompetitionParserProperties();
+        if (properties == null) {
+            throw new CompetitionParserException("Competition without parser properties");
+        }
+
+        if (StringUtils.isEmpty(properties.getTeamsSheetName())) {
+            throw new CompetitionParserException("Missing game sides property teams sheet name");
+        }
+
+        final XSSFSheet teams = book.getSheet(properties.getTeamsSheetName());
+
+        if (StringUtils.isEmpty(properties.getTeamsColumnName())) {
+            throw new CompetitionParserException("Missing game sides property teams column name");
+        }
+        final String teamsColumnName = properties.getTeamsColumnName();
+
+        if (properties.getTeamsStartIndex() == null) {
+            throw new CompetitionParserException("Missing game sides property teams start index");
+        }
+        final int teamsStartIndex = properties.getTeamsStartIndex();
+
+        if (properties.getTeamsNumber() == null) {
+            throw new CompetitionParserException("Missing game sides property number of teams");
+        }
+        final int numberOfTeams = properties.getTeamsNumber();
+
+        Map<String, GameSide> gamesByName = new HashMap<>(numberOfTeams);
 
         for (int i = 0; i < numberOfTeams; i++) {
             final CellReference cellReference = new CellReference(teamsColumnName + (teamsStartIndex + i));
@@ -126,7 +140,7 @@ public class ExcelProcessor {
             }
 
             logger.debug("Creating team " + teamName);
-            GameSide newGameSide = gameSideService.save(null, competitionId, teamName, new HashMap<>(), countryCode);
+            GameSide newGameSide = gameSideService.save(null, competition.getId(), teamName, new HashMap<>(), countryCode);
             gamesByName.put(teamName, newGameSide);
         }
         return gamesByName;

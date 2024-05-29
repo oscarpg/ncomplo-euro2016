@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.jgayoso.ncomplo.business.entities.GameSide;
 import org.jgayoso.ncomplo.business.services.CompetitionService;
 import org.jgayoso.ncomplo.business.services.GameSideService;
+import org.jgayoso.ncomplo.exceptions.CompetitionParserException;
 import org.jgayoso.ncomplo.web.admin.beans.GameSideBean;
 import org.jgayoso.ncomplo.web.admin.beans.LangBean;
 import org.jgayoso.ncomplo.web.admin.utils.FileUtils;
@@ -160,6 +161,10 @@ public class GameSideController {
             this.gameSideService.processFile(id, login, competitionFile);
         } catch (final IOException e) {
             redirectAttributes.addFlashAttribute("error", "Error processing game sides file");
+            return "redirect:list";
+        } catch (CompetitionParserException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:list";
         } finally {
             // delete file
             if (competitionFile != null) {

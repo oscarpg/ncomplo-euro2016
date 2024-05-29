@@ -10,6 +10,7 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jgayoso.ncomplo.business.entities.*;
+import org.jgayoso.ncomplo.business.entities.repositories.CompetitionParserPropertiesRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.CompetitionRepository;
 import org.jgayoso.ncomplo.business.util.ExcelProcessor;
 import org.jgayoso.ncomplo.business.util.I18nNamedEntityComparator;
@@ -28,6 +29,9 @@ public class CompetitionService {
 
     @Autowired
     private CompetitionRepository competitionRepository;
+    @Autowired
+    private CompetitionParserPropertiesRepository competitionParserPropertiesRepository;
+
     @Autowired
     private GameSideService gameSideService;
 
@@ -65,7 +69,8 @@ public class CompetitionService {
             final Integer id,
             final String name, 
             final Map<String,String> namesByLang, 
-			final boolean active, final String updaterUri) {
+			final boolean active, final String updaterUri,
+            final String teamsSheetName, final String teamsColumnName, final Integer teamsStartIndex, final Integer teamsNumber) {
         
         final Competition competition =
                 (id == null? new Competition() : this.competitionRepository.findOne(id));
@@ -75,7 +80,20 @@ public class CompetitionService {
         competition.getNamesByLang().putAll(namesByLang);
         competition.setActive(active);
 		competition.setUpdaterUri(updaterUri);
-        
+
+        if (competition.getCompetitionParserProperties() == null) {
+            competition.setCompetitionParserProperties(new CompetitionParserProperties());
+        }
+        CompetitionParserProperties competitionParserProperties = competition.getCompetitionParserProperties();
+        competitionParserProperties.setTeamsSheetName(teamsSheetName);
+        competitionParserProperties.setTeamsColumnName(teamsColumnName);
+        competitionParserProperties.setTeamsStartIndex(teamsStartIndex);
+        competitionParserProperties.setTeamsNumber(teamsNumber);
+        competitionParserProperties.setCompetition(competition);
+
+        competitionParserPropertiesRepository.save(competitionParserProperties);
+        competition.setCompetitionParserProperties(competitionParserProperties);
+
         if (id == null) {
             return this.competitionRepository.save(competition);
         }

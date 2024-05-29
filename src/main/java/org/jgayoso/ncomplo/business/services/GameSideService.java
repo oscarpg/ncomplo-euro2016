@@ -10,6 +10,7 @@ import org.jgayoso.ncomplo.business.entities.repositories.GameSideRepository;
 import org.jgayoso.ncomplo.business.util.ExcelProcessor;
 import org.jgayoso.ncomplo.business.util.I18nNamedEntityComparator;
 import org.jgayoso.ncomplo.business.util.IterableUtils;
+import org.jgayoso.ncomplo.exceptions.CompetitionParserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -105,7 +106,7 @@ public class GameSideService {
     }
 
     @Transactional
-    public void processFile(Integer competitionId, String login, File competitionFile) {
+    public void processFile(Integer competitionId, String login, File competitionFile) throws CompetitionParserException {
         Competition competition = this.competitionRepository.findOne(competitionId);
         if (competition == null) {
             logger.error("Not possible to processFile, competition not found");
@@ -116,7 +117,7 @@ public class GameSideService {
 
         try (FileInputStream fis = new FileInputStream(competitionFile); XSSFWorkbook book = new XSSFWorkbook(fis)) {
             Map<String, GameSide> gamesSidesByName =
-                    ExcelProcessor.processCompetitionGameSides(competitionId, book, this);
+                    ExcelProcessor.processCompetitionGameSides(competition, book, this);
             logger.debug("Created " + gamesSidesByName.size() + " teams");
         } catch (IOException e) {
             logger.error("Not possible to processFile, IOException", e);

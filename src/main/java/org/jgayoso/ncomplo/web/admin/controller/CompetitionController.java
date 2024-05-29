@@ -67,6 +67,13 @@ public class CompetitionController {
 			competitionBean.setUpdaterUri(competition.getUpdaterUri());
             competitionBean.getNamesByLang().clear();
             competitionBean.getNamesByLang().addAll(LangBean.listFromMap(competition.getNamesByLang()));
+
+            if (competition.getCompetitionParserProperties() != null) {
+                competitionBean.setTeamsSheetName(competition.getCompetitionParserProperties().getTeamsSheetName());
+                competitionBean.setTeamsColumnName(competition.getCompetitionParserProperties().getTeamsColumnName());
+                competitionBean.setTeamsStartIndex(competition.getCompetitionParserProperties().getTeamsStartIndex());
+                competitionBean.setTeamsNumber(competition.getCompetitionParserProperties().getTeamsNumber());
+            }
             
         }
         
@@ -81,7 +88,8 @@ public class CompetitionController {
 
 		this.competitionService.save(competitionBean.getId(), competitionBean.getName(),
 				LangBean.mapFromList(competitionBean.getNamesByLang()), competitionBean.isActive(),
-				competitionBean.getUpdaterUri());
+				competitionBean.getUpdaterUri(), competitionBean.getTeamsSheetName(), competitionBean.getTeamsColumnName(),
+                competitionBean.getTeamsStartIndex(), competitionBean.getTeamsNumber());
         
         return "redirect:list";
         

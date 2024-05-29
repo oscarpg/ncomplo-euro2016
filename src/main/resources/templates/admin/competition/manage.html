@@ -10,6 +10,8 @@
     <div class="container">
   
         <header th:substituteby="layout/admin/header :: header"></header>
+
+        <div th:substituteby="layout/messages :: messages"></div>
     
         <h1>Manage Competition</h1>
         
@@ -42,10 +44,24 @@
             </div>
             
             <div id="uri">
-              <label for="UpdaterUri">Updater URI</label>
+              <label for="uriInput">Updater URI</label>
               <input id="uriInput" type="text" th:field="*{updaterUri}" />
             </div>
-            
+
+            <div id="TeamsProperties">
+              <label for="teamsSheetName">Teams Excel Sheet Name</label>
+              <input id="teamsSheetName" type="text" th:field="*{teamsSheetName}" />
+
+              <label for="teamsColumnName">Teams Excel Column Name</label>
+              <input id="teamsColumnName" type="text" th:field="*{teamsColumnName}" />
+
+              <label for="teamsStartIndex">Teams First Row Number</label>
+              <input id="teamsStartIndex" type="number" th:field="*{teamsStartIndex}" />
+
+              <label for="teamsNumber">Teams Sheet Name</label>
+              <input id="teamsNumber" type="number" th:field="*{teamsNumber}" />
+            </div>
+
           </fieldset>
           
           <input type="submit" />
