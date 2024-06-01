@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
@@ -20,6 +21,7 @@ import org.jgayoso.ncomplo.business.entities.repositories.GameSideRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.RoundRepository;
 import org.jgayoso.ncomplo.business.util.ExcelProcessor;
 import org.jgayoso.ncomplo.business.util.IterableUtils;
+import org.jgayoso.ncomplo.exceptions.CompetitionParserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,28 +59,6 @@ public class GameService {
     
     @Autowired
     private LeagueService leagueService;
-    
-    SimpleDateFormat hourFormatter = new SimpleDateFormat("HH:mm");
-
-    public static final String GAMES_SHEET_NAME = "UEFA EURO 2024";
-
-    public static final String ROUND_OF_16_GAMES_COLUMN = "EV";
-    public static final int GAMES_ROUND16_START_INDEX = 9;
-
-    public static final String QUARTER_GAMES_COLUMN = "FC";
-    public static final int GAMES_QUARTER_START_INDEX = 11;
-
-    public static final String SEMIS_GAMES_COLUMN = "FJ";
-    public static final int GAMES_SEMIS_START_INDEX = 15;
-
-    public static final String FINAL_GAMES_COLUMN = "FQ";
-    public static final int GAMES_FINAL_INDEX = 22;
-
-    public static final String GROUPS_NAME = "Groups";
-    public static final String ROUND_OF_16_NAME = "Round of 16";
-    public static final String QUARTER_FINALS_NAME = "Quarter Finals";
-    public static final String SEMIFINALS_NAME = "Semifinals";
-    public static final String FINAL_NAME = "Final";
 
     public GameService() {
         super();
@@ -197,52 +177,78 @@ public class GameService {
     }
 
     @Transactional
-    public void processFile(Integer competitionId, String login, File competitionFile) {
-        Competition competition = this.competitionRepository.findOne(competitionId);
-        if (competition == null) {
-            logger.error("Not possible to processFile, competition not found");
-            return;
+    public void processFile(Integer competitionId, String login, File competitionFile) throws CompetitionParserException {
+        final Competition competition = this.competitionRepository.findOne(competitionId);
+        CompetitionParserProperties competitionParserProperties = competition.getCompetitionParserProperties();
+        if (competitionParserProperties == null) {
+            logger.error("Not possible to processFile, competition properties not found");
+            throw new CompetitionParserException("Competition properties not found");
         }
 
-        logger.info("User " + login + " generating games for competition " + competitionId);
+        logger.info("User " + login + " generating games for competition " + competition.getName());
 
         try (FileInputStream fis = new FileInputStream(competitionFile); XSSFWorkbook book = new XSSFWorkbook(fis)) {
             FormulaEvaluator evaluator = book.getCreationHelper().createFormulaEvaluator();
 
-            final XSSFSheet games = book.getSheet(GAMES_SHEET_NAME);
+            if (StringUtils.isEmpty(competitionParserProperties.getGamesSheetName())) {
+                throw new CompetitionParserException("Missing games property games sheet name");
+            }
+            final XSSFSheet games = book.getSheet(competitionParserProperties.getGamesSheetName());
+            if (games == null) {
+                throw new CompetitionParserException("Games sheet not found");
+            }
 
             Iterable<GameSide> gameSides = gameSideRepository.findAll();
             Map<String, GameSide> gameSideMap = new HashMap<>();
             gameSides.forEach(gameSide -> gameSideMap.put(gameSide.getName(), gameSide));
 
-            BetType groupsBetType = betTypeService.findByName(competitionId, GROUPS_NAME);
-            Round groupsRound = roundService.findByCompetitionIdAndName(competitionId, GROUPS_NAME);
-            int gameIndex = ExcelProcessor.processGroupGames(competitionId, games, evaluator, groupsBetType, groupsRound, gameSideMap, this);
+            BetType groupsBetType = betTypeService.findByName(competitionId, competitionParserProperties.getGroupsName());
+            Round groupsRound = roundService.findByCompetitionIdAndName(competitionId, competitionParserProperties.getGroupsName());
+            if (groupsBetType == null || groupsRound == null) {
+                throw new CompetitionParserException("Groups BetType or Round are null");
+            }
+            int gameIndex = ExcelProcessor.processGroupGames(competition, games, evaluator, groupsBetType, groupsRound, gameSideMap, this);
 
             // Round of 16
-            BetType roundOf16BetType = betTypeService.findByName(competitionId, ROUND_OF_16_NAME);
-            Round roundOf16Round = roundService.findByCompetitionIdAndName(competitionId, ROUND_OF_16_NAME);
-            gameIndex = ExcelProcessor.processPlayoffGames(competitionId, games, evaluator, roundOf16BetType,
-                    roundOf16Round, gameIndex, 8, 4, ROUND_OF_16_GAMES_COLUMN, GAMES_ROUND16_START_INDEX, this);
+            BetType roundOf16BetType = betTypeService.findByName(competitionId, competitionParserProperties.getRoundOf16Name());
+            Round roundOf16Round = roundService.findByCompetitionIdAndName(competitionId, competitionParserProperties.getRoundOf16Name());
+            if (roundOf16BetType == null || roundOf16Round == null) {
+                throw new CompetitionParserException("Round of 16 BetType or Round are null");
+            }
+            gameIndex = ExcelProcessor.processPlayoffGames(competition, games, evaluator, roundOf16BetType,
+                    roundOf16Round, gameIndex, 8, competitionParserProperties.getRoundOf16GamesJumpSize(),
+                    competitionParserProperties.getRoundOf16GamesColumnName(), competitionParserProperties.getRoundOf16GamesStartIndex(), this);
 
             // Quarter Finals
-            BetType quarterFinalsBetType = betTypeService.findByName(competitionId, QUARTER_FINALS_NAME);
-            Round quarterFinalsRound = roundService.findByCompetitionIdAndName(competitionId, QUARTER_FINALS_NAME);
-            gameIndex = ExcelProcessor.processPlayoffGames(competitionId, games, evaluator, quarterFinalsBetType,
-                    quarterFinalsRound, gameIndex, 4, 8, QUARTER_GAMES_COLUMN, GAMES_QUARTER_START_INDEX, this);
+            BetType quarterFinalsBetType = betTypeService.findByName(competitionId, competitionParserProperties.getQuarteFinalsName());
+            Round quarterFinalsRound = roundService.findByCompetitionIdAndName(competitionId, competitionParserProperties.getQuarteFinalsName());
+            if (quarterFinalsBetType == null || quarterFinalsRound == null) {
+                throw new CompetitionParserException("Quarter Finals BetType or Round are null");
+            }
+            gameIndex = ExcelProcessor.processPlayoffGames(competition, games, evaluator, quarterFinalsBetType,
+                    quarterFinalsRound, gameIndex, 4, competitionParserProperties.getQuarteFinalsGamesJumpSize(),
+                    competitionParserProperties.getQuarteFinalsGamesColumnName(), competitionParserProperties.getQuarteFinalsGamesStartIndex(), this);
 
 
             // Semifinals
-            BetType semifinalsBetType = betTypeService.findByName(competitionId, SEMIFINALS_NAME);
-            Round semifinalsRound = roundService.findByCompetitionIdAndName(competitionId, SEMIFINALS_NAME);
-            gameIndex = ExcelProcessor.processPlayoffGames(competitionId, games, evaluator, semifinalsBetType,
-                    semifinalsRound, gameIndex, 2, 16, SEMIS_GAMES_COLUMN, GAMES_SEMIS_START_INDEX, this);
+            BetType semifinalsBetType = betTypeService.findByName(competitionId, competitionParserProperties.getSemiFinalsName());
+            Round semifinalsRound = roundService.findByCompetitionIdAndName(competitionId, competitionParserProperties.getSemiFinalsName());
+            if (semifinalsBetType == null || semifinalsRound == null) {
+                throw new CompetitionParserException("Semifinals BetType or Round are null");
+            }
+            gameIndex = ExcelProcessor.processPlayoffGames(competition, games, evaluator, semifinalsBetType,
+                    semifinalsRound, gameIndex, 2, competitionParserProperties.getSemiFinalsGamesJumpSize(),
+                    competitionParserProperties.getSemiFinalsGamesColumnName(), competitionParserProperties.getSemiFinalsGamesStartIndex(), this);
 
             // Final
-            BetType finalBetType = betTypeService.findByName(competitionId, FINAL_NAME);
-            Round finalRound = roundService.findByCompetitionIdAndName(competitionId, FINAL_NAME);
-            ExcelProcessor.processPlayoffGames(competitionId, games, evaluator, finalBetType,
-                    finalRound, gameIndex, 1, 16, FINAL_GAMES_COLUMN, GAMES_FINAL_INDEX, this);
+            BetType finalBetType = betTypeService.findByName(competitionId, competitionParserProperties.getFinalName());
+            Round finalRound = roundService.findByCompetitionIdAndName(competitionId, competitionParserProperties.getFinalName());
+            if (finalBetType == null || finalRound == null) {
+                throw new CompetitionParserException("Final BetType or Round are null");
+            }
+            ExcelProcessor.processPlayoffGames(competition, games, evaluator, finalBetType,
+                    finalRound, gameIndex, 1, 1, competitionParserProperties.getFinalGamesColumnName(),
+                    competitionParserProperties.getFinalGamesStartIndex(), this);
 
 
         } catch (IOException e) {

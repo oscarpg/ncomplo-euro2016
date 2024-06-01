@@ -16,17 +16,13 @@ import org.jgayoso.ncomplo.business.services.GameSideService;
 import org.jgayoso.ncomplo.business.views.BetView;
 import org.jgayoso.ncomplo.exceptions.CompetitionParserException;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ExcelProcessor {
 
     private static final Logger logger = Logger.getLogger(ExcelProcessor.class);
-
-    private static final String GROUP_GAMES_COLUMN = "A";
-    public static final String GROUPS_NAME = "Groups";
-    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd,yyyy");
-    public static final SimpleDateFormat PLAYOFF_DATE_FORMAT = new SimpleDateFormat("MMM dd, yyyy   HH:ss");
 
     public static BetView processGroupsGameBet(final XSSFSheet sheet, final int rowIndex, final int matchNumber,
                                                final String columnName, final Map<Integer, Game> gamesByOrder,
@@ -146,16 +142,19 @@ public class ExcelProcessor {
         return gamesByName;
     }
 
-    public static int processPlayoffGames(Integer competitionId, XSSFSheet sheet, FormulaEvaluator evaluator,
+    public static int processPlayoffGames(Competition competition, XSSFSheet sheet, FormulaEvaluator evaluator,
                                           BetType betType, Round round, int gameOrder, int numberOfGames, int jumpSize,
                                           String gamesColumnName, Integer gamesStartIndex,
                                           GameService gameService) {
 
+        final CompetitionParserProperties competitionParserProperties = competition.getCompetitionParserProperties();
         List<Date> matchDates = new ArrayList<>(numberOfGames);
         for (int i = 0; i < numberOfGames; i++) {
             final CellReference cellReference = new CellReference(gamesColumnName + (gamesStartIndex + i * jumpSize));
             final Row row = sheet.getRow(cellReference.getRow());
-            Date matchDate = getPlayoffGameDate(cellReference, row, evaluator);
+            Date matchDate = getGameDate(cellReference, row, evaluator, competitionParserProperties.getPlayoffsGamesDateIndex(),
+                    competitionParserProperties.getPlayoffsGamesHourIndex(),
+                    new SimpleDateFormat(competitionParserProperties.getPlayoffsGamesDateFormat()));
             matchDates.add(matchDate);
         }
 
@@ -163,9 +162,9 @@ public class ExcelProcessor {
         int i = 0;
         for (Date finalDate: matchDates) {
             int gameIndex = i + 1;
-            String gameName = numberOfGames == 1 ? round.getName() : round.getName() + " - " + gameIndex;
+            String gameName = numberOfGames == 1 ? round.getName() : (round.getName() + gameIndex);
             logger.debug("Creating game " + gameName);
-            gameService.save(null, competitionId, finalDate, gameName, new HashMap<>(),
+            gameService.save(null, competition.getId(), finalDate, gameName, new HashMap<>(),
                     betType.getId(), round.getId(), gameOrder, null, null, null, null);
             i++;
             gameOrder++;
@@ -174,17 +173,21 @@ public class ExcelProcessor {
     }
 
 
-    public static int processGroupGames(Integer competitionId, XSSFSheet sheet, FormulaEvaluator evaluator,
+    public static int processGroupGames(Competition competition, XSSFSheet sheet, FormulaEvaluator evaluator,
                                          BetType groupsBetType, Round groupsRound,
                                          Map<String, GameSide> gamesByName, GameService gameService) {
 
+        final CompetitionParserProperties competitionParserProperties = competition.getCompetitionParserProperties();
         // Groups games
         int matchNumber = 1;
-        for (int rowIndex = 10; rowIndex < 46; rowIndex++) {
-            final CellReference cellReference = new CellReference(GROUP_GAMES_COLUMN + rowIndex);
+        for (int rowIndex = competitionParserProperties.getGroupGamesStartIndex();
+             rowIndex < competitionParserProperties.getGroupGamesStartIndex() + competitionParserProperties.getGroupGamesNumber();
+             rowIndex++) {
+
+            final CellReference cellReference = new CellReference(competitionParserProperties.getGroupGamesColumnName() + rowIndex);
             final Row row = sheet.getRow(cellReference.getRow());
-            Cell homeGameSideNameCell = row.getCell(cellReference.getCol() + 4);
-            Cell awayGameSideNameCell = row.getCell(cellReference.getCol() + 7);
+            Cell homeGameSideNameCell = row.getCell(cellReference.getCol() + competitionParserProperties.getGroupGamesHomeIndex());
+            Cell awayGameSideNameCell = row.getCell(cellReference.getCol() + competitionParserProperties.getAwayGamesHomeIndex());
 
             evaluator.evaluateInCell(homeGameSideNameCell);
             evaluator.evaluateInCell(awayGameSideNameCell);
@@ -194,11 +197,13 @@ public class ExcelProcessor {
             GameSide home = gamesByName.get(homeGameSideName);
             GameSide away = gamesByName.get(awayGameSideName);
 
-            Date finalDate = getGameDate(cellReference, row, evaluator);
+            Date finalDate = getGameDate(cellReference, row, evaluator,
+                    competitionParserProperties.getGroupsGamesDateIndex(), competitionParserProperties.getGroupsGamesHourIndex(),
+                    new SimpleDateFormat(competitionParserProperties.getGroupsGamesDateFormat()));
 
-            String gameName = GROUPS_NAME + " - " + matchNumber;
+            String gameName = competitionParserProperties.getGroupsName() + matchNumber;
             logger.debug("Creating game " + gameName);
-            gameService.save(null, competitionId, finalDate, gameName, new HashMap<>(),
+            gameService.save(null, competition.getId(), finalDate, gameName, new HashMap<>(),
                     groupsBetType.getId(), groupsRound.getId(), matchNumber, home.getId(), away.getId(), null, null);
             matchNumber++;
         }
@@ -206,25 +211,29 @@ public class ExcelProcessor {
         return matchNumber;
     }
 
-    private static Date getGameDate(CellReference cellReference, Row row, FormulaEvaluator evaluator) {
+    private static Date getGameDate(CellReference cellReference, Row row,
+                                    FormulaEvaluator evaluator, Integer gamesDateIndex, Integer gamesHourIndex, DateFormat dateFormat) {
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         try {
-            Cell dateCell = row.getCell(cellReference.getCol() + 2);
-            Cell hourCell = row.getCell(cellReference.getCol() + 3);
-
+            Cell dateCell = row.getCell(cellReference.getCol() + gamesDateIndex);
             evaluator.evaluateInCell(dateCell);
-            evaluator.evaluateInCell(hourCell);
 
-            date = DATE_FORMAT.parse(dateCell.getStringCellValue());
+            Cell hourCell = null;
+            if (gamesHourIndex != null) {
+                hourCell = row.getCell(cellReference.getCol() + gamesHourIndex);
+                evaluator.evaluateInCell(hourCell);
+            }
+            date = dateFormat.parse(dateCell.getStringCellValue());
             calendar.setTime(date);
 
-            Calendar timeCalendar = Calendar.getInstance();
-            timeCalendar.setTime(hourCell.getDateCellValue());
-
-            calendar.set(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY));
-            calendar.set(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE));
+            if (hourCell != null) {
+                Calendar timeCalendar = Calendar.getInstance();
+                timeCalendar.setTime(hourCell.getDateCellValue());
+                calendar.set(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY));
+                calendar.set(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE));
+            }
 
         } catch (Exception e) {
             logger.error("Error parsing game date");
@@ -232,24 +241,4 @@ public class ExcelProcessor {
         // Get the final Date object
         return calendar.getTime();
     }
-
-    private static Date getPlayoffGameDate(CellReference cellReference, Row row, FormulaEvaluator evaluator) {
-        Date date = new Date();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        try {
-            Cell dateCell = row.getCell(cellReference.getCol());
-            evaluator.evaluateInCell(dateCell);
-            date = PLAYOFF_DATE_FORMAT.parse(dateCell.getStringCellValue());
-            calendar.setTime(date);
-
-        } catch (Exception e) {
-            logger.error("Error parsing game date");
-        }
-        // Get the final Date object
-        return calendar.getTime();
-    }
-
-
-
 }

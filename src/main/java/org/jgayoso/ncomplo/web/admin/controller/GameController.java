@@ -20,6 +20,7 @@ import org.jgayoso.ncomplo.business.services.GameService;
 import org.jgayoso.ncomplo.business.services.GameSideService;
 import org.jgayoso.ncomplo.business.services.RoundService;
 import org.jgayoso.ncomplo.business.util.I18nUtils;
+import org.jgayoso.ncomplo.exceptions.CompetitionParserException;
 import org.jgayoso.ncomplo.web.admin.beans.GameBean;
 import org.jgayoso.ncomplo.web.admin.beans.LangBean;
 import org.jgayoso.ncomplo.web.admin.utils.FileUtils;
@@ -218,6 +219,9 @@ public class GameController {
             this.gameService.processFile(id, login, competitionFile);
         } catch (final IOException e) {
             redirectAttributes.addFlashAttribute("error", "Error processing games file");
+        } catch (CompetitionParserException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:list";
         } finally {
             // delete file
             if (competitionFile != null) {
