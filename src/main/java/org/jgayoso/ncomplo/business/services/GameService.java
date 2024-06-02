@@ -3,7 +3,6 @@ package org.jgayoso.ncomplo.business.services;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
@@ -220,8 +219,8 @@ public class GameService {
                     competitionParserProperties.getRoundOf16GamesColumnName(), competitionParserProperties.getRoundOf16GamesStartIndex(), this);
 
             // Quarter Finals
-            BetType quarterFinalsBetType = betTypeService.findByName(competitionId, competitionParserProperties.getQuarteFinalsName());
-            Round quarterFinalsRound = roundService.findByCompetitionIdAndName(competitionId, competitionParserProperties.getQuarteFinalsName());
+            BetType quarterFinalsBetType = betTypeService.findByName(competitionId, competitionParserProperties.getQuarterFinalsName());
+            Round quarterFinalsRound = roundService.findByCompetitionIdAndName(competitionId, competitionParserProperties.getQuarterFinalsName());
             if (quarterFinalsBetType == null || quarterFinalsRound == null) {
                 throw new CompetitionParserException("Quarter Finals BetType or Round are null");
             }

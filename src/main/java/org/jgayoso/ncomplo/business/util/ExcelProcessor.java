@@ -162,7 +162,7 @@ public class ExcelProcessor {
         int i = 0;
         for (Date finalDate: matchDates) {
             int gameIndex = i + 1;
-            String gameName = numberOfGames == 1 ? round.getName() : (round.getName() + gameIndex);
+            String gameName = numberOfGames == 1 ? round.getName() : (round.getName() + ' ' + gameIndex);
             logger.debug("Creating game " + gameName);
             gameService.save(null, competition.getId(), finalDate, gameName, new HashMap<>(),
                     betType.getId(), round.getId(), gameOrder, null, null, null, null);
@@ -187,7 +187,7 @@ public class ExcelProcessor {
             final CellReference cellReference = new CellReference(competitionParserProperties.getGroupGamesColumnName() + rowIndex);
             final Row row = sheet.getRow(cellReference.getRow());
             Cell homeGameSideNameCell = row.getCell(cellReference.getCol() + competitionParserProperties.getGroupGamesHomeIndex());
-            Cell awayGameSideNameCell = row.getCell(cellReference.getCol() + competitionParserProperties.getAwayGamesHomeIndex());
+            Cell awayGameSideNameCell = row.getCell(cellReference.getCol() + competitionParserProperties.getGroupGamesAwayIndex());
 
             evaluator.evaluateInCell(homeGameSideNameCell);
             evaluator.evaluateInCell(awayGameSideNameCell);
@@ -201,7 +201,7 @@ public class ExcelProcessor {
                     competitionParserProperties.getGroupsGamesDateIndex(), competitionParserProperties.getGroupsGamesHourIndex(),
                     new SimpleDateFormat(competitionParserProperties.getGroupsGamesDateFormat()));
 
-            String gameName = competitionParserProperties.getGroupsName() + matchNumber;
+            String gameName = competitionParserProperties.getGroupsName() + ' ' + matchNumber;
             logger.debug("Creating game " + gameName);
             gameService.save(null, competition.getId(), finalDate, gameName, new HashMap<>(),
                     groupsBetType.getId(), groupsRound.getId(), matchNumber, home.getId(), away.getId(), null, null);

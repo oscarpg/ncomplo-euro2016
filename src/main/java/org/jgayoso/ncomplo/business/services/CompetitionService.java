@@ -1,18 +1,11 @@
 package org.jgayoso.ncomplo.business.services;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.*;
 
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jgayoso.ncomplo.business.entities.*;
 import org.jgayoso.ncomplo.business.entities.repositories.CompetitionParserPropertiesRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.CompetitionRepository;
-import org.jgayoso.ncomplo.business.util.ExcelProcessor;
 import org.jgayoso.ncomplo.business.util.I18nNamedEntityComparator;
 import org.jgayoso.ncomplo.business.util.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +63,7 @@ public class CompetitionService {
             final String name, 
             final Map<String,String> namesByLang, 
 			final boolean active, final String updaterUri,
-            final String teamsSheetName, final String teamsColumnName, final Integer teamsStartIndex, final Integer teamsNumber) {
+            final CompetitionParserProperties competitionParserProperties) {
         
         final Competition competition =
                 (id == null? new Competition() : this.competitionRepository.findOne(id));
@@ -81,19 +74,13 @@ public class CompetitionService {
         competition.setActive(active);
 		competition.setUpdaterUri(updaterUri);
 
-        if (competition.getCompetitionParserProperties() == null) {
-            competition.setCompetitionParserProperties(new CompetitionParserProperties());
+        if (competition.getCompetitionParserProperties() == null && competitionParserProperties != null) {
+            competitionParserProperties.setCompetition(competition);
+            competition.setCompetitionParserProperties(competitionParserPropertiesRepository.save(competitionParserProperties));
+        } else if (competition.getCompetitionParserProperties() != null && competitionParserProperties != null) {
+            // Update properties values
+            competition.getCompetitionParserProperties().updateProperties(competitionParserProperties);
         }
-        CompetitionParserProperties competitionParserProperties = competition.getCompetitionParserProperties();
-        competitionParserProperties.setTeamsSheetName(teamsSheetName);
-        competitionParserProperties.setTeamsColumnName(teamsColumnName);
-        competitionParserProperties.setTeamsStartIndex(teamsStartIndex);
-        competitionParserProperties.setTeamsNumber(teamsNumber);
-        competitionParserProperties.setCompetition(competition);
-
-        competitionParserPropertiesRepository.save(competitionParserProperties);
-        competition.setCompetitionParserProperties(competitionParserProperties);
-
         if (id == null) {
             return this.competitionRepository.save(competition);
         }
@@ -105,6 +92,5 @@ public class CompetitionService {
     public void delete(final Integer competitionId) {
         this.competitionRepository.delete(competitionId);
     }
-
 
 }

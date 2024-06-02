@@ -35,7 +35,7 @@ public class CompetitionParserProperties {
     @Column(name="GROUPS_GAMES_HOME_INDEX")
     private Integer groupGamesHomeIndex;
     @Column(name="GROUPS_GAMES_AWAY_INDEX")
-    private Integer awayGamesHomeIndex;
+    private Integer groupGamesAwayIndex;
     @Column(name="GROUPS_GAMES_DATE_INDEX")
     private Integer groupsGamesDateIndex;
     @Column(name="GROUPS_GAMES_HOUR_INDEX")
@@ -81,7 +81,7 @@ public class CompetitionParserProperties {
     @Column(name="ROUND_OF_16_NAME")
     private String roundOf16Name;
     @Column(name="QUARTER_FINALS_NAME")
-    private String quarteFinalsName;
+    private String quarterFinalsName;
     @Column(name="SEMIFINALS_NAME")
     private String semiFinalsName;
     @Column(name="FINAL_NAME")
@@ -89,6 +89,41 @@ public class CompetitionParserProperties {
 
     public CompetitionParserProperties() {
         super();
+    }
+
+    public void updateProperties(CompetitionParserProperties from) {
+        this.teamsSheetName = from.teamsSheetName;
+        this.gamesSheetName = from.gamesSheetName;
+        this.teamsColumnName = from.teamsColumnName;
+        this.teamsStartIndex = from.teamsStartIndex;
+        this.teamsNumber = from.teamsNumber;
+        this.groupGamesColumnName = from.groupGamesColumnName;
+        this.groupGamesStartIndex = from.groupGamesStartIndex;
+        this.groupGamesNumber = from.groupGamesNumber;
+        this.groupGamesHomeIndex = from.groupGamesHomeIndex;
+        this.groupGamesAwayIndex = from.groupGamesAwayIndex;
+        this.groupsGamesDateIndex = from.groupsGamesDateIndex;
+        this.groupsGamesHourIndex = from.groupsGamesHourIndex;
+        this.groupsGamesDateFormat = from.groupsGamesDateFormat;
+        this.playoffsGamesDateIndex = from.playoffsGamesDateIndex;
+        this.playoffsGamesHourIndex = from.playoffsGamesHourIndex;
+        this.playoffsGamesDateFormat = from.playoffsGamesDateFormat;
+        this.roundOf16GamesColumnName = from.roundOf16GamesColumnName;
+        this.roundOf16GamesStartIndex = from.roundOf16GamesStartIndex;
+        this.roundOf16GamesJumpSize = from.roundOf16GamesJumpSize;
+        this.quarteFinalsGamesColumnName = from.quarteFinalsGamesColumnName;
+        this.quarteFinalsGamesStartIndex = from.quarteFinalsGamesStartIndex;
+        this.quarteFinalsGamesJumpSize = from.quarteFinalsGamesJumpSize;
+        this.semiFinalsGamesColumnName = from.semiFinalsGamesColumnName;
+        this.semiFinalsGamesStartIndex = from.semiFinalsGamesStartIndex;
+        this.semiFinalsGamesJumpSize = from.semiFinalsGamesJumpSize;
+        this.finalGamesColumnName = from.finalGamesColumnName;
+        this.finalGamesStartIndex = from.finalGamesStartIndex;
+        this.groupsName = from.groupsName;
+        this.roundOf16Name = from.roundOf16Name;
+        this.quarterFinalsName = from.quarterFinalsName;
+        this.semiFinalsName = from.semiFinalsName;
+        this.finalName = from.finalName;
     }
 
     public Integer getId() {
@@ -186,12 +221,12 @@ public class CompetitionParserProperties {
         this.roundOf16Name = roundOf16Name;
     }
 
-    public String getQuarteFinalsName() {
-        return quarteFinalsName;
+    public String getQuarterFinalsName() {
+        return quarterFinalsName;
     }
 
-    public void setQuarteFinalsName(String quarteFinalsName) {
-        this.quarteFinalsName = quarteFinalsName;
+    public void setQuarterFinalsName(String quarterFinalsName) {
+        this.quarterFinalsName = quarterFinalsName;
     }
 
     public String getSemiFinalsName() {
@@ -206,7 +241,7 @@ public class CompetitionParserProperties {
         return finalName;
     }
 
-    public void setFinalsName(String finalName) {
+    public void setFinalName(String finalName) {
         this.finalName = finalName;
     }
 
@@ -218,12 +253,12 @@ public class CompetitionParserProperties {
         this.groupGamesHomeIndex = groupGamesHomeIndex;
     }
 
-    public Integer getAwayGamesHomeIndex() {
-        return awayGamesHomeIndex;
+    public Integer getGroupGamesAwayIndex() {
+        return groupGamesAwayIndex;
     }
 
-    public void setAwayGamesHomeIndex(Integer awayGamesHomeIndex) {
-        this.awayGamesHomeIndex = awayGamesHomeIndex;
+    public void setGroupGamesAwayIndex(Integer groupGamesAwayIndex) {
+        this.groupGamesAwayIndex = groupGamesAwayIndex;
     }
 
     public Integer getGroupsGamesDateIndex() {
@@ -336,10 +371,6 @@ public class CompetitionParserProperties {
 
     public void setFinalGamesStartIndex(Integer finalGamesStartIndex) {
         this.finalGamesStartIndex = finalGamesStartIndex;
-    }
-
-    public void setFinalName(String finalName) {
-        this.finalName = finalName;
     }
 
     public Integer getRoundOf16GamesJumpSize() {

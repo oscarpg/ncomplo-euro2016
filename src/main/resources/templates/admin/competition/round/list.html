@@ -12,8 +12,15 @@
         <header th:substituteby="layout/admin/header :: header"></header>
   
         <h1>Rounds for competition "<span th:text="${competition.getName(#locale)}">competition</span>"</h1>
-        
+
         <a th:href="@{manage}">Create new</a>
+
+        <div class="row">
+            <form th:action="@{createDefaults}" method="post">
+                <button type="submit">Create defaults for Playoff competition</button>
+            </form>
+        </div>
+
         <table class="table table-striped table-bordered">
           <tr th:each="r : ${allRounds}">
             <td th:text="${r.order}">order of round</td>

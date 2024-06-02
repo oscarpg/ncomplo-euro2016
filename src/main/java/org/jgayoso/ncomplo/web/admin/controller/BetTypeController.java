@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.jgayoso.ncomplo.business.entities.BetType;
+import org.jgayoso.ncomplo.business.entities.Competition;
 import org.jgayoso.ncomplo.business.services.BetTypeService;
 import org.jgayoso.ncomplo.business.services.CompetitionService;
 import org.jgayoso.ncomplo.web.admin.beans.BetTypeBean;
@@ -31,18 +32,10 @@ public class BetTypeController {
     @Autowired
     private BetTypeService betTypeService;
 
-    
-    
-    
     public BetTypeController() {
         super();
     }
-    
 
-
-
-    
-    
     @RequestMapping("/list")
     public String list(
             @PathVariable("competitionId") final Integer competitionId, 
@@ -59,8 +52,16 @@ public class BetTypeController {
         
     }
 
-    
-    
+    @RequestMapping("/createDefaults")
+    public String createDefaults(@PathVariable("competitionId")
+                                     final Integer competitionId, final ModelMap model) {
+
+        this.betTypeService.createDefaults(competitionId);
+
+        return "redirect:list";
+
+    }
+
     @RequestMapping("/manage")
     public String manage(
             @RequestParam(value="id",required=false)

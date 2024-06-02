@@ -28,18 +28,10 @@ public class RoundController {
     @Autowired
     private RoundService roundService;
 
-    
-    
-    
     public RoundController() {
         super();
     }
-    
 
-
-
-    
-    
     @RequestMapping("/list")
     public String list(
             @PathVariable("competitionId") final Integer competitionId, 
@@ -54,8 +46,6 @@ public class RoundController {
         
     }
 
-    
-    
     @RequestMapping("/manage")
     public String manage(
             @RequestParam(value="id",required=false)
@@ -82,7 +72,15 @@ public class RoundController {
         
     }
 
-    
+    @RequestMapping("/createDefaults")
+    public String createDefaults(@PathVariable("competitionId")
+                                 final Integer competitionId, final ModelMap model) {
+
+        this.roundService.createDefaults(competitionId);
+
+        return "redirect:list";
+
+    }
     
     @RequestMapping("/save")
     public String save(
