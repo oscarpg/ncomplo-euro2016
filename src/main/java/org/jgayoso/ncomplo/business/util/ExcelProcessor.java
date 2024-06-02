@@ -11,6 +11,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jgayoso.ncomplo.business.entities.*;
+import org.jgayoso.ncomplo.business.services.BetService;
 import org.jgayoso.ncomplo.business.services.GameService;
 import org.jgayoso.ncomplo.business.services.GameSideService;
 import org.jgayoso.ncomplo.business.views.BetView;
@@ -24,23 +25,64 @@ public class ExcelProcessor {
 
     private static final Logger logger = Logger.getLogger(ExcelProcessor.class);
 
-    public static BetView processGroupsGameBet(final XSSFSheet sheet, final int rowIndex, final int matchNumber,
-                                               final String columnName, final Map<Integer, Game> gamesByOrder,
-                                         final Map<Integer, BetView> betsByGameId) {
+    public static int processGroupGamesBets(Integer leagueId, String login, Competition competition, XSSFSheet sheet,
+        Map<Integer, Game> gamesByOrder, Map<Integer, Integer> betIdsByGameId, Map<Integer, BetView> betsByGameId, BetService betService) {
+
+        int matchNumber = 1;
+        CompetitionParserProperties parserProperties = competition.getCompetitionParserProperties();
+        for (int rowIndex = parserProperties.getGroupGamesStartIndex();
+             rowIndex < parserProperties.getGroupGamesStartIndex() + parserProperties.getGroupGamesNumber();
+             rowIndex++) {
+
+            final BetView betView = ExcelProcessor.processGroupsGameBet(parserProperties, sheet, rowIndex, matchNumber,
+                    parserProperties.getGroupGamesColumnName(), gamesByOrder, betsByGameId);
+            // If betId is not null, update the current bet instance
+            final Integer betId = betIdsByGameId.get(betView.getGameId());
+
+            betService.save(betId, leagueId, login, betView.getGameId(), betView.getGameSideAId(),
+                    betView.getGameSideBId(), betView.getScoreA(), betView.getScoreB());
+            matchNumber++;
+        }
+        return matchNumber;
+
+
+    }
+
+    public static BetView processGroupsGameBet(CompetitionParserProperties parserProperties, final XSSFSheet sheet, final int rowIndex, final int matchNumber,
+           final String columnName, final Map<Integer, Game> gamesByOrder, final Map<Integer, BetView> betsByGameId) {
 
         final CellReference cellReference = new CellReference(columnName + rowIndex);
         final Row row = sheet.getRow(cellReference.getRow());
-        final Cell homeResultCell = row.getCell(cellReference.getCol() + 1);
-        final Cell awayResultCell = row.getCell(cellReference.getCol() + 2);
+        final Cell homeResultCell = row.getCell(cellReference.getCol() + parserProperties.getGroupGamesHomeIndex() + 1);
+        final Cell awayResultCell = row.getCell(cellReference.getCol() + parserProperties.getGroupGamesHomeIndex() + 2);
 
         final int homeResult = Double.valueOf(homeResultCell.getNumericCellValue()).intValue();
         final int awayResult = Double.valueOf(awayResultCell.getNumericCellValue()).intValue();
 
-        final Game game = gamesByOrder.get(Integer.valueOf(matchNumber));
+        final Game game = gamesByOrder.get(matchNumber);
         final BetView betView = betsByGameId.get(game.getId());
-        betView.setScoreA(Integer.valueOf(homeResult));
-        betView.setScoreB(Integer.valueOf(awayResult));
+        betView.setScoreA(homeResult);
+        betView.setScoreB(awayResult);
         return betView;
+    }
+
+    public static int processPlayOffGamesBets(Integer leagueId, String login, final XSSFSheet sheet, int matchNumber,
+            final String columnName, final int startIndex, final int numberOfGames, final int jumpSize,
+            final Map<Integer, Game> gamesByOrder, final Map<Integer, Integer> betIdsByGameId,
+            final Map<Integer, BetView> betsByGameId, final Map<String, GameSide> gameSidesByName, BetService betService) {
+
+        for (int i = 0; i < numberOfGames; i++) {
+            final BetView betView = processPlayOffGameBet(sheet, startIndex + (i * jumpSize), matchNumber,
+                    columnName, gamesByOrder, betsByGameId, gameSidesByName);
+            // If betId is not null, update the current bet instance
+            final Integer betId = betIdsByGameId.get(betView.getGameId());
+            betService.save(betId, leagueId, login, betView.getGameId(), betView.getGameSideAId(),
+                    betView.getGameSideBId(), betView.getScoreA(), betView.getScoreB());
+            matchNumber++;
+        }
+
+        return matchNumber;
+
     }
 
     public static BetView processPlayOffGameBet(final XSSFSheet sheet, final int rowIndex, final int matchNumber,
@@ -48,23 +90,27 @@ public class ExcelProcessor {
                                           final Map<Integer, BetView> betsByGameId,
                                           final Map<String, GameSide> gameSidesByName) {
 
-        final CellReference homeCellReference = new CellReference(columnName + rowIndex);
+        // rowIndex points to Date. Go to the next row
+        final CellReference homeCellReference = new CellReference(columnName + (rowIndex + 1));
+
         final Row homeRow = sheet.getRow(homeCellReference.getRow());
-        final Cell homeTeamCell = homeRow.getCell(homeCellReference.getCol());
-        final Cell homeResultCell = homeRow.getCell(homeCellReference.getCol() + 1);
-        final Cell extraTimeHomeResultCell = homeRow.getCell(homeCellReference.getCol() + 2);
-        final Cell penaltiesHomeResultCell = homeRow.getCell(homeCellReference.getCol() + 3);
+
+        final Cell homeTeamCell = homeRow.getCell(homeCellReference.getCol() + 1);
+        final Cell homeResultCell = homeRow.getCell(homeCellReference.getCol() + 2);
+        final Cell extraTimeHomeResultCell = homeRow.getCell(homeCellReference.getCol() + 3);
+        final Cell penaltiesHomeResultCell = homeRow.getCell(homeCellReference.getCol() + 4);
         final String homeTeamName = homeTeamCell.getStringCellValue();
         int homeResult = Double.valueOf(homeResultCell.getNumericCellValue()).intValue();
         final int extraTimeHomeResult = Double.valueOf(extraTimeHomeResultCell.getNumericCellValue()).intValue();
         final int penaltiesHomeResult = Double.valueOf(penaltiesHomeResultCell.getNumericCellValue()).intValue();
 
-        final CellReference awayCellReference = new CellReference(columnName + (rowIndex + 1));
+        final CellReference awayCellReference = new CellReference(columnName + (rowIndex + 2));
         final Row awayRow = sheet.getRow(awayCellReference.getRow());
-        final Cell awayTeamCell = awayRow.getCell(awayCellReference.getCol());
-        final Cell awayResultCell = awayRow.getCell(awayCellReference.getCol() + 1);
-        final Cell extraTimeAwayResultCell = awayRow.getCell(homeCellReference.getCol() + 2);
-        final Cell penaltiesAwayResultCell = awayRow.getCell(homeCellReference.getCol() + 3);
+
+        final Cell awayTeamCell = awayRow.getCell(awayCellReference.getCol() + 1);
+        final Cell awayResultCell = awayRow.getCell(awayCellReference.getCol() + 2);
+        final Cell extraTimeAwayResultCell = awayRow.getCell(homeCellReference.getCol() + 3);
+        final Cell penaltiesAwayResultCell = awayRow.getCell(homeCellReference.getCol() + 4);
         final String awayTeamName = awayTeamCell.getStringCellValue();
         int awayResult = Double.valueOf(awayResultCell.getNumericCellValue()).intValue();
         final int extraTimeAwayResult = Double.valueOf(extraTimeAwayResultCell.getNumericCellValue()).intValue();
@@ -75,7 +121,7 @@ public class ExcelProcessor {
         final Integer gameSideBId =
                 gameSidesByName.get(awayTeamName) == null ? null : gameSidesByName.get(awayTeamName).getId();
 
-        final Game game = gamesByOrder.get(Integer.valueOf(matchNumber));
+        final Game game = gamesByOrder.get(matchNumber);
         final BetView betView = betsByGameId.get(game.getId());
         betView.setGameSideAId(gameSideAId);
         betView.setGameSideBId(gameSideBId);
@@ -89,8 +135,8 @@ public class ExcelProcessor {
             }
         }
 
-        betView.setScoreA(Integer.valueOf(homeResult));
-        betView.setScoreB(Integer.valueOf(awayResult));
+        betView.setScoreA(homeResult);
+        betView.setScoreB(awayResult);
         return betView;
     }
 

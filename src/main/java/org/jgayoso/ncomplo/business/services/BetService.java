@@ -7,13 +7,8 @@ import java.util.*;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jgayoso.ncomplo.business.entities.Bet;
+import org.jgayoso.ncomplo.business.entities.*;
 import org.jgayoso.ncomplo.business.entities.Bet.BetComparator;
-import org.jgayoso.ncomplo.business.entities.Game;
-import org.jgayoso.ncomplo.business.entities.GameSide;
-import org.jgayoso.ncomplo.business.entities.League;
-import org.jgayoso.ncomplo.business.entities.LeagueGame;
-import org.jgayoso.ncomplo.business.entities.User;
 import org.jgayoso.ncomplo.business.entities.repositories.BetRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.GameRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.GameSideRepository;
@@ -78,16 +73,13 @@ public class BetService {
     @Transactional
     public void processBetsFile(final File betsFile, final String login, final Integer leagueId, final boolean updateAllLeagues, final Locale locale)
             throws IOException {
-        FileInputStream fis = null;
-        XSSFWorkbook book = null;
 
-        try {
-            fis = new FileInputStream(betsFile);
-            book = new XSSFWorkbook(fis);
-            final XSSFSheet sheet = book.getSheetAt(2);
+        try (FileInputStream fis = new FileInputStream(betsFile); XSSFWorkbook book = new XSSFWorkbook(fis);) {
+            final League requestLeague = this.leagueService.find(leagueId);
+
+            final XSSFSheet sheet = book.getSheet(requestLeague.getCompetition().getCompetitionParserProperties().getGamesSheetName());
 
             List<League> leaguesToUpdate;
-            final League requestLeague = this.leagueService.find(leagueId);
             if (updateAllLeagues) {
                 final User user = this.userRepository.findOne(login);
                 if (user == null) {
@@ -103,17 +95,6 @@ public class BetService {
             }
             
             return;
-        } finally {
-            try {
-                if (book != null) {book.close(); }
-            } catch (final Exception e) {
-                // Nothing to do
-            }
-            try {
-                if (fis != null) { fis.close(); }
-            } catch (final Exception e) {
-                // Nothing to do
-            }
         }
     }
 
@@ -159,58 +140,31 @@ public class BetService {
             gamesByOrder.put(game.getOrder(), game);
         }
 
+        final Competition competition = league.getCompetition();
         // Groups games
-        int matchNumber = 1;
-        for (int rowIndex = 7; rowIndex < 55; rowIndex++) {
-            final BetView betView = ExcelProcessor.processGroupsGameBet(sheet, rowIndex, matchNumber,
-                    this.groupsFirstColumnName, gamesByOrder, betViewssByGameId);
-            // If betId is not null, update the current bet instance
-            final Integer betId = betIdsByGameId.get(betView.getGameId());
+        int matchNumber = ExcelProcessor.processGroupGamesBets(leagueId, login, competition, sheet, gamesByOrder,
+                betIdsByGameId, betViewssByGameId, this);
 
-            this.save(betId, leagueId, login, betView.getGameId(), betView.getGameSideAId(),
-                    betView.getGameSideBId(), betView.getScoreA(), betView.getScoreB());
-            matchNumber++;
-        }
-
-        // Second round
-        for (int rowIndex = 10; rowIndex < 40; rowIndex += 4) {
-            final BetView betView = ExcelProcessor.processPlayOffGameBet(sheet, rowIndex, matchNumber,
-                    this.secondRoundColumnName, gamesByOrder, betViewssByGameId, gameSidesByName);
-            // If betId is not null, update the current bet instance
-            final Integer betId = betIdsByGameId.get(betView.getGameId());
-            this.save(betId, leagueId, login, betView.getGameId(), betView.getGameSideAId(),
-                    betView.getGameSideBId(), betView.getScoreA(), betView.getScoreB());
-            matchNumber++;
-        }
+        // Round of 16
+        CompetitionParserProperties competitionParserProperties = competition.getCompetitionParserProperties();
+        matchNumber = ExcelProcessor.processPlayOffGamesBets(leagueId, login, sheet, matchNumber,
+                competitionParserProperties.getRoundOf16GamesColumnName(), competitionParserProperties.getRoundOf16GamesStartIndex(), 8,
+                competitionParserProperties.getRoundOf16GamesJumpSize(),gamesByOrder, betIdsByGameId, betViewssByGameId, gameSidesByName, this);
 
         // Quarter final round
-        for (int rowIndex = 12; rowIndex < 40; rowIndex += 8) {
-            final BetView betView = ExcelProcessor.processPlayOffGameBet(sheet, rowIndex, matchNumber, this.quarterFinalsColumnName,
-                    gamesByOrder, betViewssByGameId, gameSidesByName);
-            // If betId is not null, update the current bet instance
-            final Integer betId = betIdsByGameId.get(betView.getGameId());
-            this.save(betId, leagueId, login, betView.getGameId(), betView.getGameSideAId(),
-                    betView.getGameSideBId(), betView.getScoreA(), betView.getScoreB());
-            matchNumber++;
-        }
+        matchNumber = ExcelProcessor.processPlayOffGamesBets(leagueId, login, sheet, matchNumber,
+                competitionParserProperties.getQuarteFinalsGamesColumnName(), competitionParserProperties.getQuarteFinalsGamesStartIndex(), 4,
+                competitionParserProperties.getQuarteFinalsGamesJumpSize(),gamesByOrder, betIdsByGameId, betViewssByGameId, gameSidesByName, this);
+
         // Semifinal round
-        for (int rowIndex = 16; rowIndex < 40; rowIndex += 16) {
-            final BetView betView = ExcelProcessor.processPlayOffGameBet(sheet, rowIndex, matchNumber, this.semisColumnName,
-                    gamesByOrder, betViewssByGameId, gameSidesByName);
-            // If betId is not null, update the current bet instance
-            final Integer betId = betIdsByGameId.get(betView.getGameId());
-            this.save(betId, leagueId, login, betView.getGameId(), betView.getGameSideAId(),
-                    betView.getGameSideBId(), betView.getScoreA(), betView.getScoreB());
-            matchNumber++;
-        }
+        matchNumber = ExcelProcessor.processPlayOffGamesBets(leagueId, login, sheet, matchNumber,
+                competitionParserProperties.getSemiFinalsGamesColumnName(), competitionParserProperties.getSemiFinalsGamesStartIndex(), 2,
+                competitionParserProperties.getSemiFinalsGamesJumpSize(),gamesByOrder, betIdsByGameId, betViewssByGameId, gameSidesByName, this);
 
         // Final
-        final BetView betView = ExcelProcessor.processPlayOffGameBet(sheet, 23, matchNumber, this.finalColumnName,
-                gamesByOrder, betViewssByGameId, gameSidesByName);
-        // If betId is not null, update the current bet instance
-        final Integer betId = betIdsByGameId.get(betView.getGameId());
-        this.save(betId, leagueId, login, betView.getGameId(), betView.getGameSideAId(),
-                betView.getGameSideBId(), betView.getScoreA(), betView.getScoreB());
+        ExcelProcessor.processPlayOffGamesBets(leagueId, login, sheet, matchNumber,
+                competitionParserProperties.getFinalGamesColumnName(), competitionParserProperties.getFinalGamesStartIndex(), 1,
+                0, gamesByOrder, betIdsByGameId, betViewssByGameId, gameSidesByName, this);
     }
 
 
