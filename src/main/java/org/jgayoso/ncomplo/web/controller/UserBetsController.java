@@ -213,20 +213,26 @@ public class UserBetsController {
             return "redirect:/scoreboard";
         }
 
+        List<String> invalidBets = null;
         try {
             final File betsFile = this.convert(file, login);
             if (!betsFile.exists() || betsFile.length() == 0) {
                 redirectAttributes.addFlashAttribute("error", "Empty file");
                 return "redirect:/bets/"+leagueId+"/";
             }
-            this.betService.processBetsFile(betsFile, login, leagueId, Boolean.TRUE.equals(allLeagues), locale);
+            invalidBets = this.betService.processBetsFile(betsFile, login, leagueId, Boolean.TRUE.equals(allLeagues), locale);
             betsFile.delete();
         } catch (final IOException e) {
             redirectAttributes.addFlashAttribute("error", "Error processing bets file");
         } finally {
         	// delete file
         }
-        redirectAttributes.addFlashAttribute("message", "Bets processed successfully");
+        if (CollectionUtils.isEmpty(invalidBets)) {
+            redirectAttributes.addFlashAttribute("message", "Bets processed successfully");
+        } else {
+            redirectAttributes.addFlashAttribute("warnings", invalidBets);
+
+        }
         return "redirect:/bets/"+leagueId+"/";
     }
     

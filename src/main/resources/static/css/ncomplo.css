@@ -50,10 +50,8 @@ form#password {
 }
 
 .message {
-    color: blue;
     text-align: center;
     border: 1px;
-    border-color: blue;
     border-style: dashed;
     margin: 20px;
     font-size: 12px;
@@ -63,18 +61,19 @@ form#password {
     margin-top: 10px;
 }
 
-.error p {
-    margin-top: 10px;
+.info {
+    color: blue;
+    border-color: blue;
+}
+
+.warn {
+    color: orange;
+    border-color: orange;
 }
 
 .error {
     color: red;
-    text-align: center;
-    border: 1px;
     border-color: red;
-    border-style: dashed;
-    margin: 20px;
-    font-size: 12px;
 }
 
 

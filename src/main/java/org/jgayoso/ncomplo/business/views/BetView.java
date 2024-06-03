@@ -19,6 +19,8 @@ public class BetView implements Serializable {
     private Integer scoreA;
     
     private Integer scoreB;
+
+    private String invalidMessage;
     
     
     public BetView() {
@@ -92,5 +94,13 @@ public class BetView implements Serializable {
     
     public void setScoreB(final Integer scoreB) {
         this.scoreB = scoreB;
+    }
+
+    public String getInvalidMessage() {
+        return invalidMessage;
+    }
+
+    public void setInvalidMessage(String invalidMessage) {
+        this.invalidMessage = invalidMessage;
     }
 }

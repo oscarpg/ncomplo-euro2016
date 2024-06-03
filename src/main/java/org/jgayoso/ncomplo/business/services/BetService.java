@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jgayoso.ncomplo.business.entities.*;
@@ -71,7 +72,7 @@ public class BetService {
     }
     
     @Transactional
-    public void processBetsFile(final File betsFile, final String login, final Integer leagueId, final boolean updateAllLeagues, final Locale locale)
+    public List<String> processBetsFile(final File betsFile, final String login, final Integer leagueId, final boolean updateAllLeagues, final Locale locale)
             throws IOException {
 
         try (FileInputStream fis = new FileInputStream(betsFile); XSSFWorkbook book = new XSSFWorkbook(fis);) {
@@ -90,15 +91,16 @@ public class BetService {
                 leaguesToUpdate = Collections.singletonList(requestLeague);
             }
 
+            List<String> invalidBets = null;
             for (League league: leaguesToUpdate) {
-                updateLeagueBets(login, locale, sheet, league);
+                invalidBets = updateLeagueBets(login, locale, sheet, league);
             }
             
-            return;
+            return invalidBets;
         }
     }
 
-    private void updateLeagueBets(String login, Locale locale, XSSFSheet sheet, League league) {
+    private List<String> updateLeagueBets(String login, Locale locale, XSSFSheet sheet, League league) {
         Integer leagueId = league.getId();
 
         final Collection<LeagueGame> leagueGames = league.getLeagueGames().values();
@@ -145,30 +147,43 @@ public class BetService {
         int matchNumber = ExcelProcessor.processGroupGamesBets(leagueId, login, competition, sheet, gamesByOrder,
                 betIdsByGameId, betViewssByGameId, this);
 
+        List<String> invalidBets = new ArrayList<>();
         // Round of 16
         CompetitionParserProperties competitionParserProperties = competition.getCompetitionParserProperties();
-        matchNumber = ExcelProcessor.processPlayOffGamesBets(leagueId, login, sheet, matchNumber,
+        List<BetView> betViews = ExcelProcessor.processPlayOffGamesBets(leagueId, login, sheet, matchNumber,
                 competitionParserProperties.getRoundOf16GamesColumnName(), competitionParserProperties.getRoundOf16GamesStartIndex(), 8,
                 competitionParserProperties.getRoundOf16GamesJumpSize(),gamesByOrder, betIdsByGameId, betViewssByGameId, gameSidesByName, this);
+        getInvalidBetsMessages(invalidBets, betViews);
 
         // Quarter final round
-        matchNumber = ExcelProcessor.processPlayOffGamesBets(leagueId, login, sheet, matchNumber,
+        betViews = ExcelProcessor.processPlayOffGamesBets(leagueId, login, sheet, matchNumber + 8,
                 competitionParserProperties.getQuarteFinalsGamesColumnName(), competitionParserProperties.getQuarteFinalsGamesStartIndex(), 4,
                 competitionParserProperties.getQuarteFinalsGamesJumpSize(),gamesByOrder, betIdsByGameId, betViewssByGameId, gameSidesByName, this);
+        getInvalidBetsMessages(invalidBets, betViews);
 
         // Semifinal round
-        matchNumber = ExcelProcessor.processPlayOffGamesBets(leagueId, login, sheet, matchNumber,
+        betViews = ExcelProcessor.processPlayOffGamesBets(leagueId, login, sheet, matchNumber + 12,
                 competitionParserProperties.getSemiFinalsGamesColumnName(), competitionParserProperties.getSemiFinalsGamesStartIndex(), 2,
                 competitionParserProperties.getSemiFinalsGamesJumpSize(),gamesByOrder, betIdsByGameId, betViewssByGameId, gameSidesByName, this);
+        getInvalidBetsMessages(invalidBets, betViews);
 
         // Final
-        ExcelProcessor.processPlayOffGamesBets(leagueId, login, sheet, matchNumber,
+        betViews = ExcelProcessor.processPlayOffGamesBets(leagueId, login, sheet, matchNumber + 14,
                 competitionParserProperties.getFinalGamesColumnName(), competitionParserProperties.getFinalGamesStartIndex(), 1,
                 0, gamesByOrder, betIdsByGameId, betViewssByGameId, gameSidesByName, this);
+        getInvalidBetsMessages(invalidBets, betViews);
+        return invalidBets;
+    }
+
+    private void getInvalidBetsMessages(List<String> invalidBets, List<BetView> betViews) {
+        for (BetView betView: betViews) {
+            if (StringUtils.isNotEmpty(betView.getInvalidMessage())) {
+                invalidBets.add(betView.getInvalidMessage());
+            }
+        }
     }
 
 
-    
     @Transactional
     public Bet save(
             final Integer id,

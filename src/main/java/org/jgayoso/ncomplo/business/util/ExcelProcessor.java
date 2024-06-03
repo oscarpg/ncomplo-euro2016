@@ -66,11 +66,12 @@ public class ExcelProcessor {
         return betView;
     }
 
-    public static int processPlayOffGamesBets(Integer leagueId, String login, final XSSFSheet sheet, int matchNumber,
+    public static List<BetView> processPlayOffGamesBets(Integer leagueId, String login, final XSSFSheet sheet, int matchNumber,
             final String columnName, final int startIndex, final int numberOfGames, final int jumpSize,
             final Map<Integer, Game> gamesByOrder, final Map<Integer, Integer> betIdsByGameId,
             final Map<Integer, BetView> betsByGameId, final Map<String, GameSide> gameSidesByName, BetService betService) {
 
+        final List<BetView> betViews = new ArrayList<>();
         for (int i = 0; i < numberOfGames; i++) {
             final BetView betView = processPlayOffGameBet(sheet, startIndex + (i * jumpSize), matchNumber,
                     columnName, gamesByOrder, betsByGameId, gameSidesByName);
@@ -78,10 +79,12 @@ public class ExcelProcessor {
             final Integer betId = betIdsByGameId.get(betView.getGameId());
             betService.save(betId, leagueId, login, betView.getGameId(), betView.getGameSideAId(),
                     betView.getGameSideBId(), betView.getScoreA(), betView.getScoreB());
+
+            betViews.add(betView);
             matchNumber++;
         }
 
-        return matchNumber;
+        return betViews;
 
     }
 
@@ -123,6 +126,8 @@ public class ExcelProcessor {
 
         final Game game = gamesByOrder.get(matchNumber);
         final BetView betView = betsByGameId.get(game.getId());
+
+        final BetType betType = game.getDefaultBetType();
         betView.setGameSideAId(gameSideAId);
         betView.setGameSideBId(gameSideBId);
 
@@ -130,13 +135,26 @@ public class ExcelProcessor {
             // We need to parse the extra time and maybe penalties results
             if (extraTimeHomeResult == extraTimeAwayResult) {
                 // Penalties
-                homeResult = penaltiesHomeResult > penaltiesAwayResult ? 1 : 0;
-                awayResult = homeResult == 1 ? 0 : 1;
+                homeResult = penaltiesHomeResult;
+                awayResult = penaltiesAwayResult;
+            } else {
+                homeResult = extraTimeHomeResult;
+                awayResult = extraTimeAwayResult;
             }
         }
 
         betView.setScoreA(homeResult);
         betView.setScoreB(awayResult);
+
+        if (betType != null) {
+            if (betType.isSidesMatter() && (gameSideAId == null || gameSideBId == null)) {
+                betView.setInvalidMessage("Game " + game.getName() + ": Missing Team");
+            }
+            if (homeResult == awayResult) {
+                betView.setInvalidMessage("Game " + game.getName() + ": Draw not allowed");
+            }
+        }
+
         return betView;
     }
 
