@@ -40,7 +40,7 @@ public class GameSide implements I18nNamedEntity {
     @Column(name="NAME", nullable=false,length=200)
     private final Map<String,String> namesByLang = new LinkedHashMap<>();
     
-    @Column(name="CODE", nullable=false, length=5, unique=true)
+    @Column(name="CODE", nullable=false, length=10, unique=true)
     private String code;
     
     @ManyToOne

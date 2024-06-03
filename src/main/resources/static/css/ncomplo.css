@@ -395,93 +395,11 @@ form#password {
 	text-align: center;
 }
 
-[class*=" euro-flag-"], [class^=euro-flag-] {
-    display: inline-block;
-    margin: 0;
-    background-repeat: no-repeat;
-    background-image: url(/images/flags_sprite_empty_64x64.png);
+.big-flag.fi {
+    line-height: 4em;
+    width: 4em;
 }
-
-.team-flag {
-   	background-size: 230px 506px;
-    width: 46px;
-    height: 46px;
-    vertical-align: middle;
+.small-flag.fi {
+    line-height: 3em;
+    width: 3em;
 }
-
-.euro-flag-Bélgica {background-position: 0 10%;}
-.euro-flag-Portugal {background-position: 0 80%;}
-.euro-flag-Hungría {background-position: 50% 40%;}
-.euro-flag-Austria {background-position: 75% 0;}
-.euro-flag-Islandia {background-position: 75% 40%;}
-.euro-flag-Republica-de-Irlanda {background-position: 100% 40%;}
-.euro-flag-Rumania {background-position: 25% 80%;}
-.euro-flag-Albania {background-position: 100% 100%;}
-.euro-flag-Suiza {background-position: 50% 90%;}
-.euro-flag-Francia {background-position: 25% 30%;}
-.euro-flag-Rusia {background-position: 50% 80%;}
-.euro-flag-Gales {background-position: 50% 100%;}
-.euro-flag-Eslovaquia {background-position: 75% 90%;}
-.euro-flag-Inglaterra {background-position: 75% 20%;}
-.euro-flag-Ucrania {background-position: 25% 100%;}
-.euro-flag-Polonia {background-position: 100% 70%;}
-.euro-flag-Irlanda-del-Norte {background-position: 50% 70%;}
-.euro-flag-Alemania {background-position: 100% 30%;}
-.euro-flag-República-Checa {background-position: 25% 20%;}
-.euro-flag-Turquía {background-position: 0 100%;}
-.euro-flag-Croacia {background-position: 100% 10%;}
-.euro-flag-España {background-position: 25% 90%;}
-.euro-flag-Italia {background-position: 25% 50%;}
-.euro-flag-Suecia {background-position: 100% 90%;}
-
-[class*=" world-flag-"], [class^=world-flag-] {
-    display: inline-block;
-    margin: 0;
-    background-repeat: no-repeat;
-    background-image: url(/images/mundial2018-flags-72x44.png);
-}
-.world-team-flag {
-   	background-size: 72px 1408px;
-    width: 72px;
-    height: 44px;
-    vertical-align: middle;
-}
-.small-world-team-flag {
-   	background-size: 36px 704px;
-    width: 36px;
-    height: 22px;
-    vertical-align: middle;
-}
-
-.world-flag-AR, .world-flag-ARG {background-position: 0%   0.000%;}
-.world-flag-AU, .world-flag-AUS {background-position: 0%   3.226%;}
-.world-flag-BE, .world-flag-BEL {background-position: 0%   6.452%;}
-.world-flag-BR, .world-flag-BRA {background-position: 0%   9.678%;}
-.world-flag-CH, .world-flag-SUI {background-position: 0%  12.904%;}
-.world-flag-QA, .world-flag-QAT {background-position: 0%  16.130%;}
-.world-flag-CR, .world-flag-CRC {background-position: 0%  19.356%;}
-.world-flag-GER                 {background-position: 0%  22.582%;}
-.world-flag-DK, .world-flag-DEN {background-position: 0%  25.808%;}
-.world-flag-EC, .world-flag-ECU {background-position: 0%  29.034%;}
-.world-flag-ENG 				{background-position: 0%  32.260%;}
-.world-flag-ES, .world-flag-ESP {background-position: 0%  35.486%;}
-.world-flag-FR, .world-flag-FRA {background-position: 0%  38.712%;}
-.world-flag-HR, .world-flag-CRO {background-position: 0%  41.938%;}
-.world-flag-NL, .world-flag-NLD {background-position: 0%  45.164%;}
-.world-flag-US, .world-flag-USA {background-position: 0%  48.390%;}
-.world-flag-JP, .world-flag-JPN {background-position: 0%  51.616%;}
-.world-flag-KR, .world-flag-KOR {background-position: 0%  54.842%;}
-.world-flag-MA, .world-flag-MAR {background-position: 0%  58.068%;}
-.world-flag-MX, .world-flag-MEX {background-position: 0%  61.294%;}
-.world-flag-WLS                 {background-position: 0%  64.520%;}
-.world-flag-CA, .world-flag-CAN {background-position: 0%  67.746%;}
-.world-flag-CM, .world-flag-CMR {background-position: 0%  70.972%;}
-.world-flag-PL, .world-flag-POL {background-position: 0%  74.198%;}
-.world-flag-PT, .world-flag-POR {background-position: 0%  77.424%;}
-.world-flag-GH, .world-flag-GHA {background-position: 0%  80.650%;}
-.world-flag-SA, .world-flag-KSA {background-position: 0%  83.876%;}
-.world-flag-SN, .world-flag-SEN {background-position: 0%  87.102%;}
-.world-flag-RS, .world-flag-SRB {background-position: 0%  90.328%;}
-.world-flag-IR, .world-flag-IRN {background-position: 0%  93.554%;}
-.world-flag-TN, .world-flag-TUN {background-position: 0%  96.780%;}
-.world-flag-UY, .world-flag-URU {background-position: 0% 100.006%;}

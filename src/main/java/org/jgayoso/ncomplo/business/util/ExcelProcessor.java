@@ -196,7 +196,7 @@ public class ExcelProcessor {
             String countryCode = StringUtils.substring(teamName, 0, 5);
             List<CountryCode> codes = CountryCode.findByName(teamName);
             if (CollectionUtils.isNotEmpty(codes)) {
-                countryCode = codes.get(0).getAlpha2();
+                countryCode = StringUtils.lowerCase(codes.get(0).getAlpha2());
             }
 
             logger.debug("Creating team " + teamName);
