@@ -286,7 +286,9 @@ form#password {
 #bets tr.bet_notcomputed td.bet_bet_scoreB,
 #bets tr.bet_notcomputed td.bet_bet_sideB,
 #bets tr.bet_notcomputed td.bet_points,
-#bets tr.bet_notcomputed td.bet_flag {
+#bets tr.bet_notcomputed td.bet_flag,
+#bets tr.bet_notcomputed td.bet_bsa,
+#bets tr.bet_notcomputed td.bet_bsb {
     background-color: lemonchiffon;
 }
 
