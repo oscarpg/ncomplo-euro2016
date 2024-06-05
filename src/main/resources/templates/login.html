@@ -1,32 +1,35 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-  <head th:substituteby="layout/header :: head"></head>
-  
-  <body>
-  
-    <header th:substituteby="layout/header :: header"></header>
-    
-    <div class="container mt-3">
-    	
-    	<div th:substituteby="layout/messages :: messages"></div>
-        <div class="row">
-            <div class="col-12">
-                <form id="login" th:action="@{/login}" method="post" class="form-signin" role="form">
-                    <h3 class="form-signin-heading" th:text="#{login.title}">Authenticate</h3>
-                    <input id="loginInput" type="text" name="username" required="required" class="form-control" th:placeholder="#{login.form.login}" autofocus="autofocus" />
+<head th:substituteby="layout/header :: head"></head>
 
-                    <input id="passwordInput" type="password" name="password" required="required" class="form-control" th:placeholder="#{login.form.password}" />
-                    <button class="btn btn-lg btn-primary btn-block" type="submit" th:text="#{login.form.submit}">Sign in</button>
-                </form>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12">
-                <a th:href="@{/forgot-password}" th:text="#{login.form.forgot.password}">Forgot password</a>
-            </div>
-        </div>
+<body>
+
+<header th:substituteby="layout/header :: header"></header>
+
+<div class="container mt-3">
+
+  <div th:substituteby="layout/messages :: messages"></div>
+  <div class="row">
+    <div class="col-12">
+      <form class="form-signin" id="login" method="post" role="form" th:action="@{/login}">
+        <h3 class="form-signin-heading" th:text="#{login.title}">Authenticate</h3>
+        <input autofocus="autofocus" class="form-control" id="loginInput" name="username" required="required"
+               th:placeholder="#{login.form.login}" type="text"/>
+
+        <input class="form-control" id="passwordInput" name="password" required="required"
+               th:placeholder="#{login.form.password}"
+               type="password"/>
+        <button class="btn btn-lg btn-primary btn-block" th:text="#{login.form.submit}" type="submit">Sign in</button>
+      </form>
     </div>
-  </body>
-  
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <a th:href="@{/forgot-password}" th:text="#{login.form.forgot.password}">Forgot password</a>
+    </div>
+  </div>
+</div>
+</body>
+
 </html>

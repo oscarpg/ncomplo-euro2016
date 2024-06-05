@@ -1,11 +1,8 @@
 package org.jgayoso.ncomplo.web.admin.controller;
 
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.jgayoso.ncomplo.business.entities.BetType;
-import org.jgayoso.ncomplo.business.entities.Competition;
 import org.jgayoso.ncomplo.business.services.BetTypeService;
 import org.jgayoso.ncomplo.business.services.CompetitionService;
 import org.jgayoso.ncomplo.web.admin.beans.BetTypeBean;
@@ -23,108 +20,88 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 @RequestMapping("/admin/competition/{competitionId}/bettype")
 public class BetTypeController {
 
-    private static final String VIEW_BASE = "admin/competition/bettype/";
-    
-    
-    @Autowired
-    private CompetitionService competitionService;
-    
-    @Autowired
-    private BetTypeService betTypeService;
+  private static final String VIEW_BASE = "admin/competition/bettype/";
 
-    public BetTypeController() {
-        super();
+  @Autowired private CompetitionService competitionService;
+
+  @Autowired private BetTypeService betTypeService;
+
+  public BetTypeController() {
+    super();
+  }
+
+  @RequestMapping("/list")
+  public String list(
+      @PathVariable("competitionId") final Integer competitionId,
+      final HttpServletRequest request,
+      final ModelMap model) {
+
+    final List<BetType> betTypes =
+        this.betTypeService.findAllOrderByName(competitionId, RequestContextUtils.getLocale(request));
+
+    model.addAttribute("allBetTypes", betTypes);
+    model.addAttribute("competition", this.competitionService.find(competitionId));
+
+    return VIEW_BASE + "list";
+  }
+
+  @RequestMapping("/createDefaults")
+  public String createDefaults(@PathVariable("competitionId") final Integer competitionId, final ModelMap model) {
+
+    this.betTypeService.createDefaults(competitionId);
+
+    return "redirect:list";
+  }
+
+  @RequestMapping("/manage")
+  public String manage(
+      @RequestParam(value = "id", required = false) final Integer id,
+      @PathVariable("competitionId") final Integer competitionId,
+      final ModelMap model) {
+
+    final BetTypeBean betTypeBean = new BetTypeBean();
+
+    if (id != null) {
+      final BetType betType = this.betTypeService.find(id);
+      betTypeBean.setId(betType.getId());
+      betTypeBean.setName(betType.getName());
+      betTypeBean.getNamesByLang().clear();
+      betTypeBean.getNamesByLang().addAll(LangBean.listFromMap(betType.getNamesByLang()));
+      betTypeBean.setSpec(betType.getSpec());
+      betTypeBean.setSidesMatter(betType.isSidesMatter());
+      betTypeBean.setScoreMatter(betType.isScoreMatter());
+      betTypeBean.setResultMatter(betType.isResultMatter());
     }
 
-    @RequestMapping("/list")
-    public String list(
-            @PathVariable("competitionId") final Integer competitionId, 
-            final HttpServletRequest request, 
-            final ModelMap model) {
-        
-        final List<BetType> betTypes =
-                this.betTypeService.findAllOrderByName(competitionId,RequestContextUtils.getLocale(request));
-        
-        model.addAttribute("allBetTypes", betTypes);
-        model.addAttribute("competition", this.competitionService.find(competitionId));
-        
-        return VIEW_BASE + "list";
-        
-    }
+    model.addAttribute("betType", betTypeBean);
+    model.addAttribute("competition", this.competitionService.find(competitionId));
 
-    @RequestMapping("/createDefaults")
-    public String createDefaults(@PathVariable("competitionId")
-                                     final Integer competitionId, final ModelMap model) {
+    return VIEW_BASE + "manage";
+  }
 
-        this.betTypeService.createDefaults(competitionId);
+  @RequestMapping("/save")
+  public String save(
+      final BetTypeBean betTypeBean,
+      @SuppressWarnings("unused") final BindingResult bindingResult,
+      @PathVariable("competitionId") final Integer competitionId) {
 
-        return "redirect:list";
+    this.betTypeService.save(
+        betTypeBean.getId(),
+        competitionId,
+        betTypeBean.getName(),
+        LangBean.mapFromList(betTypeBean.getNamesByLang()),
+        betTypeBean.getSpec(),
+        betTypeBean.isSidesMatter(),
+        betTypeBean.isScoreMatter(),
+        betTypeBean.isResultMatter());
 
-    }
+    return "redirect:list";
+  }
 
-    @RequestMapping("/manage")
-    public String manage(
-            @RequestParam(value="id",required=false)
-            final Integer id,
-            @PathVariable("competitionId")
-            final Integer competitionId,
-            final ModelMap model) {
+  @RequestMapping("/delete")
+  public String delete(@RequestParam(value = "id") final Integer id) {
 
-        final BetTypeBean betTypeBean = new BetTypeBean();
-        
-        if (id != null) {
-            final BetType betType = this.betTypeService.find(id);
-            betTypeBean.setId(betType.getId());
-            betTypeBean.setName(betType.getName());
-            betTypeBean.getNamesByLang().clear();
-            betTypeBean.getNamesByLang().addAll(LangBean.listFromMap(betType.getNamesByLang()));
-            betTypeBean.setSpec(betType.getSpec());
-            betTypeBean.setSidesMatter(betType.isSidesMatter());
-            betTypeBean.setScoreMatter(betType.isScoreMatter());
-            betTypeBean.setResultMatter(betType.isResultMatter());
-        }
-        
-        model.addAttribute("betType", betTypeBean);
-        model.addAttribute("competition", this.competitionService.find(competitionId));
-        
-        return VIEW_BASE + "manage";
-        
-    }
-
-    
-    
-    @RequestMapping("/save")
-    public String save(
-            final BetTypeBean betTypeBean,
-            @SuppressWarnings("unused") final BindingResult bindingResult,
-            @PathVariable("competitionId")
-            final Integer competitionId) {
-
-        this.betTypeService.save(
-                betTypeBean.getId(),
-                competitionId,
-                betTypeBean.getName(),
-                LangBean.mapFromList(betTypeBean.getNamesByLang()),
-                betTypeBean.getSpec(),
-                betTypeBean.isSidesMatter(),
-                betTypeBean.isScoreMatter(),
-                betTypeBean.isResultMatter());
-        
-        return "redirect:list";
-        
-    }
-
-    
-    
-    @RequestMapping("/delete")
-    public String delete(
-            @RequestParam(value="id")
-            final Integer id) {
-
-        this.betTypeService.delete(id);
-        return "redirect:list";
-        
-    }
-    
-    
+    this.betTypeService.delete(id);
+    return "redirect:list";
+  }
 }

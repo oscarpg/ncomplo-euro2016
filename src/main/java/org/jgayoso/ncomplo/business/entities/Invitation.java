@@ -1,7 +1,6 @@
 package org.jgayoso.ncomplo.business.entities;
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,97 +14,104 @@ import javax.persistence.Table;
 @Table(name = "INVITATION")
 public class Invitation {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Integer id;
 
-	@ManyToOne
-	@JoinColumn(name = "LEAGUE_ID", nullable = false)
-	private League league;
+  @ManyToOne
+  @JoinColumn(name = "LEAGUE_ID", nullable = false)
+  private League league;
 
-	@Column(name = "EMAIL")
-	private String email;
-	
-	@Column(name = "NAME")
-	private String name;
-	
-	@Column(name = "TOKEN")
-	private String token;
-	
-	@Column(name = "ADMIN_LOGIN", nullable = false)
-	private String adminLogin;
+  @Column(name = "EMAIL")
+  private String email;
 
-	@Column(name = "DATE", nullable = true)
-	private Date date;
-	
-	public Invitation() {
-		super();
-	}
+  @Column(name = "NAME")
+  private String name;
 
-	public Integer getId() {
-		return this.id;
-	}
+  @Column(name = "TOKEN")
+  private String token;
 
-	public void setId(final Integer id) {
-		this.id = id;
-	}
+  @Column(name = "ADMIN_LOGIN", nullable = false)
+  private String adminLogin;
 
-	public League getLeague() {
-		return this.league;
-	}
+  @Column(name = "DATE", nullable = true)
+  private Date date;
 
-	public void setLeague(final League league) {
-		this.league = league;
-	}
+  public Invitation() {
+    super();
+  }
 
-	public String getEmail() {
-		return this.email;
-	}
+  public Integer getId() {
+    return this.id;
+  }
 
-	public void setEmail(final String email) {
-		this.email = email;
-	}
+  public void setId(final Integer id) {
+    this.id = id;
+  }
 
-	public String getName() {
-		return this.name;
-	}
+  public League getLeague() {
+    return this.league;
+  }
 
-	public void setName(final String name) {
-		this.name = name;
-	}
-	
-	public String getAdminLogin() {
-		return this.adminLogin;
-	}
+  public void setLeague(final League league) {
+    this.league = league;
+  }
 
-	public void setAdminLogin(final String adminLogin) {
-		this.adminLogin = adminLogin;
-	}
+  public String getEmail() {
+    return this.email;
+  }
 
-	public Date getDate() {
-		return this.date;
-	}
+  public void setEmail(final String email) {
+    this.email = email;
+  }
 
-	public void setDate(final Date date) {
-		this.date = date;
-	}
+  public String getName() {
+    return this.name;
+  }
 
-	public String getToken() {
-		return this.token;
-	}
+  public void setName(final String name) {
+    this.name = name;
+  }
 
-	public void setToken(final String token) {
-		this.token = token;
-	}
+  public String getAdminLogin() {
+    return this.adminLogin;
+  }
 
-	@Override
-	public String toString() {
-		return "Invitation{" +
-				"league=" + league +
-				", email='" + email + '\'' +
-				", name='" + name + '\'' +
-				", token='**********'" +
-				", adminLogin='" + adminLogin + '\'' +
-				'}';
-	}
+  public void setAdminLogin(final String adminLogin) {
+    this.adminLogin = adminLogin;
+  }
+
+  public Date getDate() {
+    return this.date;
+  }
+
+  public void setDate(final Date date) {
+    this.date = date;
+  }
+
+  public String getToken() {
+    return this.token;
+  }
+
+  public void setToken(final String token) {
+    this.token = token;
+  }
+
+  @Override
+  public String toString() {
+    return "Invitation{"
+        + "league="
+        + league
+        + ", email='"
+        + email
+        + '\''
+        + ", name='"
+        + name
+        + '\''
+        + ", token='**********'"
+        + ", adminLogin='"
+        + adminLogin
+        + '\''
+        + '}';
+  }
 }

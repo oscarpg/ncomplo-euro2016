@@ -6,24 +6,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class AdminController {
 
-    private static final String VIEW_BASE = "admin/";
+  private static final String VIEW_BASE = "admin/";
 
-    
-    
-    
-    public AdminController() {
-        super();
-    }
-    
+  public AdminController() {
+    super();
+  }
 
-
-
-    
-    
-    @RequestMapping("/admin")
-    public String index() {
-        return VIEW_BASE + "index";
-    }
-    
-    
+  @RequestMapping("/admin")
+  public String index() {
+    return VIEW_BASE + "index";
+  }
 }

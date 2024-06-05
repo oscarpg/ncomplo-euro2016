@@ -3,56 +3,59 @@
 
 <head th:fragment="head">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
-          integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous"/>
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css"
-          integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
+        integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css"
+        integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" rel="stylesheet"/>
 
-    <link rel="stylesheet" type="text/css" th:href="@{/css/ncomplo.css}" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css" />
+  <link rel="stylesheet" th:href="@{/css/ncomplo.css}" type="text/css"/>
+  <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css" rel="stylesheet"/>
 
-    <title>NCompl&oacute;</title>
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js"
-            integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-            crossorigin="anonymous" type="text/javascript"></script>
-    <script th:src="@{/js/ncomplo.js}" type="text/javascript"></script>
+  <title>NCompl&oacute;</title>
+  <script crossorigin="anonymous"
+          integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+          src="https://code.jquery.com/jquery-1.12.4.min.js" type="text/javascript"></script>
+  <script th:src="@{/js/ncomplo.js}" type="text/javascript"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
-            integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"
-            integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  <script crossorigin="anonymous"
+          integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+          src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script crossorigin="anonymous"
+          integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
+          src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 </head>
 
 <body>
 
 
-    <header class="navbar navbar-expand-md navbar-dark bg-dark" th:fragment="header">
-        <a class="navbar-brand" th:href="@{/}" href="/">NCompl&oacute;</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item" th:if="${user != null}">
-                    <a class="nav-link" th:href="@{/}" th:text="#{nav.scoreboard}">Scoreboard</a>
-                </li>
-                <li class="nav-item" th:if="${user != null and betsAllowed != null and betsAllowed}">
-                    <a class="nav-link" th:href="@{'/bets/' + ${league.id} + '/'}" th:text="#{scoreboard.sendbets}">Send bets</a>
-                </li>
-                <li class="nav-item" th:if="${user != null}">
-                    <a class="nav-link" th:href="@{/password}" th:text="#{nav.changepassword}">Change password</a>
-                </li>
-                <li class="nav-item" th:if="${user != null and user.admin}">
-                    <a class="nav-link" th:if="${user.admin}" th:href="@{/admin}" th:text="#{nav.admin}">Go to Admin</a>
-                </li>
-                <li class="nav-item" th:if="${user != null}">
-                    <a class="nav-link" th:href="@{/logout}" th:text="#{logout}">Logout</a>
-                </li>
-            </ul>
-        </div>
-    </header>
+<header class="navbar navbar-expand-md navbar-dark bg-dark" th:fragment="header">
+  <a class="navbar-brand" href="/" th:href="@{/}">NCompl&oacute;</a>
+  <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
+          class="navbar-toggler"
+          data-target="#navbarSupportedContent" data-toggle="collapse" type="button">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item" th:if="${user != null}">
+        <a class="nav-link" th:href="@{/}" th:text="#{nav.scoreboard}">Scoreboard</a>
+      </li>
+      <li class="nav-item" th:if="${user != null and betsAllowed != null and betsAllowed}">
+        <a class="nav-link" th:href="@{'/bets/' + ${league.id} + '/'}" th:text="#{scoreboard.sendbets}">Send bets</a>
+      </li>
+      <li class="nav-item" th:if="${user != null}">
+        <a class="nav-link" th:href="@{/password}" th:text="#{nav.changepassword}">Change password</a>
+      </li>
+      <li class="nav-item" th:if="${user != null and user.admin}">
+        <a class="nav-link" th:href="@{/admin}" th:if="${user.admin}" th:text="#{nav.admin}">Go to Admin</a>
+      </li>
+      <li class="nav-item" th:if="${user != null}">
+        <a class="nav-link" th:href="@{/logout}" th:text="#{logout}">Logout</a>
+      </li>
+    </ul>
+  </div>
+</header>
 
 
 </body>

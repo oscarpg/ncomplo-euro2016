@@ -7,144 +7,123 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.sql.DataSource;
-
 import org.jgayoso.ncomplo.business.views.SQLQueryResult;
 import org.jgayoso.ncomplo.exceptions.InternalErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
-
 @Component
 public class SQLAccessor {
-    
-    @Autowired
-    private DataSource dataSource;
 
-    
-    public SQLAccessor() {
-        super();
-    }
+  @Autowired private DataSource dataSource;
 
-    
-    
-    @SuppressWarnings("resource")
-    public int executeUpdate(final String sql) {
-        
-        Connection con = null;
-        PreparedStatement st = null;
+  public SQLAccessor() {
+    super();
+  }
+
+  @SuppressWarnings("resource")
+  public int executeUpdate(final String sql) {
+
+    Connection con = null;
+    PreparedStatement st = null;
+    try {
+
+      con = this.dataSource.getConnection();
+      st = con.prepareStatement(sql);
+
+      return st.executeUpdate();
+
+    } catch (final Exception e) {
+      throw new InternalErrorException(e);
+    } finally {
+      if (st != null) {
         try {
-            
-            con = this.dataSource.getConnection();
-            st = con.prepareStatement(sql);
-            
-            return st.executeUpdate();
-            
+          st.close();
         } catch (final Exception e) {
-            throw new InternalErrorException(e);
-        } finally {
-            if (st != null) {
-                try {
-                    st.close();
-                } catch (final Exception e) {
-                    // ignored
-                }
-            }
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (final Exception e) {
-                    // ignored
-                }
-            }
+          // ignored
         }
-        
-    }
-
-    
-
-    
-    
-    @SuppressWarnings("resource")
-    public SQLQueryResult executeQuery(final String sql) {
-        
-        Connection con = null;
-        PreparedStatement st = null;
-        ResultSet rs = null;
+      }
+      if (con != null) {
         try {
-            
-            con = this.dataSource.getConnection();
-            st = con.prepareStatement(sql);
-            
-            rs = st.executeQuery();
-            
-            final SQLQueryResult result = new SQLQueryResult();
-            
-            while (rs.next()) {
-                
-                if (!result.hasMetaData()) {
-                    retrieveMetaData(result, rs);
-                }
-
-                final List<Object> dataRow = new ArrayList<>();
-
-                for (int i = 1; i <= result.getColumnCount(); i++) {
-                    dataRow.add(rs.getObject(i));
-                }
-                
-                result.addDataRow(dataRow);
-                
-            }
-            
-            return result;
-            
+          con.close();
         } catch (final Exception e) {
-            throw new InternalErrorException(e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (final Exception e) {
-                    // ignored
-                }
-            }
-            if (st != null) {
-                try {
-                    st.close();
-                } catch (final Exception e) {
-                    // ignored
-                }
-            }
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (final Exception e) {
-                    // ignored
-                }
-            }
+          // ignored
         }
-        
+      }
     }
+  }
 
-    
-    
-    private void retrieveMetaData(final SQLQueryResult result, final ResultSet rs) 
-            throws SQLException {
-        
-        final ResultSetMetaData metaData = rs.getMetaData();
-        final int columnCount = metaData.getColumnCount();
-        
-        final List<String> columnNames = new ArrayList<>();
-        
-        for (int i = 1; i <= columnCount;i++) {
-            columnNames.add(metaData.getColumnLabel(i));
+  @SuppressWarnings("resource")
+  public SQLQueryResult executeQuery(final String sql) {
+
+    Connection con = null;
+    PreparedStatement st = null;
+    ResultSet rs = null;
+    try {
+
+      con = this.dataSource.getConnection();
+      st = con.prepareStatement(sql);
+
+      rs = st.executeQuery();
+
+      final SQLQueryResult result = new SQLQueryResult();
+
+      while (rs.next()) {
+
+        if (!result.hasMetaData()) {
+          retrieveMetaData(result, rs);
         }
 
-        result.setColumnNames(columnNames);
-        
+        final List<Object> dataRow = new ArrayList<>();
+
+        for (int i = 1; i <= result.getColumnCount(); i++) {
+          dataRow.add(rs.getObject(i));
+        }
+
+        result.addDataRow(dataRow);
+      }
+
+      return result;
+
+    } catch (final Exception e) {
+      throw new InternalErrorException(e);
+    } finally {
+      if (rs != null) {
+        try {
+          rs.close();
+        } catch (final Exception e) {
+          // ignored
+        }
+      }
+      if (st != null) {
+        try {
+          st.close();
+        } catch (final Exception e) {
+          // ignored
+        }
+      }
+      if (con != null) {
+        try {
+          con.close();
+        } catch (final Exception e) {
+          // ignored
+        }
+      }
     }
-    
+  }
+
+  private void retrieveMetaData(final SQLQueryResult result, final ResultSet rs) throws SQLException {
+
+    final ResultSetMetaData metaData = rs.getMetaData();
+    final int columnCount = metaData.getColumnCount();
+
+    final List<String> columnNames = new ArrayList<>();
+
+    for (int i = 1; i <= columnCount; i++) {
+      columnNames.add(metaData.getColumnLabel(i));
+    }
+
+    result.setColumnNames(columnNames);
+  }
 }
-    

@@ -1,211 +1,211 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-  <head th:substituteby="layout/header :: head"></head>
-  
-  <body>
-  
-    <header th:substituteby="layout/header :: header"></header>
-  
-    <div class="container">
-  
-        <header th:substituteby="layout/admin/header :: header"></header>
+<head th:substituteby="layout/header :: head"></head>
 
-        <div th:substituteby="layout/messages :: messages"></div>
-    
-        <h1>Manage Competition</h1>
-        
-        <form th:action="@{save}" th:object="${competition}" method="post">
-        
-          <fieldset>
-          
-            <input type="hidden" th:field="*{id}" />
-            
-            <div id="name">
-              <label for="nameInput">Name</label>
-              <input id="nameInput" type="text" th:field="*{name}" required="required" />
-              <a href="#" onclick="$.org.jgayoso.ncomplo.lang.add('name');">add language</a>
-            </div>
-            
-            <div class="name-lang-existing lang-element" th:each="nameLang : *{namesByLang}">
-              <input class="langInput" type="text" th:field="*{namesByLang[__${nameLangStat.index}__].lang}" />
-              <input class="valueInput" type="text" th:field="*{namesByLang[__${nameLangStat.index}__].value}" />
-              <a href="#" onclick="$.org.jgayoso.ncomplo.lang.remove(this);">delete</a>
-            </div>
-            <div id="name-lang-prototype" class="lang-element">
-              <input class="langInput" type="text" name="namesByLang[$index$].lang" id="namesByLang$index$.lang" value="" />
-              <input class="valueInput" type="text" name="namesByLang[$index$].value" id="namesByLang$index$.value" value="" />
-              <a href="#" onclick="$.org.jgayoso.ncomplo.lang.remove(this);">delete</a>
-            </div>
-            
-            <div>
-              <label for="activeCheck">Active</label>
-              <input id="activeCheck" type="checkbox" th:field="*{active}" />
-            </div>
-            
-            <div id="uri">
-              <label for="uriInput">Updater URI</label>
-              <input id="uriInput" type="text" th:field="*{updaterUri}" />
-            </div>
+<body>
 
-            <div id="parseroptions" class="collapsible">
-              <h1>Excel parser configuration</h1>
-              <label>Update parser properties: </label>
-              <input type="checkbox" name="updateProperties" th:field="*{updateProperties}" />
+<header th:substituteby="layout/header :: header"></header>
 
-              <div id="TeamsProperties" class="collapsible">
-                <div>
-                  <label for="teamsSheetName">Teams sheet name</label>
-                  <input id="teamsSheetName" type="text" th:field="*{teamsSheetName}" />
-                </div>
-                <div>
-                  <label for="teamsColumnName">Teams column name</label>
-                  <input id="teamsColumnName" type="text" th:field="*{teamsColumnName}" />
-                </div>
-                <div>
-                  <label for="teamsStartIndex">Teams first row number</label>
-                  <input id="teamsStartIndex" type="number" th:field="*{teamsStartIndex}" />
-                </div>
-                <div>
-                  <label for="teamsNumber">Number of teams</label>
-                  <input id="teamsNumber" type="number" th:field="*{teamsNumber}" />
-                </div>
-              </div>
-              <div id="CommonNames"  class="collapsible">
-                <div>
-                  <label for="groupsName">Name for Groups round</label>
-                  <input id="groupsName" type="text" th:field="*{groupsName}" value="Groups" />
-                </div>
-                <div>
-                  <label for="roundOf16Name">Name for Round of 16 round</label>
-                  <input id="roundOf16Name" type="text" th:field="*{roundOf16Name}" value="Round of 16" />
-                </div>
-                <div>
-                  <label for="quarterFinalsName">Name for Quarter Finals round</label>
-                  <input id="quarterFinalsName" type="text" th:field="*{quarterFinalsName}" value="Quarter Finals" />
-                </div>
-                <div>
-                  <label for="semiFinalsName">Name for Semi Finals round</label>
-                  <input id="semiFinalsName" type="text" th:field="*{semiFinalsName}" value="Semifinals" />
-                </div>
-                <div>
-                  <label for="finalName">Name for Final round</label>
-                  <input id="finalName" type="text" th:field="*{finalName}" value="Final" />
-                </div>
-              </div>
+<div class="container">
 
-              <div id="GamesProperties"  class="collapsible">
-                <div>
-                  <label for="gamesSheetName">Games sheet name</label>
-                  <input id="gamesSheetName" type="text" th:field="*{gamesSheetName}" />
-                </div>
-                <div>
-                  <label for="groupGamesColumnName">Games groups column name</label>
-                  <input id="groupGamesColumnName" type="text" th:field="*{groupGamesColumnName}" />
-                </div>
-                <div>
-                  <label for="groupGamesStartIndex">Games first row number</label>
-                  <input id="groupGamesStartIndex" type="number" th:field="*{groupGamesStartIndex}" />
-                </div>
-                <div>
-                  <label for="groupGamesNumber">Number of games in groups</label>
-                  <input id="groupGamesNumber" type="number" th:field="*{groupGamesNumber}" />
-                </div>
-                <div>
-                  <label for="groupsGamesHomeIndex">Groups home team index</label>
-                  <input id="groupsGamesHomeIndex" type="number" th:field="*{groupsGamesHomeIndex}" />
-                </div>
-                <div>
-                  <label for="groupsGamesAwayIndex">Groups away team index</label>
-                  <input id="groupsGamesAwayIndex" type="number" th:field="*{groupsGamesAwayIndex}" />
-                </div>
-                <div>
-                  <label for="groupsGamesDateIndex">Groups games date index</label>
-                  <input id="groupsGamesDateIndex" type="number" th:field="*{groupsGamesDateIndex}" />
-                </div>
-                <div>
-                  <label for="groupsGamesHourIndex">Groups games hour index</label>
-                  <input id="groupsGamesHourIndex" type="number" th:field="*{groupsGamesHourIndex}" />
-                </div>
-                <div>
-                  <label for="groupsGamesDateFormat">Groups games date format</label>
-                  <input id="groupsGamesDateFormat" type="text" th:field="*{groupsGamesDateFormat}" />
-                </div>
-                <div>
-                  <label for="playoffsGamesDateIndex">Playoffs games date index</label>
-                  <input id="playoffsGamesDateIndex" type="number" th:field="*{playoffsGamesDateIndex}" />
-                </div>
-                <div>
-                  <label for="playoffsGamesHourIndex">Playoffs games hour index</label>
-                  <input id="playoffsGamesHourIndex" type="number" th:field="*{playoffsGamesHourIndex}" />
-                </div>
-                <div>
-                  <label for="playoffsGamesDateFormat">Playoffs games date format</label>
-                  <input id="playoffsGamesDateFormat" type="text" th:field="*{playoffsGamesDateFormat}" />
-                </div>
+  <header th:substituteby="layout/admin/header :: header"></header>
 
-                <div>
-                  <label for="roundOf16GamesColumnName">Round of 16 games column name</label>
-                  <input id="roundOf16GamesColumnName" type="text" th:field="*{roundOf16GamesColumnName}" />
-                </div>
-                <div>
-                  <label for="roundOf16GamesStartIndex">Round of 16 games start index</label>
-                  <input id="roundOf16GamesStartIndex" type="number" th:field="*{roundOf16GamesStartIndex}" />
-                </div>
-                <div>
-                  <label for="roundOf16GamesJumpSize">Round of 16 games jump size</label>
-                  <input id="roundOf16GamesJumpSize" type="number" th:field="*{roundOf16GamesJumpSize}" />
-                </div>
+  <div th:substituteby="layout/messages :: messages"></div>
 
-                <div>
-                  <label for="quarteFinalsGamesColumnName">Quarter Finals games column name</label>
-                  <input id="quarteFinalsGamesColumnName" type="text" th:field="*{quarteFinalsGamesColumnName}" />
-                </div>
-                <div>
-                  <label for="quarteFinalsGamesStartIndex">Quarter Finals games start index</label>
-                  <input id="quarteFinalsGamesStartIndex" type="number" th:field="*{quarteFinalsGamesStartIndex}" />
-                </div>
-                <div>
-                  <label for="quarteFinalsGamesJumpSize">Quarter Finals games jump size</label>
-                  <input id="quarteFinalsGamesJumpSize" type="number" th:field="*{quarteFinalsGamesJumpSize}" />
-                </div>
+  <h1>Manage Competition</h1>
 
-                <div>
-                  <label for="semiFinalsGamesColumnName">Semi Finals games column name</label>
-                  <input id="semiFinalsGamesColumnName" type="text" th:field="*{semiFinalsGamesColumnName}" />
-                </div>
-                <div>
-                  <label for="semiFinalsGamesStartIndex">Semi Finals games start index</label>
-                  <input id="semiFinalsGamesStartIndex" type="number" th:field="*{semiFinalsGamesStartIndex}" />
-                </div>
-                <div>
-                  <label for="semiFinalsGamesJumpSize">Semi Finals games jump size</label>
-                  <input id="semiFinalsGamesJumpSize" type="number" th:field="*{semiFinalsGamesJumpSize}" />
-                </div>
+  <form method="post" th:action="@{save}" th:object="${competition}">
 
-                <div>
-                  <label for="finalGamesColumnName">Final game column name</label>
-                  <input id="finalGamesColumnName" type="text" th:field="*{finalGamesColumnName}" />
-                </div>
-                <div>
-                  <label for="finalGamesStartIndex">Final game row index</label>
-                  <input id="finalGamesStartIndex" type="number" th:field="*{finalGamesStartIndex}" />
-                </div>
+    <fieldset>
+
+      <input th:field="*{id}" type="hidden"/>
+
+      <div id="name">
+        <label for="nameInput">Name</label>
+        <input id="nameInput" required="required" th:field="*{name}" type="text"/>
+        <a href="#" onclick="$.org.jgayoso.ncomplo.lang.add('name');">add language</a>
+      </div>
+
+      <div class="name-lang-existing lang-element" th:each="nameLang : *{namesByLang}">
+        <input class="langInput" th:field="*{namesByLang[__${nameLangStat.index}__].lang}" type="text"/>
+        <input class="valueInput" th:field="*{namesByLang[__${nameLangStat.index}__].value}" type="text"/>
+        <a href="#" onclick="$.org.jgayoso.ncomplo.lang.remove(this);">delete</a>
+      </div>
+      <div class="lang-element" id="name-lang-prototype">
+        <input class="langInput" id="namesByLang$index$.lang" name="namesByLang[$index$].lang" type="text" value=""/>
+        <input class="valueInput" id="namesByLang$index$.value" name="namesByLang[$index$].value" type="text" value=""/>
+        <a href="#" onclick="$.org.jgayoso.ncomplo.lang.remove(this);">delete</a>
+      </div>
+
+      <div>
+        <label for="activeCheck">Active</label>
+        <input id="activeCheck" th:field="*{active}" type="checkbox"/>
+      </div>
+
+      <div id="uri">
+        <label for="uriInput">Updater URI</label>
+        <input id="uriInput" th:field="*{updaterUri}" type="text"/>
+      </div>
+
+      <div class="collapsible" id="parseroptions">
+        <h1>Excel parser configuration</h1>
+        <label>Update parser properties: </label>
+        <input name="updateProperties" th:field="*{updateProperties}" type="checkbox"/>
+
+        <div class="collapsible" id="TeamsProperties">
+          <div>
+            <label for="teamsSheetName">Teams sheet name</label>
+            <input id="teamsSheetName" th:field="*{teamsSheetName}" type="text"/>
+          </div>
+          <div>
+            <label for="teamsColumnName">Teams column name</label>
+            <input id="teamsColumnName" th:field="*{teamsColumnName}" type="text"/>
+          </div>
+          <div>
+            <label for="teamsStartIndex">Teams first row number</label>
+            <input id="teamsStartIndex" th:field="*{teamsStartIndex}" type="number"/>
+          </div>
+          <div>
+            <label for="teamsNumber">Number of teams</label>
+            <input id="teamsNumber" th:field="*{teamsNumber}" type="number"/>
+          </div>
+        </div>
+        <div class="collapsible" id="CommonNames">
+          <div>
+            <label for="groupsName">Name for Groups round</label>
+            <input id="groupsName" th:field="*{groupsName}" type="text" value="Groups"/>
+          </div>
+          <div>
+            <label for="roundOf16Name">Name for Round of 16 round</label>
+            <input id="roundOf16Name" th:field="*{roundOf16Name}" type="text" value="Round of 16"/>
+          </div>
+          <div>
+            <label for="quarterFinalsName">Name for Quarter Finals round</label>
+            <input id="quarterFinalsName" th:field="*{quarterFinalsName}" type="text" value="Quarter Finals"/>
+          </div>
+          <div>
+            <label for="semiFinalsName">Name for Semi Finals round</label>
+            <input id="semiFinalsName" th:field="*{semiFinalsName}" type="text" value="Semifinals"/>
+          </div>
+          <div>
+            <label for="finalName">Name for Final round</label>
+            <input id="finalName" th:field="*{finalName}" type="text" value="Final"/>
+          </div>
+        </div>
+
+        <div class="collapsible" id="GamesProperties">
+          <div>
+            <label for="gamesSheetName">Games sheet name</label>
+            <input id="gamesSheetName" th:field="*{gamesSheetName}" type="text"/>
+          </div>
+          <div>
+            <label for="groupGamesColumnName">Games groups column name</label>
+            <input id="groupGamesColumnName" th:field="*{groupGamesColumnName}" type="text"/>
+          </div>
+          <div>
+            <label for="groupGamesStartIndex">Games first row number</label>
+            <input id="groupGamesStartIndex" th:field="*{groupGamesStartIndex}" type="number"/>
+          </div>
+          <div>
+            <label for="groupGamesNumber">Number of games in groups</label>
+            <input id="groupGamesNumber" th:field="*{groupGamesNumber}" type="number"/>
+          </div>
+          <div>
+            <label for="groupsGamesHomeIndex">Groups home team index</label>
+            <input id="groupsGamesHomeIndex" th:field="*{groupsGamesHomeIndex}" type="number"/>
+          </div>
+          <div>
+            <label for="groupsGamesAwayIndex">Groups away team index</label>
+            <input id="groupsGamesAwayIndex" th:field="*{groupsGamesAwayIndex}" type="number"/>
+          </div>
+          <div>
+            <label for="groupsGamesDateIndex">Groups games date index</label>
+            <input id="groupsGamesDateIndex" th:field="*{groupsGamesDateIndex}" type="number"/>
+          </div>
+          <div>
+            <label for="groupsGamesHourIndex">Groups games hour index</label>
+            <input id="groupsGamesHourIndex" th:field="*{groupsGamesHourIndex}" type="number"/>
+          </div>
+          <div>
+            <label for="groupsGamesDateFormat">Groups games date format</label>
+            <input id="groupsGamesDateFormat" th:field="*{groupsGamesDateFormat}" type="text"/>
+          </div>
+          <div>
+            <label for="playoffsGamesDateIndex">Playoffs games date index</label>
+            <input id="playoffsGamesDateIndex" th:field="*{playoffsGamesDateIndex}" type="number"/>
+          </div>
+          <div>
+            <label for="playoffsGamesHourIndex">Playoffs games hour index</label>
+            <input id="playoffsGamesHourIndex" th:field="*{playoffsGamesHourIndex}" type="number"/>
+          </div>
+          <div>
+            <label for="playoffsGamesDateFormat">Playoffs games date format</label>
+            <input id="playoffsGamesDateFormat" th:field="*{playoffsGamesDateFormat}" type="text"/>
+          </div>
+
+          <div>
+            <label for="roundOf16GamesColumnName">Round of 16 games column name</label>
+            <input id="roundOf16GamesColumnName" th:field="*{roundOf16GamesColumnName}" type="text"/>
+          </div>
+          <div>
+            <label for="roundOf16GamesStartIndex">Round of 16 games start index</label>
+            <input id="roundOf16GamesStartIndex" th:field="*{roundOf16GamesStartIndex}" type="number"/>
+          </div>
+          <div>
+            <label for="roundOf16GamesJumpSize">Round of 16 games jump size</label>
+            <input id="roundOf16GamesJumpSize" th:field="*{roundOf16GamesJumpSize}" type="number"/>
+          </div>
+
+          <div>
+            <label for="quarteFinalsGamesColumnName">Quarter Finals games column name</label>
+            <input id="quarteFinalsGamesColumnName" th:field="*{quarteFinalsGamesColumnName}" type="text"/>
+          </div>
+          <div>
+            <label for="quarteFinalsGamesStartIndex">Quarter Finals games start index</label>
+            <input id="quarteFinalsGamesStartIndex" th:field="*{quarteFinalsGamesStartIndex}" type="number"/>
+          </div>
+          <div>
+            <label for="quarteFinalsGamesJumpSize">Quarter Finals games jump size</label>
+            <input id="quarteFinalsGamesJumpSize" th:field="*{quarteFinalsGamesJumpSize}" type="number"/>
+          </div>
+
+          <div>
+            <label for="semiFinalsGamesColumnName">Semi Finals games column name</label>
+            <input id="semiFinalsGamesColumnName" th:field="*{semiFinalsGamesColumnName}" type="text"/>
+          </div>
+          <div>
+            <label for="semiFinalsGamesStartIndex">Semi Finals games start index</label>
+            <input id="semiFinalsGamesStartIndex" th:field="*{semiFinalsGamesStartIndex}" type="number"/>
+          </div>
+          <div>
+            <label for="semiFinalsGamesJumpSize">Semi Finals games jump size</label>
+            <input id="semiFinalsGamesJumpSize" th:field="*{semiFinalsGamesJumpSize}" type="number"/>
+          </div>
+
+          <div>
+            <label for="finalGamesColumnName">Final game column name</label>
+            <input id="finalGamesColumnName" th:field="*{finalGamesColumnName}" type="text"/>
+          </div>
+          <div>
+            <label for="finalGamesStartIndex">Final game row index</label>
+            <input id="finalGamesStartIndex" th:field="*{finalGamesStartIndex}" type="number"/>
+          </div>
 
 
-              </div>
-            </div>
+        </div>
+      </div>
 
-          </fieldset>
-          
-          <input type="submit" />
-          
-        </form>
-        
-        <a th:href="@{list}">Back to list of Competitions</a>
-        
-    </div>
-    
-  </body>
-  
+    </fieldset>
+
+    <input type="submit"/>
+
+  </form>
+
+  <a th:href="@{list}">Back to list of Competitions</a>
+
+</div>
+
+</body>
+
 </html>

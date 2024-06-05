@@ -2,21 +2,19 @@ package org.jgayoso.ncomplo.business.entities.repositories;
 
 import java.util.Date;
 import java.util.List;
-
 import org.jgayoso.ncomplo.business.entities.Competition;
 import org.jgayoso.ncomplo.business.entities.Game;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
-
 @Repository
-public interface GameRepository extends PagingAndSortingRepository<Game,Integer> {
-    
-    public List<Game> findByCompetitionId(final Integer competitionId);
-    
-    public List<Game> findByCompetitionAndDateBetweenOrderByDate(Competition competition, Date initialDate, Date finalDate);
-    
-    public Game findFirstByCompetitionAndDateBetweenOrderByDate(Competition competition, Date initialDate, Date finalDate);
-    
+public interface GameRepository extends PagingAndSortingRepository<Game, Integer> {
+
+  public List<Game> findByCompetitionId(final Integer competitionId);
+
+  public List<Game> findByCompetitionAndDateBetweenOrderByDate(
+      Competition competition, Date initialDate, Date finalDate);
+
+  public Game findFirstByCompetitionAndDateBetweenOrderByDate(
+      Competition competition, Date initialDate, Date finalDate);
 }
-    

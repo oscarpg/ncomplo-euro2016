@@ -1,7 +1,6 @@
 package org.jgayoso.ncomplo.web.admin.controller;
 
 import java.util.List;
-
 import org.jgayoso.ncomplo.business.entities.Round;
 import org.jgayoso.ncomplo.business.services.CompetitionService;
 import org.jgayoso.ncomplo.business.services.RoundService;
@@ -19,98 +18,78 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/admin/competition/{competitionId}/round")
 public class RoundController {
 
-    private static final String VIEW_BASE = "admin/competition/round/";
-    
-    
-    @Autowired
-    private CompetitionService competitionService;
-    
-    @Autowired
-    private RoundService roundService;
+  private static final String VIEW_BASE = "admin/competition/round/";
 
-    public RoundController() {
-        super();
+  @Autowired private CompetitionService competitionService;
+
+  @Autowired private RoundService roundService;
+
+  public RoundController() {
+    super();
+  }
+
+  @RequestMapping("/list")
+  public String list(@PathVariable("competitionId") final Integer competitionId, final ModelMap model) {
+
+    final List<Round> rounds = this.roundService.findAll(competitionId);
+
+    model.addAttribute("allRounds", rounds);
+    model.addAttribute("competition", this.competitionService.find(competitionId));
+
+    return VIEW_BASE + "list";
+  }
+
+  @RequestMapping("/manage")
+  public String manage(
+      @RequestParam(value = "id", required = false) final Integer id,
+      @PathVariable("competitionId") final Integer competitionId,
+      final ModelMap model) {
+
+    final RoundBean roundBean = new RoundBean();
+
+    if (id != null) {
+      final Round round = this.roundService.find(id);
+      roundBean.setId(round.getId());
+      roundBean.setName(round.getName());
+      roundBean.getNamesByLang().clear();
+      roundBean.getNamesByLang().addAll(LangBean.listFromMap(round.getNamesByLang()));
+      roundBean.setOrder(round.getOrder());
     }
 
-    @RequestMapping("/list")
-    public String list(
-            @PathVariable("competitionId") final Integer competitionId, 
-            final ModelMap model) {
-        
-        final List<Round> rounds = this.roundService.findAll(competitionId);
-        
-        model.addAttribute("allRounds", rounds);
-        model.addAttribute("competition", this.competitionService.find(competitionId));
-        
-        return VIEW_BASE + "list";
-        
-    }
+    model.addAttribute("round", roundBean);
+    model.addAttribute("competition", this.competitionService.find(competitionId));
 
-    @RequestMapping("/manage")
-    public String manage(
-            @RequestParam(value="id",required=false)
-            final Integer id,
-            @PathVariable("competitionId")
-            final Integer competitionId,
-            final ModelMap model) {
+    return VIEW_BASE + "manage";
+  }
 
-        final RoundBean roundBean = new RoundBean();
-        
-        if (id != null) {
-            final Round round = this.roundService.find(id);
-            roundBean.setId(round.getId());
-            roundBean.setName(round.getName());
-            roundBean.getNamesByLang().clear();
-            roundBean.getNamesByLang().addAll(LangBean.listFromMap(round.getNamesByLang()));
-            roundBean.setOrder(round.getOrder());
-        }
-        
-        model.addAttribute("round", roundBean);
-        model.addAttribute("competition", this.competitionService.find(competitionId));
-        
-        return VIEW_BASE + "manage";
-        
-    }
+  @RequestMapping("/createDefaults")
+  public String createDefaults(@PathVariable("competitionId") final Integer competitionId, final ModelMap model) {
 
-    @RequestMapping("/createDefaults")
-    public String createDefaults(@PathVariable("competitionId")
-                                 final Integer competitionId, final ModelMap model) {
+    this.roundService.createDefaults(competitionId);
 
-        this.roundService.createDefaults(competitionId);
+    return "redirect:list";
+  }
 
-        return "redirect:list";
+  @RequestMapping("/save")
+  public String save(
+      final RoundBean roundBean,
+      @SuppressWarnings("unused") final BindingResult bindingResult,
+      @PathVariable("competitionId") final Integer competitionId) {
 
-    }
-    
-    @RequestMapping("/save")
-    public String save(
-            final RoundBean roundBean,
-            @SuppressWarnings("unused") final BindingResult bindingResult,
-            @PathVariable("competitionId")
-            final Integer competitionId) {
+    this.roundService.save(
+        roundBean.getId(),
+        competitionId,
+        roundBean.getName(),
+        LangBean.mapFromList(roundBean.getNamesByLang()),
+        roundBean.getOrder());
 
-        this.roundService.save(
-                roundBean.getId(),
-                competitionId,
-                roundBean.getName(),
-                LangBean.mapFromList(roundBean.getNamesByLang()),
-                roundBean.getOrder());
-        
-        return "redirect:list";
-        
-    }
+    return "redirect:list";
+  }
 
-    
-    
-    @RequestMapping("/delete")
-    public String delete(
-            @RequestParam(value="id")
-            final Integer id) {
+  @RequestMapping("/delete")
+  public String delete(@RequestParam(value = "id") final Integer id) {
 
-        this.roundService.delete(id);
-        return "redirect:list";
-        
-    }
-    
-    
+    this.roundService.delete(id);
+    return "redirect:list";
+  }
 }
