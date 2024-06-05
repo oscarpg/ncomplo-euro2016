@@ -1,46 +1,46 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-  <head th:substituteby="layout/header :: head"></head>
-  
-  <body>
-    
-    <header th:substituteby="layout/header :: header"></header>
-  
-    <div class="container">
-  
-        <header th:substituteby="layout/admin/header :: header"></header>
-        
-        <div class="row">
-            <h1>Bet Types for competition "<span th:text="${competition.getName(#locale)}">competition</span>"</h1>
-        </div>
-        
-        <div class="row">        
-            <a th:href="@{manage}">Create new</a>
-        </div>
+<head th:substituteby="layout/header :: head"></head>
 
-        <div class="row">.
-            <form th:action="@{createDefaults}" method="post">
-                <button type="submit">Create defaults for Playoff competition</button>
-            </form>
-        </div>
+<body>
 
-        <div class="row">
-            <table class="table table-striped table-bordered">
-              <tr th:each="bt : ${allBetTypes}">
-                <td th:text="${bt.getName(#locale)}">Type of Bet</td>
-                <td><a th:href="@{manage(id=${bt.id})}">manage bet type</a></td>
-                <td><a th:href="@{delete(id=${bt.id})}" onclick="return confirm('Sure?');">delete bet type</a></td>
-              </tr>
-            </table>
-        </div>
-        
-        <div class="row">
-            <a th:href="@{../../list}">Back to list of Competitions</a>
-        </div>
-        
-    </div> 
+<header th:substituteby="layout/header :: header"></header>
 
-  </body>
-  
+<div class="container">
+
+  <header th:substituteby="layout/admin/header :: header"></header>
+
+  <div class="row">
+    <h1>Bet Types for competition "<span th:text="${competition.getName(#locale)}">competition</span>"</h1>
+  </div>
+
+  <div class="row">
+    <a th:href="@{manage}">Create new</a>
+  </div>
+
+  <div class="row">.
+    <form method="post" th:action="@{createDefaults}">
+      <button type="submit">Create defaults for Playoff competition</button>
+    </form>
+  </div>
+
+  <div class="row">
+    <table class="table table-striped table-bordered">
+      <tr th:each="bt : ${allBetTypes}">
+        <td th:text="${bt.getName(#locale)}">Type of Bet</td>
+        <td><a th:href="@{manage(id=${bt.id})}">manage bet type</a></td>
+        <td><a onclick="return confirm('Sure?');" th:href="@{delete(id=${bt.id})}">delete bet type</a></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="row">
+    <a th:href="@{../../list}">Back to list of Competitions</a>
+  </div>
+
+</div>
+
+</body>
+
 </html>

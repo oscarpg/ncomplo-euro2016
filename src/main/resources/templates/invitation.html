@@ -1,69 +1,70 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-  <head th:substituteby="layout/header :: head"></head>
-  
-  <body>
-  
-    <header th:substituteby="layout/header :: header"></header>
-  
-    <div class="container mt-3">
-    
-        <h1 th:text="#{register.form.title}">Invitation Form</h1>
-        
-        <div th:substituteby="layout/messages :: messages"></div>
-        
-        <form th:action="@{register}" th:object="${invitation}" method="post" class="form-horizontal">
-        
-          <fieldset>
-          
-          	<input type="hidden" th:field="*{invitationId}" />
-            
-            <div class="form-group">
-              <label for="loginInput" th:text="#{register.form.login}" class="col-sm-4 control-label">Login</label>
-              <input id="loginInput" type="text" th:field="*{login}" required="required" class="col-sm-4" />
-            </div>
-            
-            <div class="form-group">
-              	<label for="nameInput" th:text="#{register.form.name}" class="col-sm-4 control-label">Name</label>
-           		<input id="nameInput" type="text" th:field="*{name}" required="required" class="col-sm-4" />
-            </div>
-            
-            <div class="form-group">
-              	<label for="emailInput" th:text="#{register.form.email}" class="col-sm-4 control-label">Email</label>
-          		<input id="emailInput" type="text" th:field="*{email}" required="required" class="col-sm-4" />
-            </div>
-            
-            <div class="form-group">
-                <label for="newPassword1Input" th:text="#{register.form.password1}" class="col-sm-4 control-label">New password:</label>
-                <input id="newPassword1Input"  type="password" th:field="*{password}" required="required" class="col-sm-4" />
-            </div>
-            
-            <div class="form-group">
-                <label for="newPassword2Input" th:text="#{register.form.password2}" class="col-sm-4 control-label">Repeat password:</label>
-				<input id="newPassword2Input" type="password" th:field="*{password2}" required="required" class="col-sm-4" />
-            </div>
-            <div class="form-group">
-            	<button type="submit" class="btn btn-primary" th:text="#{register.form.submit}">Change</button>
-            </div>
-          </fieldset>
+<head th:substituteby="layout/header :: head"></head>
+
+<body>
+
+<header th:substituteby="layout/header :: header"></header>
+
+<div class="container mt-3">
+
+  <h1 th:text="#{register.form.title}">Invitation Form</h1>
+
+  <div th:substituteby="layout/messages :: messages"></div>
+
+  <form class="form-horizontal" method="post" th:action="@{register}" th:object="${invitation}">
+
+    <fieldset>
+
+      <input th:field="*{invitationId}" type="hidden"/>
+
+      <div class="form-group">
+        <label class="col-sm-4 control-label" for="loginInput" th:text="#{register.form.login}">Login</label>
+        <input class="col-sm-4" id="loginInput" required="required" th:field="*{login}" type="text"/>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-4 control-label" for="nameInput" th:text="#{register.form.name}">Name</label>
+        <input class="col-sm-4" id="nameInput" required="required" th:field="*{name}" type="text"/>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-4 control-label" for="emailInput" th:text="#{register.form.email}">Email</label>
+        <input class="col-sm-4" id="emailInput" required="required" th:field="*{email}" type="text"/>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-4 control-label" for="newPassword1Input" th:text="#{register.form.password1}">New
+          password:</label>
+        <input class="col-sm-4" id="newPassword1Input" required="required" th:field="*{password}" type="password"/>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-4 control-label" for="newPassword2Input" th:text="#{register.form.password2}">Repeat
+          password:</label>
+        <input class="col-sm-4" id="newPassword2Input" required="required" th:field="*{password2}" type="password"/>
+      </div>
+      <div class="form-group">
+        <button class="btn btn-primary" th:text="#{register.form.submit}" type="submit">Change</button>
+      </div>
+    </fieldset>
 
 
+  </form>
 
-        </form>
+  <h1 th:text="#{register.form.already.registered}">Already registered?</h1>
+  <form class="form-horizontal" method="get" th:action="@{/authJoinLeague}" th:object="${invitation}">
 
-        <h1 th:text="#{register.form.already.registered}">Already registered?</h1>
-        <form th:action="@{/authJoinLeague}" th:object="${invitation}" method="get" class="form-horizontal">
-
-            <input type="hidden" th:field="*{invitationId}" />
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary" th:text="#{register.form.goToLogin}">Go to Login</button>
-            </div>
-        </form>
-
-
+    <input th:field="*{invitationId}" type="hidden"/>
+    <div class="form-group">
+      <button class="btn btn-primary" th:text="#{register.form.goToLogin}" type="submit">Go to Login</button>
     </div>
-    
-  </body>
-  
+  </form>
+
+
+</div>
+
+</body>
+
 </html>

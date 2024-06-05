@@ -1,53 +1,53 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-  <head th:substituteby="layout/header :: head"></head>
-  
-  <body>
-    
-    <header th:substituteby="layout/header :: header"></header>
-  
-    <div class="container">
-  
-        <header th:substituteby="layout/admin/header :: header"></header>
+<head th:substituteby="layout/header :: head"></head>
 
-        <div th:substituteby="layout/messages :: messages"></div>
-  
-        <h1>Games for competition "<span th:text="${competition.getName(#locale)}">competition</span>"</h1>
-        
-        <a th:href="@{manage}">Create new</a>
+<body>
 
-        <section>
-            <form method="POST" enctype="multipart/form-data" th:action="@{upload}">
-                <input type="hidden" th:value="${competition.id}" name="id" />
-                <span><input type="file" name="file" /></span>
-                <p><input type="submit" class="btn btn-primary" value="Upload Games from Excel" /></p>
-            </form>
-        </section>
-        <table class="table table-striped table-bordered">
-          <tr th:each="g : ${allGames}">
-            <td th:text="${g.date} ? ${#dates.format(g.date,#messages.msg('dates.format'))} : '-'">date of game</td>
-            <td th:text="${g.order}">game order</td>
-            <td th:text="${g.defaultBetType.getName(#locale)}">game order</td>
-            <td th:text="${g.getName(#locale)}">name of game</td>
-            <td th:text="${g.gameSideA} ? ${g.gameSideA.getName(#locale)} : '-'">name of team/player A</td>
-            <td th:text="${g.gameSideB} ? ${g.gameSideB.getName(#locale)} : '-'">name of team/player B</td>
-            <td><a th:href="@{manage(id=${g.id})}">manage game</a></td>
-            <td><a th:href="@{delete(id=${g.id})}" onclick="return confirm('Sure?');">delete game</a></td>
-          </tr>
-        </table>
+<header th:substituteby="layout/header :: header"></header>
 
-        <section>
-            <form method="POST" th:action="@{deleteAll}">
-                <input type="hidden" th:value="${competition.id}" name="competitionId" />
-                <p><input type="submit" class="btn btn-primary" value="Delete All" /></p>
-            </form>
-        </section>
-        
-        <a th:href="@{../../list}">Back to list of Competitions</a>
-        
-    </div> 
+<div class="container">
 
-  </body>
-  
+  <header th:substituteby="layout/admin/header :: header"></header>
+
+  <div th:substituteby="layout/messages :: messages"></div>
+
+  <h1>Games for competition "<span th:text="${competition.getName(#locale)}">competition</span>"</h1>
+
+  <a th:href="@{manage}">Create new</a>
+
+  <section>
+    <form enctype="multipart/form-data" method="POST" th:action="@{upload}">
+      <input name="id" th:value="${competition.id}" type="hidden"/>
+      <span><input name="file" type="file"/></span>
+      <p><input class="btn btn-primary" type="submit" value="Upload Games from Excel"/></p>
+    </form>
+  </section>
+  <table class="table table-striped table-bordered">
+    <tr th:each="g : ${allGames}">
+      <td th:text="${g.date} ? ${#dates.format(g.date,#messages.msg('dates.format'))} : '-'">date of game</td>
+      <td th:text="${g.order}">game order</td>
+      <td th:text="${g.defaultBetType.getName(#locale)}">game order</td>
+      <td th:text="${g.getName(#locale)}">name of game</td>
+      <td th:text="${g.gameSideA} ? ${g.gameSideA.getName(#locale)} : '-'">name of team/player A</td>
+      <td th:text="${g.gameSideB} ? ${g.gameSideB.getName(#locale)} : '-'">name of team/player B</td>
+      <td><a th:href="@{manage(id=${g.id})}">manage game</a></td>
+      <td><a onclick="return confirm('Sure?');" th:href="@{delete(id=${g.id})}">delete game</a></td>
+    </tr>
+  </table>
+
+  <section>
+    <form method="POST" th:action="@{deleteAll}">
+      <input name="competitionId" th:value="${competition.id}" type="hidden"/>
+      <p><input class="btn btn-primary" type="submit" value="Delete All"/></p>
+    </form>
+  </section>
+
+  <a th:href="@{../../list}">Back to list of Competitions</a>
+
+</div>
+
+</body>
+
 </html>

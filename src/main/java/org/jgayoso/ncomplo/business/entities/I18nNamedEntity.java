@@ -3,12 +3,11 @@ package org.jgayoso.ncomplo.business.entities;
 import java.util.Locale;
 import java.util.Map;
 
-
 public interface I18nNamedEntity {
 
+  public String getName(final Locale locale);
 
-    public String getName(final Locale locale);
-    public String getName();
-    public Map<String, String> getNamesByLang();
-    
+  public String getName();
+
+  public Map<String, String> getNamesByLang();
 }

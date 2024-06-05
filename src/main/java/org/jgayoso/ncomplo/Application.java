@@ -1,7 +1,6 @@
 package org.jgayoso.ncomplo;
 
 import javax.servlet.Filter;
-
 import org.jasypt.util.password.ConfigurablePasswordEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -32,77 +31,92 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableGlobalMethodSecurity(securedEnabled = true)
 public class Application extends WebMvcConfigurerAdapter {
 
-	@Bean
-	public ConfigurablePasswordEncryptor configurablePasswordEncryptor() {
-		return new ConfigurablePasswordEncryptor();
-	}
-	
-	@Bean
-    public Filter characterEncodingFilter() {
-        final CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
-        characterEncodingFilter.setEncoding("UTF-8");
-        characterEncodingFilter.setForceEncoding(true);
-        return characterEncodingFilter;
+  public static void main(final String[] args) {
+
+    String webPort = System.getenv("PORT");
+    if (webPort == null || webPort.isEmpty()) {
+      webPort = "8080";
     }
-	
-	
-    public static void main(final String[] args) {
-        
-        String webPort = System.getenv("PORT");
-        if (webPort == null || webPort.isEmpty()) {
-            webPort = "8080";
-        }
-        System.setProperty("server.port", webPort);
-        
-        SpringApplication.run(Application.class, args);
-    }
-    
+    System.setProperty("server.port", webPort);
+
+    SpringApplication.run(Application.class, args);
+  }
+
+  @Bean
+  public ConfigurablePasswordEncryptor configurablePasswordEncryptor() {
+    return new ConfigurablePasswordEncryptor();
+  }
+
+  @Bean
+  public Filter characterEncodingFilter() {
+    final CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
+    characterEncodingFilter.setEncoding("UTF-8");
+    characterEncodingFilter.setForceEncoding(true);
+    return characterEncodingFilter;
+  }
+
+  @Override
+  public void addViewControllers(final ViewControllerRegistry registry) {
+    registry.addViewController("/login").setViewName("login");
+  }
+
+  @Bean
+  public ApplicationSecurity applicationSecurity() {
+    return new ApplicationSecurity();
+  }
+
+  @Order(Ordered.HIGHEST_PRECEDENCE)
+  @Configuration
+  protected static class AuthenticationSecurity extends GlobalAuthenticationConfigurerAdapter {
+
+    @Autowired private AuthenticationProvider authenticationProvider;
+
     @Override
-	public void addViewControllers(final ViewControllerRegistry registry) {
-		registry.addViewController("/login").setViewName("login");
-	}
+    public void init(final AuthenticationManagerBuilder auth) throws Exception {
+      auth.authenticationProvider(this.authenticationProvider);
+    }
+  }
 
-    @Bean
-	public ApplicationSecurity applicationSecurity() {
-		return new ApplicationSecurity();
-	}
+  @Order(Ordered.LOWEST_PRECEDENCE - 8)
+  protected static class ApplicationSecurity extends WebSecurityConfigurerAdapter {
 
-	@Order(Ordered.HIGHEST_PRECEDENCE)
-	@Configuration
-	protected static class AuthenticationSecurity extends GlobalAuthenticationConfigurerAdapter {
-
-		@Autowired
-		private AuthenticationProvider authenticationProvider;
-		
-		@Override
-		public void init(final AuthenticationManagerBuilder auth) throws Exception {
-			auth.authenticationProvider(this.authenticationProvider);
-		}
-	}
-
-	@Order(Ordered.LOWEST_PRECEDENCE - 8)
-	protected static class ApplicationSecurity extends WebSecurityConfigurerAdapter {
-
-		@Override
-		protected void configure(final HttpSecurity http) throws Exception {
-			http.authorizeRequests()
-				.antMatchers("/admin/**").authenticated()
-				.antMatchers("/admin/**").hasAuthority("ADMIN")
-				.antMatchers(HttpMethod.GET, "/resetpassword*").permitAll()
-				.antMatchers(HttpMethod.GET, "/forgot-password*").permitAll()
-				.antMatchers(HttpMethod.POST, "/forgot-password*").permitAll()
-				.antMatchers("/joinLeague*").permitAll()
-				.antMatchers("/invitation*").permitAll()
-				.antMatchers("/register").permitAll()
-				.antMatchers("/login").permitAll()
-				.antMatchers("/css/ncomplo.css").permitAll()
-				.antMatchers("/js/ncomplo.js").permitAll()
-				.antMatchers("/*").fullyAuthenticated()
-					.and().formLogin().loginPage("/login").failureUrl("/login?error")
-					.and().logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-					.and().exceptionHandling().accessDeniedPage("/login?error");
-		}
-
-	}
-	
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+      http.authorizeRequests()
+          .antMatchers("/admin/**")
+          .authenticated()
+          .antMatchers("/admin/**")
+          .hasAuthority("ADMIN")
+          .antMatchers(HttpMethod.GET, "/resetpassword*")
+          .permitAll()
+          .antMatchers(HttpMethod.GET, "/forgot-password*")
+          .permitAll()
+          .antMatchers(HttpMethod.POST, "/forgot-password*")
+          .permitAll()
+          .antMatchers("/joinLeague*")
+          .permitAll()
+          .antMatchers("/invitation*")
+          .permitAll()
+          .antMatchers("/register")
+          .permitAll()
+          .antMatchers("/login")
+          .permitAll()
+          .antMatchers("/css/ncomplo.css")
+          .permitAll()
+          .antMatchers("/js/ncomplo.js")
+          .permitAll()
+          .antMatchers("/*")
+          .fullyAuthenticated()
+          .and()
+          .formLogin()
+          .loginPage("/login")
+          .failureUrl("/login?error")
+          .and()
+          .logout()
+          .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+          .and()
+          .exceptionHandling()
+          .accessDeniedPage("/login?error");
+    }
+  }
 }

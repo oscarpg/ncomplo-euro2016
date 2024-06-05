@@ -1,10 +1,10 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta name="viewport" content="width=device-width" />
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Simple Transactional Email</title>
-    <style>
+  <meta content="width=device-width" name="viewport"/>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+  <title>Simple Transactional Email</title>
+  <style>
     /*<![CDATA[*/
 
       /* -------------------------------------
@@ -274,78 +274,83 @@
           background-color: #34495e !important;
           border-color: #34495e !important; } }
 /*]]>*/
-    </style>
+  </style>
 </head>
 <body class="">
 <table border="0" cellpadding="0" cellspacing="0" class="body">
-    <tr>
-        <td>&nbsp;</td>
-        <td class="container">
-            <div class="content">
+  <tr>
+    <td>&nbsp;</td>
+    <td class="container">
+      <div class="content">
 
-                <!-- START CENTERED WHITE CONTAINER -->
-                <span class="preheader" th:text="#{emails.invitation.p1(${leagueName})}">You have been invited to participate at the league World Cup of ncomplo</span>
-                <table class="main">
+        <!-- START CENTERED WHITE CONTAINER -->
+        <span class="preheader" th:text="#{emails.invitation.p1(${leagueName})}">You have been invited to participate at the league World Cup of ncomplo</span>
+        <table class="main">
 
-                    <!-- START MAIN CONTENT AREA -->
-                    <tr>
-                        <td class="wrapper">
-                            <table border="0" cellpadding="0" cellspacing="0">
-                                <tr>
-                                    <td>
-                                        <p> <span th:text="#{emails.welcome(${invitationName})}">Hi Ivan,</span></p>
-                                        <p> <span th:text="#{emails.invitation.p1(${leagueName})}">You have been invited to participate at the league World Cup of ncomplo</span></p>
-                                        <p> <span th:if="${isNewUser}" th:text="#{emails.invitation.create.account}">To create your account and sign up at the competition, click in the link below.</span></p>
-                                        <p> <span th:unless="${isNewUser}" th:text="#{emails.invitation.join.league}">To join to this league, click in the link below and sing in with your account.</span></p>
-                                        <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
-                                            <tbody>
-                                            <tr>
-                                                <td align="left">
-                                                    <table border="0" cellpadding="0" cellspacing="0">
-                                                        <tbody>
-                                                        <tr>
-                                                            <td> <a th:href="${url}" th:text="#{emails.invitation.join.league.button(${leagueName})}">Join ncomplo</a> </td>
-                                                        </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                        <p> <span th:unless="${isNewUser}" th:text="#{emails.invitation.forgot}">If you do not remember your password, contact with the league administrator</span></p>
-                                        <p> <span th:text="#{emails.invitation.see.you}">See you soon!</span></p>
-                                    </td>
-                                </tr>
-                            </table>
+          <!-- START MAIN CONTENT AREA -->
+          <tr>
+            <td class="wrapper">
+              <table border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td>
+                    <p><span th:text="#{emails.welcome(${invitationName})}">Hi Ivan,</span></p>
+                    <p><span th:text="#{emails.invitation.p1(${leagueName})}">You have been invited to participate at the league World Cup of ncomplo</span>
+                    </p>
+                    <p><span th:if="${isNewUser}" th:text="#{emails.invitation.create.account}">To create your account and sign up at the competition, click in the link below.</span>
+                    </p>
+                    <p><span th:text="#{emails.invitation.join.league}" th:unless="${isNewUser}">To join to this league, click in the link below and sing in with your account.</span>
+                    </p>
+                    <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+                      <tbody>
+                      <tr>
+                        <td align="left">
+                          <table border="0" cellpadding="0" cellspacing="0">
+                            <tbody>
+                            <tr>
+                              <td><a th:href="${url}" th:text="#{emails.invitation.join.league.button(${leagueName})}">Join
+                                ncomplo</a></td>
+                            </tr>
+                            </tbody>
+                          </table>
                         </td>
-                    </tr>
-
-                    <!-- END MAIN CONTENT AREA -->
-                </table>
-
-                <!-- START FOOTER -->
-                <div class="footer">
-                    <table border="0" cellpadding="0" cellspacing="0">
-                        <tr>
-                            <td class="content-block">
-                                <span class="apple-link"></span>
-                                <br/> <span th:text="#{emails.dont.like}">Don't like these emails? Sorry :(.</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="content-block powered-by">
-                                Powered by dnd-games.
-                            </td>
-                        </tr>
+                      </tr>
+                      </tbody>
                     </table>
-                </div>
-                <!-- END FOOTER -->
+                    <p><span th:text="#{emails.invitation.forgot}" th:unless="${isNewUser}">If you do not remember your password, contact with the league administrator</span>
+                    </p>
+                    <p><span th:text="#{emails.invitation.see.you}">See you soon!</span></p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-                <!-- END CENTERED WHITE CONTAINER -->
-            </div>
-        </td>
-        <td>&nbsp;</td>
-    </tr>
+          <!-- END MAIN CONTENT AREA -->
+        </table>
+
+        <!-- START FOOTER -->
+        <div class="footer">
+          <table border="0" cellpadding="0" cellspacing="0">
+            <tr>
+              <td class="content-block">
+                <span class="apple-link"></span>
+                <br/> <span th:text="#{emails.dont.like}">Don't like these emails? Sorry :(.</span>
+              </td>
+            </tr>
+            <tr>
+              <td class="content-block powered-by">
+                Powered by dnd-games.
+              </td>
+            </tr>
+          </table>
+        </div>
+        <!-- END FOOTER -->
+
+        <!-- END CENTERED WHITE CONTAINER -->
+      </div>
+    </td>
+    <td>&nbsp;</td>
+  </tr>
 </table>
 </body>
 </html>

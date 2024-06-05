@@ -1,103 +1,86 @@
 package org.jgayoso.ncomplo.web.admin.beans;
 
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import javax.validation.constraints.AssertTrue;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import javax.validation.constraints.NotNull;
-
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.Length;
 
 public class LeagueBean implements Serializable {
 
-	private static final long serialVersionUID = 2981813244600985282L;
+  private static final long serialVersionUID = 2981813244600985282L;
+  @NotNull private final List<LangBean> namesByLang = new ArrayList<>();
+  @NotNull private final Map<Integer, Integer> betTypesByGame = new LinkedHashMap<>();
+  @NotNull private Integer id;
+  @NotNull private Integer competitionId;
 
+  @NotNull
+  @Length(min = 3, max = 200)
+  private String name;
 
-	@NotNull
-	private Integer id;
+  @NotNull private boolean active = true;
+  @NotNull private String adminEmail;
+  private String date;
 
-	@NotNull
-	private Integer competitionId;
+  public LeagueBean() {
+    super();
+  }
 
-	@NotNull
-	@Length(min = 3, max = 200)
-	private String name;
+  public Integer getId() {
+    return this.id;
+  }
 
-	@NotNull
-	private final List<LangBean> namesByLang = new ArrayList<>();
+  public void setId(final Integer id) {
+    this.id = id;
+  }
 
-	@NotNull
-	private boolean active = true;
+  public Integer getCompetitionId() {
+    return this.competitionId;
+  }
 
-	@NotNull
-	private String adminEmail;
+  public void setCompetitionId(final Integer competitionId) {
+    this.competitionId = competitionId;
+  }
 
-	private String date;
+  public String getName() {
+    return this.name;
+  }
 
-	@NotNull
-	private final Map<Integer, Integer> betTypesByGame = new LinkedHashMap<>();
+  public void setName(final String name) {
+    this.name = name;
+  }
 
-	public LeagueBean() {
-		super();
-	}
+  public boolean isActive() {
+    return this.active;
+  }
 
-	public Integer getId() {
-		return this.id;
-	}
+  public void setActive(final boolean active) {
+    this.active = active;
+  }
 
-	public void setId(final Integer id) {
-		this.id = id;
-	}
+  public String getAdminEmail() {
+    return this.adminEmail;
+  }
 
-	public Integer getCompetitionId() {
-		return this.competitionId;
-	}
+  public void setAdminEmail(final String adminEmail) {
+    this.adminEmail = adminEmail;
+  }
 
-	public void setCompetitionId(final Integer competitionId) {
-		this.competitionId = competitionId;
-	}
+  public List<LangBean> getNamesByLang() {
+    return this.namesByLang;
+  }
 
-	public String getName() {
-		return this.name;
-	}
+  public Map<Integer, Integer> getBetTypesByGame() {
+    return this.betTypesByGame;
+  }
 
-	public void setName(final String name) {
-		this.name = name;
-	}
+  public String getDate() {
+    return this.date;
+  }
 
-	public boolean isActive() {
-		return this.active;
-	}
-
-	public void setActive(final boolean active) {
-		this.active = active;
-	}
-
-	public String getAdminEmail() {
-		return this.adminEmail;
-	}
-
-	public void setAdminEmail(final String adminEmail) {
-		this.adminEmail = adminEmail;
-	}
-
-	public List<LangBean> getNamesByLang() {
-		return this.namesByLang;
-	}
-
-	public Map<Integer, Integer> getBetTypesByGame() {
-		return this.betTypesByGame;
-	}
-
-	public String getDate() {
-		return this.date;
-	}
-
-	public void setDate(String date) {
-		this.date = date;
-	}
-
+  public void setDate(String date) {
+    this.date = date;
+  }
 }

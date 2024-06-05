@@ -15,24 +15,25 @@ The bet types define the way that the points will be calculated
 ![create_competition](https://user-images.githubusercontent.com/5988819/207457823-128288b0-ed46-484e-8712-7812f5dbbf61.png)
 
 ### Side matters
-    
+
 The bet will assign points depending on the team that pass to the next round, regardless the match itself.
-    
+
 ### Score matters
-    
+
     The bet will assign points depending on the exact score of the match.
-    
+
 ### Result matters
-    
+
     The bet will assign points depending on the teams that wins the game.
-    
+
 ### Example. In a World Cup event, the following bet types are usefull:
 
 * Group stage
-    
+
 Score matters and result matters.
-    
+
 Specification:
+
 ```
 if(game.scoreA && game.scoreB) {
     if(bet.scoreA==game.scoreA && bet.scoreB==game.scoreB) {
@@ -65,6 +66,7 @@ if(game.scoreA && game.scoreB) {
 Side matters (we only want to know if a team success in that round)
 
 Specification:
+
 ```
 var totalPoints=0;
 var foundA = false;
@@ -100,9 +102,11 @@ if (existsGamesInRound) {
 ```
 
 * Final
-Side matters and result matters (we want to give points if the user guess the teams that reach the final, and more points when the user guess the winner.
+  Side matters and result matters (we want to give points if the user guess the teams that reach the final, and more
+  points when the user guess the winner.
 
 Specification:
+
 ```
 var totalPoints=0;
 var foundA = false;
@@ -149,13 +153,16 @@ if (existsGamesInRound) {
 
 ## Create the games
 
-The group games are known before the competition starts. The playoff games will be updated with the teams as the competition goes on, but the games must be created before to be able to ask the bets to the users.
+The group games are known before the competition starts. The playoff games will be updated with the teams as the
+competition goes on, but the games must be created before to be able to ask the bets to the users.
 
 ## Create the league
 
-Once the competition is ready, multiple leagues can be created to that competition. Each league can define the bet type for each game in the league. This is usefull when you want to create different leagues with different rules.
+Once the competition is ready, multiple leagues can be created to that competition. Each league can define the bet type
+for each game in the league. This is usefull when you want to create different leagues with different rules.
 
 ## Invite people to join the league.
 
-Once the league is created, the people will be able to send their bets before the league deadline. As the games finish, the administrators must update the game results and playoff teams to recalculate the scoreboards.
+Once the league is created, the people will be able to send their bets before the league deadline. As the games finish,
+the administrators must update the game results and playoff teams to recalculate the scoreboards.
 

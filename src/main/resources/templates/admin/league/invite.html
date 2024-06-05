@@ -1,56 +1,60 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-  <head th:substituteby="layout/header :: head"></head>
-  
-  <body>
-    
-    <header th:substituteby="layout/header :: header"></header>
-  
-    <div class="container">
-    
-        <header th:substituteby="layout/admin/header :: header"></header>
-  
-        <h1>Send invitation</h1>
-        <div class="row">
-        	<form th:action="@{doInvite}" th:object="${invitation}" method="post">
-        		<fieldset>
-	        		<input type="hidden" th:field="*{leagueId}" />
-	        		
-	        		<div id="name">
-		              <label for="nameInput">Name</label>
-		              <input id="nameInput" type="text" th:field="*{name}" required="required" />
-		            </div>
-		            
-		            <div id="email">
-		              <label for="emailInput">Email</label>
-		              <input id="emailInput" type="text" th:field="*{email}" required="required" />
-		            </div>
-        		</fieldset>
-        		<input type="submit" />
-        	</form>
-        </div>
-        
-        <div class="row">
-        	<h2>Invitations already sent</h2>
-	        <table id="invitations" class="table table-striped table-bordered">
-	        <thead>
-	        	<tr><th>Name</th><th>Email</th><th>Admin</th></tr>
-        	</thead>
-        	<tbody>
-		        <tr th:each="inv : ${invitations}">
-		          	<td><span th:text="${inv.name}" >name</span></td>
-		          	<td><span th:text="${inv.email}">email</span></td>
-		          	<td><span th:text="${inv.adminLogin}">admin</span></td>
-		        </tr>
-	        </tbody>
-	        </table>
-		</div>	        
-		<br /><br /><br />
-        <a th:href="@{list}">Back to list of Leagues</a>
-        
-    </div> 
+<head th:substituteby="layout/header :: head"></head>
 
-  </body>
-  
+<body>
+
+<header th:substituteby="layout/header :: header"></header>
+
+<div class="container">
+
+  <header th:substituteby="layout/admin/header :: header"></header>
+
+  <h1>Send invitation</h1>
+  <div class="row">
+    <form method="post" th:action="@{doInvite}" th:object="${invitation}">
+      <fieldset>
+        <input th:field="*{leagueId}" type="hidden"/>
+
+        <div id="name">
+          <label for="nameInput">Name</label>
+          <input id="nameInput" required="required" th:field="*{name}" type="text"/>
+        </div>
+
+        <div id="email">
+          <label for="emailInput">Email</label>
+          <input id="emailInput" required="required" th:field="*{email}" type="text"/>
+        </div>
+      </fieldset>
+      <input type="submit"/>
+    </form>
+  </div>
+
+  <div class="row">
+    <h2>Invitations already sent</h2>
+    <table class="table table-striped table-bordered" id="invitations">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Admin</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="inv : ${invitations}">
+        <td><span th:text="${inv.name}">name</span></td>
+        <td><span th:text="${inv.email}">email</span></td>
+        <td><span th:text="${inv.adminLogin}">admin</span></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <br/><br/><br/>
+  <a th:href="@{list}">Back to list of Leagues</a>
+
+</div>
+
+</body>
+
 </html>

@@ -5,10 +5,9 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface ForgotPasswordTokenRepository extends PagingAndSortingRepository<ForgotPasswordToken, Integer> {
 
-    public ForgotPasswordToken findByToken(final String token);
+  public ForgotPasswordToken findByToken(final String token);
 
-    public ForgotPasswordToken findByEmail(final String email);
+  public ForgotPasswordToken findByEmail(final String email);
 
-    public ForgotPasswordToken findByLogin(final String login);
-
+  public ForgotPasswordToken findByLogin(final String login);
 }

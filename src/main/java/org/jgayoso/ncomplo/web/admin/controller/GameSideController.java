@@ -1,12 +1,9 @@
 package org.jgayoso.ncomplo.web.admin.controller;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.jgayoso.ncomplo.business.entities.GameSide;
 import org.jgayoso.ncomplo.business.services.CompetitionService;
 import org.jgayoso.ncomplo.business.services.GameSideService;
@@ -33,146 +30,118 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 @RequestMapping("/admin/competition/{competitionId}/gameside")
 public class GameSideController {
 
-    private static final String VIEW_BASE = "admin/competition/gameside/";
-    
-    
-    @Autowired
-    private CompetitionService competitionService;
-    
-    @Autowired
-    private GameSideService gameSideService;
+  private static final String VIEW_BASE = "admin/competition/gameside/";
 
-    
-    
-    
-    public GameSideController() {
-        super();
-    }
-    
+  @Autowired private CompetitionService competitionService;
 
+  @Autowired private GameSideService gameSideService;
 
+  public GameSideController() {
+    super();
+  }
 
-    
-    
-    @RequestMapping("/list")
-    public String list(
-            @PathVariable("competitionId") final Integer competitionId, 
-            final HttpServletRequest request, 
-            final ModelMap model) {
-        
-        final List<GameSide> gameSides =
-                this.gameSideService.findAll(competitionId,RequestContextUtils.getLocale(request));
-        
-        model.addAttribute("allGameSides", gameSides);
-        model.addAttribute("competition", this.competitionService.find(competitionId));
-        
-        return VIEW_BASE + "list";
-        
-    }
+  @RequestMapping("/list")
+  public String list(
+      @PathVariable("competitionId") final Integer competitionId,
+      final HttpServletRequest request,
+      final ModelMap model) {
 
-    
-    
-    @RequestMapping("/manage")
-    public String manage(
-            @RequestParam(value="id",required=false)
-            final Integer id,
-            @PathVariable("competitionId")
-            final Integer competitionId,
-            final ModelMap model) {
+    final List<GameSide> gameSides =
+        this.gameSideService.findAll(competitionId, RequestContextUtils.getLocale(request));
 
-        final GameSideBean gameSideBean = new GameSideBean();
-        
-        if (id != null) {
-            final GameSide gameSide = this.gameSideService.find(id);
-            gameSideBean.setId(gameSide.getId());
-            gameSideBean.setName(gameSide.getName());
-            gameSideBean.getNamesByLang().clear();
-            gameSideBean.getNamesByLang().addAll(LangBean.listFromMap(gameSide.getNamesByLang()));
-			gameSideBean.setCode(gameSide.getCode());
-        }
-        
-        model.addAttribute("gameSide", gameSideBean);
-        model.addAttribute("competition", this.competitionService.find(competitionId));
-        
-        return VIEW_BASE + "manage";
-        
+    model.addAttribute("allGameSides", gameSides);
+    model.addAttribute("competition", this.competitionService.find(competitionId));
+
+    return VIEW_BASE + "list";
+  }
+
+  @RequestMapping("/manage")
+  public String manage(
+      @RequestParam(value = "id", required = false) final Integer id,
+      @PathVariable("competitionId") final Integer competitionId,
+      final ModelMap model) {
+
+    final GameSideBean gameSideBean = new GameSideBean();
+
+    if (id != null) {
+      final GameSide gameSide = this.gameSideService.find(id);
+      gameSideBean.setId(gameSide.getId());
+      gameSideBean.setName(gameSide.getName());
+      gameSideBean.getNamesByLang().clear();
+      gameSideBean.getNamesByLang().addAll(LangBean.listFromMap(gameSide.getNamesByLang()));
+      gameSideBean.setCode(gameSide.getCode());
     }
 
-    
-    
-    @RequestMapping("/save")
-    public String save(
-            final GameSideBean gameSideBean,
-            final BindingResult bindingResult,
-            @PathVariable("competitionId")
-            final Integer competitionId) {
+    model.addAttribute("gameSide", gameSideBean);
+    model.addAttribute("competition", this.competitionService.find(competitionId));
 
-        this.gameSideService.save(
-                gameSideBean.getId(),
-                competitionId,
-                gameSideBean.getName(),
-                LangBean.mapFromList(gameSideBean.getNamesByLang()),
-                gameSideBean.getCode());
-        
+    return VIEW_BASE + "manage";
+  }
+
+  @RequestMapping("/save")
+  public String save(
+      final GameSideBean gameSideBean,
+      final BindingResult bindingResult,
+      @PathVariable("competitionId") final Integer competitionId) {
+
+    this.gameSideService.save(
+        gameSideBean.getId(),
+        competitionId,
+        gameSideBean.getName(),
+        LangBean.mapFromList(gameSideBean.getNamesByLang()),
+        gameSideBean.getCode());
+
+    return "redirect:list";
+  }
+
+  @RequestMapping("/deleteAll")
+  public String deleteAll(@RequestParam(value = "competitionId") final Integer competitionId) {
+
+    this.gameSideService.deleteAll(competitionId);
+    return "redirect:list";
+  }
+
+  @RequestMapping("/delete")
+  public String delete(@RequestParam(value = "id") final Integer id) {
+
+    this.gameSideService.delete(id);
+    return "redirect:list";
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/upload")
+  public String uploadGameSides(
+      @RequestParam("file") final MultipartFile file,
+      @RequestParam(value = "id") final Integer id,
+      final HttpServletRequest request,
+      final RedirectAttributes redirectAttributes) {
+
+    final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth instanceof AnonymousAuthenticationToken) {
+      return "error";
+    }
+    final String login = auth.getName();
+
+    File competitionFile = null;
+    try {
+      competitionFile = FileUtils.convert("gameside", file, login);
+      if (!competitionFile.exists() || competitionFile.length() == 0) {
+        redirectAttributes.addFlashAttribute("error", "Empty file");
         return "redirect:list";
-        
+      }
+      this.gameSideService.processFile(id, login, competitionFile);
+    } catch (final IOException e) {
+      redirectAttributes.addFlashAttribute("error", "Error processing game sides file");
+      return "redirect:list";
+    } catch (CompetitionParserException e) {
+      redirectAttributes.addFlashAttribute("error", e.getMessage());
+      return "redirect:list";
+    } finally {
+      // delete file
+      if (competitionFile != null) {
+        competitionFile.delete();
+      }
     }
-
-    @RequestMapping("/deleteAll")
-    public String deleteAll(
-            @RequestParam(value="competitionId")
-            final Integer competitionId) {
-
-        this.gameSideService.deleteAll(competitionId);
-        return "redirect:list";
-
-    }
-    
-    @RequestMapping("/delete")
-    public String delete(
-            @RequestParam(value="id")
-            final Integer id) {
-
-        this.gameSideService.delete(id);
-        return "redirect:list";
-        
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value = "/upload")
-    public String uploadGameSides(@RequestParam("file") final MultipartFile file,
-                                    @RequestParam(value="id") final Integer id,
-                                    final HttpServletRequest request,
-                                    final RedirectAttributes redirectAttributes){
-
-        final Authentication auth = SecurityContextHolder.getContext()
-                .getAuthentication();
-        if (auth instanceof AnonymousAuthenticationToken) {
-            return "error";
-        }
-        final String login = auth.getName();
-
-        File competitionFile = null;
-        try {
-            competitionFile = FileUtils.convert("gameside", file, login);
-            if (!competitionFile.exists() || competitionFile.length() == 0) {
-                redirectAttributes.addFlashAttribute("error", "Empty file");
-                return "redirect:list";
-            }
-            this.gameSideService.processFile(id, login, competitionFile);
-        } catch (final IOException e) {
-            redirectAttributes.addFlashAttribute("error", "Error processing game sides file");
-            return "redirect:list";
-        } catch (CompetitionParserException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:list";
-        } finally {
-            // delete file
-            if (competitionFile != null) {
-                competitionFile.delete();
-            }
-        }
-        redirectAttributes.addFlashAttribute("message", "Game sides processed successfully");
-        return "redirect:list";
-    }
-    
+    redirectAttributes.addFlashAttribute("message", "Game sides processed successfully");
+    return "redirect:list";
+  }
 }
