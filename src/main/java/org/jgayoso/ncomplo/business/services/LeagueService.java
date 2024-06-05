@@ -5,6 +5,8 @@ import java.util.Map.Entry;
 
 import org.jgayoso.ncomplo.business.entities.*;
 import org.jgayoso.ncomplo.business.entities.repositories.*;
+import org.jgayoso.ncomplo.business.services.emailproviders.MailgunEmailService;
+import org.jgayoso.ncomplo.business.services.emailproviders.SendGridEmailService;
 import org.jgayoso.ncomplo.business.util.I18nNamedEntityComparator;
 import org.jgayoso.ncomplo.business.util.IterableUtils;
 import org.jgayoso.ncomplo.business.views.ScoreMatterBetView;
@@ -39,7 +41,7 @@ public class LeagueService {
 	private InvitationRepository invitationRepository;
 	
 	@Autowired
-	private EmailService emailService;
+	private MailgunEmailService emailService;
 
 	public LeagueService() {
 		super();
