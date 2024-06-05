@@ -2,8 +2,8 @@ package org.jgayoso.ncomplo.business.util;
 
 import java.util.Locale;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.springframework.util.StringUtils;
 
 public final class I18nUtils {
 

@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
+
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jgayoso.ncomplo.business.entities.Bet;
@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 @Service
 public class BetService {
@@ -226,7 +227,7 @@ public class BetService {
 
   private void getInvalidBetsMessages(List<String> invalidBets, List<BetView> betViews) {
     for (BetView betView : betViews) {
-      if (StringUtils.isNotEmpty(betView.getInvalidMessage())) {
+      if (!StringUtils.isEmpty(betView.getInvalidMessage())) {
         invalidBets.add(betView.getInvalidMessage());
       }
     }

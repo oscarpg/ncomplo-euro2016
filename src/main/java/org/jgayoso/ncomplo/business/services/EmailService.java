@@ -10,7 +10,7 @@ import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
 import java.io.IOException;
 import java.util.Locale;
-import org.apache.commons.lang3.StringUtils;
+
 import org.apache.log4j.Logger;
 import org.jgayoso.ncomplo.business.entities.ForgotPasswordToken;
 import org.jgayoso.ncomplo.business.entities.Invitation;
@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -40,7 +41,7 @@ public class EmailService {
   public EmailService() {
     super();
     final String apiKey = System.getenv("SENDGRID_API_KEY");
-    if (StringUtils.isNotBlank(apiKey)) {
+    if (StringUtils.hasText(apiKey)) {
       this.sendGrid = new SendGrid(apiKey);
     } else {
       this.sendGrid = null;

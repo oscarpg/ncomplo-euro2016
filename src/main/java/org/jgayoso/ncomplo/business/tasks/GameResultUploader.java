@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.jgayoso.ncomplo.business.entities.Competition;
@@ -22,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 @Component
@@ -51,7 +51,7 @@ public class GameResultUploader {
     for (final Competition competition : competitions) {
       final Integer competitionId = competition.getId();
       final String uri = competition.getUpdaterUri();
-      if (StringUtils.isBlank(uri)) {
+      if (!StringUtils.hasText(uri)) {
         continue;
       }
 

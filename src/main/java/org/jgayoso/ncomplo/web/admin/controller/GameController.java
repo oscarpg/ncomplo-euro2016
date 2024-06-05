@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
+
 import org.jgayoso.ncomplo.business.entities.Game;
 import org.jgayoso.ncomplo.business.services.BetTypeService;
 import org.jgayoso.ncomplo.business.services.CompetitionService;
@@ -31,6 +31,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -128,7 +129,7 @@ public class GameController {
       final BindingResult bindingResult,
       @PathVariable("competitionId") final Integer competitionId) {
 
-    if (StringUtils.isNotBlank(gameBean.getTime()) && gameBean.getDate() != null) {
+    if (StringUtils.hasText(gameBean.getTime()) && gameBean.getDate() != null) {
       final LocalTime localTime = LocalTime.parse(gameBean.getTime(), DateTimeFormatter.ofPattern("HH:mm"));
       final int hour = localTime.get(ChronoField.CLOCK_HOUR_OF_DAY);
       final int minute = localTime.get(ChronoField.MINUTE_OF_HOUR);

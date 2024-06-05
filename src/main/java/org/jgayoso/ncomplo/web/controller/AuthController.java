@@ -1,6 +1,5 @@
 package org.jgayoso.ncomplo.web.controller;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jgayoso.ncomplo.business.entities.ForgotPasswordToken;
 import org.jgayoso.ncomplo.business.entities.Invitation;
@@ -17,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -277,7 +277,7 @@ public class AuthController {
   @RequestMapping("/forgot-password-confirm")
   public String forgotPasswordConfirm(final ResetPasswordBean bean, final RedirectAttributes redirectAttributes) {
 
-    if (StringUtils.isBlank(bean.getEmail())) {
+    if (!StringUtils.hasText(bean.getEmail())) {
       redirectAttributes.addFlashAttribute("error", "Empty email address");
       return "redirect:/login?error";
     }
@@ -296,7 +296,7 @@ public class AuthController {
     User user = this.userService.find(login);
     if (user != null) {
       ForgotPasswordToken fpt = this.userService.findForgotPasswordToken(user);
-      if (fpt != null && StringUtils.equalsIgnoreCase(token, fpt.getToken())) {
+      if (fpt != null && fpt.getToken() != null && fpt.getToken().equalsIgnoreCase(token)) {
         model.addAttribute("user", user);
         return "forgotpasswordreset";
       }

@@ -10,7 +10,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import org.apache.commons.lang3.StringUtils;
+
+
 import org.apache.commons.lang3.time.DateUtils;
 import org.jgayoso.ncomplo.business.entities.BetType;
 import org.jgayoso.ncomplo.business.entities.Competition;
@@ -33,6 +34,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -206,7 +208,7 @@ public class LeagueController {
     /* The user is logged in */
     final String adminLogin = auth.getName();
 
-    if (StringUtils.isBlank(bean.getName()) || StringUtils.isBlank(bean.getEmail())) {
+    if (!StringUtils.hasText(bean.getName()) || !StringUtils.hasText(bean.getEmail())) {
       redirectAttributes.addFlashAttribute("error", "Mandatory name and email fields");
       return VIEW_BASE + "invite";
     }

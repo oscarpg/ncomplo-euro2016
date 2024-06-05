@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
@@ -30,6 +29,7 @@ import org.jgayoso.ncomplo.business.services.GameService;
 import org.jgayoso.ncomplo.business.services.GameSideService;
 import org.jgayoso.ncomplo.business.views.BetView;
 import org.jgayoso.ncomplo.exceptions.CompetitionParserException;
+import org.springframework.util.StringUtils;
 
 public class ExcelProcessor {
 
@@ -249,10 +249,10 @@ public class ExcelProcessor {
       final CellReference cellReference = new CellReference(teamsColumnName + (teamsStartIndex + i));
       final Row row = teams.getRow(cellReference.getRow());
       final String teamName = row.getCell(cellReference.getCol()).getStringCellValue();
-      String countryCode = StringUtils.substring(teamName, 0, 5);
+      String countryCode = teamName.substring(0, 5);
       List<CountryCode> codes = CountryCode.findByName(teamName);
       if (CollectionUtils.isNotEmpty(codes)) {
-        countryCode = StringUtils.lowerCase(codes.get(0).getAlpha2());
+        countryCode = codes.get(0).getAlpha2().toLowerCase();
       }
 
       logger.debug("Creating team " + teamName);

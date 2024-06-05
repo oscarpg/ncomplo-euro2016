@@ -6,7 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
-import org.apache.commons.lang3.StringUtils;
+
+import org.springframework.util.StringUtils;
 
 public class LangBean implements Serializable {
 
