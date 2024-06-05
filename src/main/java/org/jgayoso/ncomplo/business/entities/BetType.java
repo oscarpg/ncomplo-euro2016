@@ -38,7 +38,7 @@ public class BetType implements I18nNamedEntity {
 
   @Column(name = "SPEC", nullable = false)
   @Lob
-  @Type(type = "org.hibernate.type.StringClobType")
+  @Type(type = "org.hibernate.type.MaterializedClobType")
   private String spec;
 
   @ManyToOne
