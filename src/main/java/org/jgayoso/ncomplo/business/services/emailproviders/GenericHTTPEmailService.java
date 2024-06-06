@@ -1,9 +1,14 @@
 package org.jgayoso.ncomplo.business.services.emailproviders;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.JsonNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import org.apache.http.Header;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
 import org.jgayoso.ncomplo.business.entities.ForgotPasswordToken;
 import org.jgayoso.ncomplo.business.entities.Invitation;
@@ -13,33 +18,41 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 @Service
-public class MailgunEmailService implements EmailService {
+public class GenericHTTPEmailService implements EmailService {
 
-    private static final Logger logger = Logger.getLogger(MailgunEmailService.class);
+    private static final Logger logger = Logger.getLogger(GenericHTTPEmailService.class);
 
-    public static final String NEW_PASSWORD_SUBJECT = "Your new NComplo password";
-    public static final String RESTORE_PASSWORD_SUBJECT = "Restore you NComplo password";
+    private static final String NEW_PASSWORD_SUBJECT = "Your new NComplo password";
+    private static final String RESTORE_PASSWORD_SUBJECT = "Restore you NComplo password";
 
-    @Value("${mailgun.domain}")
-    private String domain;
-    @Value("${mailgun.apikey}")
-    private String apikey;
-    @Value("${ncomplo.fromEmail}")
+    @Value("${emailservice.url}")
+    private String emailUrl;
+    @Value("${emailservice.body.template}")
+    private String emailTemplate;
+
+    @Value("${emailservice.headers}")
+    private String headers;
+
+    @Value("${emailservice.contentType}")
+    private String contentType;
+
+    @Value("${emailservice.fromEmail}")
     private String fromEmail;
-
-    @Value("${ncomplo.email.mailgun.enabled}")
-    private boolean enabled;
 
     @Autowired
     private TemplateEngine templateEngine;
@@ -48,16 +61,7 @@ public class MailgunEmailService implements EmailService {
 
 
     @Override
-    public boolean isEnabled() {
-        logger.info("MailgunEmailService service is enabled:  " + enabled);
-        return enabled;
-    }
-
-    @Override
     public void sendNewPassword(User user, String newPassword, String baseUrl) {
-        if (!isEnabled()) {
-            return;
-        }
 
         final String html = "Hello " + user.getName()
                 + "<br />To access to your ncomplo account, use your new credentials:<br><ul><li>Login: "
@@ -79,9 +83,6 @@ public class MailgunEmailService implements EmailService {
     @Override
     public void sendForgotPassword(User user, ForgotPasswordToken fpt, String url) {
 
-        if (!isEnabled()) {
-            return;
-        }
         final String html = "Hello " + user.getName()
                 + "<br />You have requested to restore the NComplo password for the login <b>" + user.getLogin() + "</b>."
                 + "<br />If you have not requested that, ignore this email."
@@ -100,9 +101,7 @@ public class MailgunEmailService implements EmailService {
 
     @Override
     public void sendInvitations(String leagueName, Invitation invitation, String registerUrl, User user, Locale locale) {
-        if (!isEnabled()) {
-            return;
-        }
+
         String[] subjectParams = {leagueName};
         final String emailSubject = resource.getMessage("emails.invitation.subject", subjectParams, locale);
 
@@ -125,9 +124,7 @@ public class MailgunEmailService implements EmailService {
 
     @Override
     public void sendNotification(String subject, String[] destinations, String text) {
-        if (!isEnabled()) {
-            return;
-        }
+
         try {
             sendMailRequest(Arrays.asList(destinations), subject, text);
         } catch (IOException e) {
@@ -138,19 +135,60 @@ public class MailgunEmailService implements EmailService {
     }
 
     private void sendMailRequest(List<String> recipients, String subject, String message) throws IOException {
-        try {
-            for (String recipient: recipients) {
-                HttpResponse request = Unirest.post("https://api.mailgun.net/v3/" + domain + "/messages")
-                        .basicAuth("api", apikey)
-                        .queryString("from", "NComplo <" + fromEmail + ">")
-                        .queryString("to", recipient)
-                        .queryString("subject", subject)
-                        .body(message)
-                        .asJson();
-                logger.debug("email sent to " + recipient + ". response: " + request.getBody().toString());
+
+        for (String recipient: recipients) {
+            try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
+                HttpPost httpPost = new HttpPost(emailUrl);
+                addHeaders(httpPost);
+
+                String body = emailTemplate.replaceFirst("@FROM@", fromEmail);
+                body = body.replace("@TO@", recipient);
+                body = body.replace("@SUBJECT@", subject);
+                body = body.replace("@HTML@", message);
+
+                final StringEntity entity = new StringEntity(body, ContentType.create(contentType));
+                httpPost.setEntity(entity);
+
+                logger.info("Sending email " + subject + " to email " + recipient + " throw the API " + emailUrl);
+                try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+                    logOutput(response.getEntity().getContent());
+                    StatusLine sl = response.getStatusLine();
+                    if (sl.getStatusCode() != HttpStatus.SC_OK && sl.getStatusCode() != HttpStatus.SC_ACCEPTED
+                            && sl.getStatusCode() != HttpStatus.SC_CREATED) {
+                        logger.error("Error sending mail. Status code: " + sl);
+                    }
+                }
             }
-        } catch (UnirestException e) {
-            throw new IOException("Error reading response", e);
+        }
+
+    }
+
+    private void addHeaders(HttpPost httpPost) {
+        httpPost.addHeader("content-type", contentType);
+
+        if (StringUtils.isEmpty(headers)) {
+            return;
+        }
+
+        for (String header: headers.split(";")) {
+            String[] nameValue = header.split(":");
+            if (nameValue.length != 2) {
+                continue;
+            }
+            httpPost.addHeader(nameValue[0], nameValue[1]);
+        }
+    }
+
+    private void logOutput(InputStream inputStream) {
+        try {
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            for (int length; (length = inputStream.read(buffer)) != -1; ) {
+                result.write(buffer, 0, length);
+            }
+            logger.debug("Email response: " + result.toString(StandardCharsets.UTF_8.name()));
+        } catch (IOException e) {
+            logger.debug("Error reading response", e);
         }
     }
 

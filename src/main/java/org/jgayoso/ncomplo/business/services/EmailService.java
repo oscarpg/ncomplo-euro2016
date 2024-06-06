@@ -8,7 +8,6 @@ import java.util.Locale;
 
 public interface EmailService {
 
-    boolean isEnabled();
     void sendNewPassword(final User user, final String newPassword, final String baseUrl);
     void sendForgotPassword(final User user, final ForgotPasswordToken fpt, final String url);
     void sendInvitations(final String leagueName, final Invitation invitation, final String registerUrl,

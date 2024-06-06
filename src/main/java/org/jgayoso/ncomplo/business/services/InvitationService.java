@@ -12,8 +12,7 @@ import org.jgayoso.ncomplo.business.entities.Invitation;
 import org.jgayoso.ncomplo.business.entities.League;
 import org.jgayoso.ncomplo.business.entities.User;
 import org.jgayoso.ncomplo.business.entities.repositories.InvitationRepository;
-import org.jgayoso.ncomplo.business.services.emailproviders.MailgunEmailService;
-import org.jgayoso.ncomplo.business.services.emailproviders.SendGridEmailService;
+import org.jgayoso.ncomplo.business.services.emailproviders.EmailServiceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,7 @@ public class InvitationService {
 	@Autowired
 	private LeagueService leagueService;
 	@Autowired
-	private MailgunEmailService emailService;
+	private EmailServiceFactory emailServiceFactory;
 	@Autowired
     private UserService userService;
 	
@@ -67,6 +66,12 @@ public class InvitationService {
 			logger.info("Trying to send an invitation for a non existent league " + leagueId);
 			return;
 		}
+
+		EmailService emailService = emailServiceFactory.getEmailService();
+		if (emailService == null) {
+			logger.info("Email service not available for sending invitations for league " + leagueId);
+			return;
+		}
 		
 		final User user = this.userService.findByEmail(email);
 		
@@ -74,7 +79,7 @@ public class InvitationService {
         if (existentInvitation != null) {
             // send the invitation again
             final String registrationUrl = this.generateRegistrationUrl(existentInvitation, league.getId());
-            this.emailService.sendInvitations(league.getName(), existentInvitation, registrationUrl, user, locale);
+            emailService.sendInvitations(league.getName(), existentInvitation, registrationUrl, user, locale);
             logger.debug("Created invitation for " + name + ", " + email);
             return;
         }
@@ -91,7 +96,7 @@ public class InvitationService {
 		
         final String registrationUrl = this.generateRegistrationUrl(inv, league.getId());
 			
-		this.emailService.sendInvitations(league.getName(), invitation, registrationUrl, user, locale);
+		emailService.sendInvitations(league.getName(), invitation, registrationUrl, user, locale);
 		logger.debug("Created invitation for " + name + ", " + email);
 	}
 	
