@@ -1,6 +1,5 @@
-package org.jgayoso.ncomplo.business.services.emailproviders;
+package org.jgayoso.ncomplo.business.services;
 
-import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -13,7 +12,6 @@ import org.apache.log4j.Logger;
 import org.jgayoso.ncomplo.business.entities.ForgotPasswordToken;
 import org.jgayoso.ncomplo.business.entities.Invitation;
 import org.jgayoso.ncomplo.business.entities.User;
-import org.jgayoso.ncomplo.business.services.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -40,19 +38,14 @@ public class GenericHTTPEmailService implements EmailService {
     private static final String NEW_PASSWORD_SUBJECT = "Your new NComplo password";
     private static final String RESTORE_PASSWORD_SUBJECT = "Restore you NComplo password";
 
-    @Value("${emailservice.url}")
     private String emailUrl;
 
-    @Value("${emailservice.body.template}")
     private String emailTemplate;
 
-    @Value("${emailservice.headers}")
     private String headers;
 
-    @Value("${emailservice.contentType}")
     private String contentType;
 
-    @Value("${emailservice.fromEmail}")
     private String fromEmail;
 
     @Autowired
@@ -60,6 +53,23 @@ public class GenericHTTPEmailService implements EmailService {
     @Autowired
     protected MessageSource resource;
 
+    public GenericHTTPEmailService() {
+        this.emailUrl = System.getenv("EMAIL_URL");
+        this.emailTemplate = System.getenv("EMAIL_BODY_TEMPLATE");
+        this.headers = System.getenv("EMAIL_HEADERS");
+        this.contentType = System.getenv("EMAIL_CONTENT_TYPE");
+        this.fromEmail = System.getenv("EMAIL_FROM");
+    }
+
+    @Override
+    public void logConfiguration() {
+        logger.info("emailUrl: " + emailUrl);
+        logger.info("emailTemplate: " + emailTemplate);
+        logger.info("headers: " + headers);
+        logger.info("contentType: " + contentType);
+        logger.info("fromEmail: " + fromEmail);
+
+    }
 
     @Override
     public void sendNewPassword(User user, String newPassword, String baseUrl) {

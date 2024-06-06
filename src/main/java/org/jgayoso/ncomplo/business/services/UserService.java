@@ -18,7 +18,6 @@ import org.jgayoso.ncomplo.business.entities.repositories.ForgotPasswordTokenRep
 import org.jgayoso.ncomplo.business.entities.repositories.InvitationRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.LeagueRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.UserRepository;
-import org.jgayoso.ncomplo.business.services.emailproviders.EmailServiceFactory;
 import org.jgayoso.ncomplo.business.util.IterableUtils;
 import org.jgayoso.ncomplo.exceptions.InternalErrorException;
 import org.jgayoso.ncomplo.exceptions.InvalidLoginException;

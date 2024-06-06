@@ -12,7 +12,6 @@ import org.jgayoso.ncomplo.business.entities.Invitation;
 import org.jgayoso.ncomplo.business.entities.League;
 import org.jgayoso.ncomplo.business.entities.User;
 import org.jgayoso.ncomplo.business.entities.repositories.InvitationRepository;
-import org.jgayoso.ncomplo.business.services.emailproviders.EmailServiceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

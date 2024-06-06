@@ -1,4 +1,4 @@
-package org.jgayoso.ncomplo.business.services.emailproviders;
+package org.jgayoso.ncomplo.business.services;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 import org.jgayoso.ncomplo.business.entities.ForgotPasswordToken;
 import org.jgayoso.ncomplo.business.entities.Invitation;
 import org.jgayoso.ncomplo.business.entities.User;
-import org.jgayoso.ncomplo.business.services.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -50,6 +49,12 @@ public class SendGridEmailService implements EmailService {
 		}
 
     }
+
+	@Override
+	public void logConfiguration() {
+		logger.info("baseUrl: " + baseUrl);
+		logger.info("fromEmail: " + fromEmail);
+	}
 
 	public void sendNewPassword(final User user, final String newPassword, final String baseUrl) {
 		try {
