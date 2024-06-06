@@ -18,8 +18,7 @@ import org.jgayoso.ncomplo.business.entities.repositories.ForgotPasswordTokenRep
 import org.jgayoso.ncomplo.business.entities.repositories.InvitationRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.LeagueRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.UserRepository;
-import org.jgayoso.ncomplo.business.services.emailproviders.MailgunEmailService;
-import org.jgayoso.ncomplo.business.services.emailproviders.SendGridEmailService;
+import org.jgayoso.ncomplo.business.services.emailproviders.EmailServiceFactory;
 import org.jgayoso.ncomplo.business.util.IterableUtils;
 import org.jgayoso.ncomplo.exceptions.InternalErrorException;
 import org.jgayoso.ncomplo.exceptions.InvalidLoginException;
@@ -51,7 +50,7 @@ public class UserService {
     private PasswordEncryptor passwordEncryptor;
 
     @Autowired
-    private MailgunEmailService emailService;
+    private EmailServiceFactory emailServiceFactory;
     
 
     @Value("${ncomplo.server.url}")
@@ -209,6 +208,11 @@ public class UserService {
             return;
         }
 
+        EmailService emailService = emailServiceFactory.getEmailService();
+        if (emailService == null) {
+            return;
+        }
+
         ForgotPasswordToken forgotPwdToken = this.forgotPasswordTokenRepository.findByEmail(email);
         if (forgotPwdToken == null) {
             forgotPwdToken = new ForgotPasswordToken();
@@ -222,7 +226,7 @@ public class UserService {
         }
 
         String fptUrl = this.baseUrl + "/forgot-password-reset/" + forgotPwdToken.getLogin() + "/" + forgotPwdToken.getToken();
-        this.emailService.sendForgotPassword(user, forgotPwdToken, fptUrl);
+        emailService.sendForgotPassword(user, forgotPwdToken, fptUrl);
 
     }
 
@@ -232,6 +236,7 @@ public class UserService {
     
     @Transactional
     public String resetPassword(final String login, final boolean sendEmail) {
+
         
         final String newPassword = 
                 RandomStringUtils.randomAlphanumeric(10);
@@ -240,9 +245,13 @@ public class UserService {
 
         final User user = this.userRepository.findOne(login);
         user.setPassword(hashedNewPassword);
-    
+
         if (sendEmail) {
-            this.emailService.sendNewPassword(user, newPassword, this.baseUrl);
+            EmailService emailService = emailServiceFactory.getEmailService();
+            if (emailService == null) {
+                return newPassword;
+            }
+            emailService.sendNewPassword(user, newPassword, this.baseUrl);
         }
         
         return newPassword;

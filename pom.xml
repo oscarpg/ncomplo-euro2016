@@ -105,25 +105,6 @@
 			<version>4.7.2</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.konghq/unirest-java-core -->
-		<dependency>
-			<groupId>com.konghq</groupId>
-			<artifactId>unirest-java-core</artifactId>
-		</dependency>
-
-		<!-- pick a JSON module if you want to parse JSON include one of these: -->
-		<!-- Google GSON -->
-		<dependency>
-			<groupId>com.konghq</groupId>
-			<artifactId>unirest-modules-gson</artifactId>
-		</dependency>
-
-		<!-- OR maybe you like Jackson better? -->
-		<dependency>
-			<groupId>com.konghq</groupId>
-			<artifactId>unirest-modules-jackson</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
@@ -150,9 +131,6 @@
 			<version>4.1.5</version>
 		</dependency>
 
-
-
-
 		<dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
@@ -173,19 +151,6 @@
 
 
 	</dependencies>
-
-	<dependencyManagement>
-		<dependencies>
-			<!-- https://mvnrepository.com/artifact/com.konghq/unirest-java-bom -->
-			<dependency>
-				<groupId>com.konghq</groupId>
-				<artifactId>unirest-java-bom</artifactId>
-				<version>4.4.0</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<build>
 		<plugins>

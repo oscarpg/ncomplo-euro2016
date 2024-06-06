@@ -5,8 +5,7 @@ import java.util.Map.Entry;
 
 import org.jgayoso.ncomplo.business.entities.*;
 import org.jgayoso.ncomplo.business.entities.repositories.*;
-import org.jgayoso.ncomplo.business.services.emailproviders.MailgunEmailService;
-import org.jgayoso.ncomplo.business.services.emailproviders.SendGridEmailService;
+import org.jgayoso.ncomplo.business.services.emailproviders.EmailServiceFactory;
 import org.jgayoso.ncomplo.business.util.I18nNamedEntityComparator;
 import org.jgayoso.ncomplo.business.util.IterableUtils;
 import org.jgayoso.ncomplo.business.views.ScoreMatterBetView;
@@ -41,7 +40,7 @@ public class LeagueService {
 	private InvitationRepository invitationRepository;
 	
 	@Autowired
-	private MailgunEmailService emailService;
+	private EmailServiceFactory emailServiceFactory;
 
 	public LeagueService() {
 		super();
@@ -259,6 +258,11 @@ public class LeagueService {
 	
 	public void sendNotificationEmailToLeagueMembers(final Integer leagueId, final String subject, final String text) {
 		final League league = this.leagueRepository.findOne(leagueId);
+
+		EmailService emailService = emailServiceFactory.getEmailService();
+		if (emailService == null) {
+			return;
+		}
 		
 		final Set<User> participants = league.getParticipants();
 		if (CollectionUtils.isEmpty(participants)) {
@@ -271,7 +275,7 @@ public class LeagueService {
 			destinations[i] = participant.getEmail();
 			i++;
 		}
-		this.emailService.sendNotification(subject, destinations, text);
+		emailService.sendNotification(subject, destinations, text);
 	}
 
 }

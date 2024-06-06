@@ -29,7 +29,7 @@ public class SendGridEmailService implements EmailService {
 
 	@Value("${ncomplo.server.url}")
     private String baseUrl;
-	@Value("${ncomplo.fromEmail}")
+	@Value("${emailservice.fromEmail}")
 	private String fromEmail;
 
 	@Autowired
@@ -39,33 +39,19 @@ public class SendGridEmailService implements EmailService {
 
 	private final SendGrid sendGrid;
 
-	@Value("${ncomplo.email.sendgrid.enabled}")
-	private boolean enabled;
-
     public SendGridEmailService() {
         super();
-        if (enabled) {
-			final String apiKey = System.getenv("SENDGRID_API_KEY");
-			if (StringUtils.isNotBlank(apiKey)) {
-				this.sendGrid = new SendGrid(apiKey);
-			} else {
-				this.sendGrid = null;
-			}
+
+		final String apiKey = System.getenv("SENDGRID_API_KEY");
+		if (StringUtils.isNotBlank(apiKey)) {
+			this.sendGrid = new SendGrid(apiKey);
 		} else {
 			this.sendGrid = null;
 		}
+
     }
 
-	@Override
-	public boolean isEnabled() {
-		logger.info("SendGridEmailService service is enabled:  " + (enabled && sendGrid != null));
-		return enabled && sendGrid != null;
-	}
-
 	public void sendNewPassword(final User user, final String newPassword, final String baseUrl) {
-		if (!isEnabled()) {
-			return;
-		}
 		try {
 			Email email = new Email(fromEmail, "NComplo");
 			String subject = "Your new ncomplo password";
@@ -97,9 +83,6 @@ public class SendGridEmailService implements EmailService {
 	}
 
 	public void sendForgotPassword(final User user, final ForgotPasswordToken fpt, final String url) {
-		if (!isEnabled()) {
-			return;
-		}
 
 		try {
 			Email email = new Email(fromEmail, "NComplo");
@@ -134,9 +117,6 @@ public class SendGridEmailService implements EmailService {
 
 	public void sendInvitations(final String leagueName, final Invitation invitation, final String registerUrl,
 								final User user, final Locale locale) {
-		if (!isEnabled()) {
-			return;
-		}
 		try {
 			String[] subjectParams = {leagueName};
 
@@ -163,9 +143,7 @@ public class SendGridEmailService implements EmailService {
 	}
 
 	public void sendNotification(final String subject, final String[] destinations, final String text) {
-		if (!isEnabled()) {
-			return;
-		}
+
 		try {
 
 			final Email from = new Email(fromEmail, "NComplo");
