@@ -41,8 +41,6 @@ public class GenericHTTPEmailService implements EmailService {
 
     private String headers;
 
-    private String contentType;
-
     private String fromEmail;
 
     @Autowired
@@ -53,15 +51,13 @@ public class GenericHTTPEmailService implements EmailService {
     public GenericHTTPEmailService() {
         this.emailUrl = System.getenv("EMAIL_URL");
         this.headers = System.getenv("EMAIL_HEADERS");
-        this.contentType = System.getenv("EMAIL_CONTENT_TYPE");
         this.fromEmail = System.getenv("EMAIL_FROM");
     }
 
     @Override
     public void logConfiguration() {
         logger.info("emailUrl: " + emailUrl);
-        logger.info("headers: " + headers);
-        logger.info("contentType: " + contentType);
+        logger.info("headers length: " + headers.length());
         logger.info("fromEmail: " + fromEmail);
 
     }
@@ -163,7 +159,7 @@ public class GenericHTTPEmailService implements EmailService {
             HttpPost httpPost = new HttpPost(emailUrl);
             addHeaders(httpPost);
 
-            final StringEntity entity = new StringEntity(json, ContentType.create(contentType));
+            final StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
             httpPost.setEntity(entity);
 
             logger.info("Sending email " + subject + " to emails " + recipients + " throw the API " + emailUrl);
@@ -181,7 +177,7 @@ public class GenericHTTPEmailService implements EmailService {
     }
 
     private void addHeaders(HttpPost httpPost) {
-        httpPost.addHeader("content-type", contentType);
+        httpPost.addHeader("content-type", ContentType.APPLICATION_JSON.toString());
 
         if (StringUtils.isEmpty(headers)) {
             return;

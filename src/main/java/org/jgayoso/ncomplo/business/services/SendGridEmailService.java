@@ -28,23 +28,28 @@ public class SendGridEmailService implements EmailService {
 
 	@Value("${ncomplo.server.url}")
     private String baseUrl;
-	private String fromEmail;
+	private final String fromEmail;
 
 	@Autowired
 	private TemplateEngine templateEngine;
 	@Autowired
 	protected MessageSource resource;
 
-	private final SendGrid sendGrid;
+	private SendGrid sendGrid;
 
     public SendGridEmailService() {
         super();
 
 		this.fromEmail = System.getenv("EMAIL_FROM");
-		final String apiKey = System.getenv("SENDGRID_API_KEY");
-		if (StringUtils.isNotBlank(apiKey)) {
-			this.sendGrid = new SendGrid(apiKey);
-		} else {
+		try {
+			final String apiKey = System.getenv("SENDGRID_API_KEY");
+			if (StringUtils.isNotBlank(apiKey)) {
+				this.sendGrid = new SendGrid(apiKey);
+			} else {
+				this.sendGrid = null;
+			}
+		} catch (Exception e) {
+			// Nothing to do
 			this.sendGrid = null;
 		}
 
