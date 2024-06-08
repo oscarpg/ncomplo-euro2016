@@ -5,7 +5,6 @@ import java.util.Map.Entry;
 
 import org.jgayoso.ncomplo.business.entities.*;
 import org.jgayoso.ncomplo.business.entities.repositories.*;
-import org.jgayoso.ncomplo.business.services.emailproviders.EmailServiceFactory;
 import org.jgayoso.ncomplo.business.util.I18nNamedEntityComparator;
 import org.jgayoso.ncomplo.business.util.IterableUtils;
 import org.jgayoso.ncomplo.business.views.ScoreMatterBetView;

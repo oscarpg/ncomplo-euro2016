@@ -1,6 +1,7 @@
-package org.jgayoso.ncomplo.business.services.emailproviders;
+package org.jgayoso.ncomplo.business.services;
 
-import org.apache.http.Header;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -13,9 +14,7 @@ import org.apache.log4j.Logger;
 import org.jgayoso.ncomplo.business.entities.ForgotPasswordToken;
 import org.jgayoso.ncomplo.business.entities.Invitation;
 import org.jgayoso.ncomplo.business.entities.User;
-import org.jgayoso.ncomplo.business.services.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -26,11 +25,9 @@ import org.thymeleaf.context.Context;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 @Service
 public class GenericHTTPEmailService implements EmailService {
@@ -40,18 +37,10 @@ public class GenericHTTPEmailService implements EmailService {
     private static final String NEW_PASSWORD_SUBJECT = "Your new NComplo password";
     private static final String RESTORE_PASSWORD_SUBJECT = "Restore you NComplo password";
 
-    @Value("${emailservice.url}")
     private String emailUrl;
-    @Value("${emailservice.body.template}")
-    private String emailTemplate;
 
-    @Value("${emailservice.headers}")
     private String headers;
 
-    @Value("${emailservice.contentType}")
-    private String contentType;
-
-    @Value("${emailservice.fromEmail}")
     private String fromEmail;
 
     @Autowired
@@ -59,6 +48,19 @@ public class GenericHTTPEmailService implements EmailService {
     @Autowired
     protected MessageSource resource;
 
+    public GenericHTTPEmailService() {
+        this.emailUrl = System.getenv("EMAIL_URL");
+        this.headers = System.getenv("EMAIL_HEADERS");
+        this.fromEmail = System.getenv("EMAIL_FROM");
+    }
+
+    @Override
+    public void logConfiguration() {
+        logger.info("emailUrl: " + emailUrl);
+        logger.info("headers length: " + headers.length());
+        logger.info("fromEmail: " + fromEmail);
+
+    }
 
     @Override
     public void sendNewPassword(User user, String newPassword, String baseUrl) {
@@ -71,7 +73,8 @@ public class GenericHTTPEmailService implements EmailService {
         logger.info("Sending new password email to " + user.getEmail());
 
         try {
-            sendMailRequest(Collections.singletonList(user.getEmail()), NEW_PASSWORD_SUBJECT, html);
+            sendMailRequest(Collections.singletonList(new EmailIndividual(user.getEmail(),
+                    user.getName())), NEW_PASSWORD_SUBJECT, html);
         } catch (IOException e) {
             logger.error("Error sending password to " + user.getEmail(), e);
             return;
@@ -90,7 +93,8 @@ public class GenericHTTPEmailService implements EmailService {
 
         logger.info("Sending forgot password email to " + user.getEmail());
         try {
-            sendMailRequest(Collections.singletonList(user.getEmail()), RESTORE_PASSWORD_SUBJECT, html);
+            sendMailRequest(Collections.singletonList(new EmailIndividual(user.getEmail(),
+                    user.getName())), RESTORE_PASSWORD_SUBJECT, html);
         } catch (IOException e) {
             logger.error("Error sending forgot password to " + user.getEmail(), e);
             return;
@@ -114,19 +118,25 @@ public class GenericHTTPEmailService implements EmailService {
         final String html = this.templateEngine.process("emails/invitation", ctx);
 
         try {
-            sendMailRequest(Collections.singletonList(user.getEmail()), emailSubject, html);
+            sendMailRequest(Collections.singletonList(new EmailIndividual(invitation.getEmail(),
+                    invitation.getName())), emailSubject, html);
         } catch (IOException e) {
-            logger.error("Error sending invitation to " + user.getEmail(), e);
+            logger.error("Error sending invitation to " + invitation.getEmail(), e);
             return;
         }
-        logger.info("Invitation sent to " + user.getEmail());
+        logger.info("Invitation sent to " + invitation.getEmail());
     }
 
     @Override
     public void sendNotification(String subject, String[] destinations, String text) {
 
         try {
-            sendMailRequest(Arrays.asList(destinations), subject, text);
+            List<EmailIndividual> tos = new ArrayList<>(destinations.length);
+            for (String destination: destinations) {
+                tos.add(new EmailIndividual(destination, null));
+            }
+
+            sendMailRequest(tos, subject, text);
         } catch (IOException e) {
             logger.error("Error sending notifications", e);
             return;
@@ -134,37 +144,40 @@ public class GenericHTTPEmailService implements EmailService {
         logger.info("Notification sent");
     }
 
-    private void sendMailRequest(List<String> recipients, String subject, String message) throws IOException {
+    private void sendMailRequest(List<EmailIndividual> recipients, String subject, String message) throws IOException {
+        Email email = new Email();
+        email.setSubject(subject);
+        email.setHtml(message);
+        email.setFrom(new EmailIndividual(fromEmail, "NComplo"));
+        email.setTo(recipients.toArray(new EmailIndividual[0]));
 
-        for (String recipient: recipients) {
-            try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
-                HttpPost httpPost = new HttpPost(emailUrl);
-                addHeaders(httpPost);
+        Gson gson = new GsonBuilder().create();
+        String json = gson.toJson(email);
 
-                String body = emailTemplate.replaceFirst("@FROM@", fromEmail);
-                body = body.replace("@TO@", recipient);
-                body = body.replace("@SUBJECT@", subject);
-                body = body.replace("@HTML@", message);
 
-                final StringEntity entity = new StringEntity(body, ContentType.create(contentType));
-                httpPost.setEntity(entity);
+        try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
+            HttpPost httpPost = new HttpPost(emailUrl);
+            addHeaders(httpPost);
 
-                logger.info("Sending email " + subject + " to email " + recipient + " throw the API " + emailUrl);
-                try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-                    logOutput(response.getEntity().getContent());
-                    StatusLine sl = response.getStatusLine();
-                    if (sl.getStatusCode() != HttpStatus.SC_OK && sl.getStatusCode() != HttpStatus.SC_ACCEPTED
-                            && sl.getStatusCode() != HttpStatus.SC_CREATED) {
-                        logger.error("Error sending mail. Status code: " + sl);
-                    }
+            final StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
+            httpPost.setEntity(entity);
+
+            logger.info("Sending email " + subject + " to emails " + recipients + " throw the API " + emailUrl);
+            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+                logOutput(response.getEntity().getContent());
+                StatusLine sl = response.getStatusLine();
+                if (sl.getStatusCode() != HttpStatus.SC_OK && sl.getStatusCode() != HttpStatus.SC_ACCEPTED
+                        && sl.getStatusCode() != HttpStatus.SC_CREATED) {
+                    logger.error("Error sending mail. Status code: " + sl);
                 }
             }
         }
 
+
     }
 
     private void addHeaders(HttpPost httpPost) {
-        httpPost.addHeader("content-type", contentType);
+        httpPost.addHeader("content-type", ContentType.APPLICATION_JSON.toString());
 
         if (StringUtils.isEmpty(headers)) {
             return;
@@ -189,6 +202,79 @@ public class GenericHTTPEmailService implements EmailService {
             logger.debug("Email response: " + result.toString(StandardCharsets.UTF_8.name()));
         } catch (IOException e) {
             logger.debug("Error reading response", e);
+        }
+    }
+
+    static class Email {
+        private EmailIndividual from;
+        private EmailIndividual[] to;
+        private String subject;
+        private String html;
+
+        public EmailIndividual getFrom() {
+            return from;
+        }
+
+        public void setFrom(EmailIndividual from) {
+            this.from = from;
+        }
+
+        public EmailIndividual[] getTo() {
+            return to;
+        }
+
+        public void setTo(EmailIndividual[] to) {
+            this.to = to;
+        }
+
+        public String getSubject() {
+            return subject;
+        }
+
+        public void setSubject(String subject) {
+            this.subject = subject;
+        }
+
+        public String getHtml() {
+            return html;
+        }
+
+        public void setHtml(String html) {
+            this.html = html;
+        }
+    }
+
+    static class EmailIndividual {
+        private String email;
+        private String name;
+
+        public EmailIndividual(String email, String name) {
+            this.email = email;
+            this.name = name;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return "EmailIndividual{" +
+                    "email='" + email + '\'' +
+                    ", name='" + name + '\'' +
+                    '}';
         }
     }
 

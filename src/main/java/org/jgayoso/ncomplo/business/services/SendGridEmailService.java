@@ -1,4 +1,4 @@
-package org.jgayoso.ncomplo.business.services.emailproviders;
+package org.jgayoso.ncomplo.business.services;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 import org.jgayoso.ncomplo.business.entities.ForgotPasswordToken;
 import org.jgayoso.ncomplo.business.entities.Invitation;
 import org.jgayoso.ncomplo.business.entities.User;
-import org.jgayoso.ncomplo.business.services.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -29,27 +28,38 @@ public class SendGridEmailService implements EmailService {
 
 	@Value("${ncomplo.server.url}")
     private String baseUrl;
-	@Value("${emailservice.fromEmail}")
-	private String fromEmail;
+	private final String fromEmail;
 
 	@Autowired
 	private TemplateEngine templateEngine;
 	@Autowired
 	protected MessageSource resource;
 
-	private final SendGrid sendGrid;
+	private SendGrid sendGrid;
 
     public SendGridEmailService() {
         super();
 
-		final String apiKey = System.getenv("SENDGRID_API_KEY");
-		if (StringUtils.isNotBlank(apiKey)) {
-			this.sendGrid = new SendGrid(apiKey);
-		} else {
+		this.fromEmail = System.getenv("EMAIL_FROM");
+		try {
+			final String apiKey = System.getenv("SENDGRID_API_KEY");
+			if (StringUtils.isNotBlank(apiKey)) {
+				this.sendGrid = new SendGrid(apiKey);
+			} else {
+				this.sendGrid = null;
+			}
+		} catch (Exception e) {
+			// Nothing to do
 			this.sendGrid = null;
 		}
 
     }
+
+	@Override
+	public void logConfiguration() {
+		logger.info("baseUrl: " + baseUrl);
+		logger.info("fromEmail: " + fromEmail);
+	}
 
 	public void sendNewPassword(final User user, final String newPassword, final String baseUrl) {
 		try {
