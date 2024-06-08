@@ -28,7 +28,6 @@ public class SendGridEmailService implements EmailService {
 
 	@Value("${ncomplo.server.url}")
     private String baseUrl;
-	@Value("${emailservice.fromEmail}")
 	private String fromEmail;
 
 	@Autowired
@@ -41,6 +40,7 @@ public class SendGridEmailService implements EmailService {
     public SendGridEmailService() {
         super();
 
+		this.fromEmail = System.getenv("EMAIL_FROM");
 		final String apiKey = System.getenv("SENDGRID_API_KEY");
 		if (StringUtils.isNotBlank(apiKey)) {
 			this.sendGrid = new SendGrid(apiKey);
