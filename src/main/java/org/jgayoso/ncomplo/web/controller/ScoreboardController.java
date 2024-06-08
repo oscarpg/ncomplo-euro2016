@@ -1,5 +1,6 @@
 package org.jgayoso.ncomplo.web.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.jgayoso.ncomplo.business.entities.Bet;
 import org.jgayoso.ncomplo.business.entities.Bet.BetComparator;
@@ -23,6 +25,7 @@ import org.jgayoso.ncomplo.business.views.TodayEventsView;
 import org.jgayoso.ncomplo.exceptions.InternalErrorException;
 import org.jgayoso.ncomplo.web.beans.LeagueSelectorBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +33,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 @Controller
@@ -192,6 +196,35 @@ public class ScoreboardController {
 		model.addAttribute("allBets", betsForUser);
 
 		return "bets";
+
+	}
+
+	@RequestMapping(value = { "/downloadbets/{leagueId}/{login}" })
+	public void downloadbets(@PathVariable("leagueId") final Integer leagueId, @PathVariable("login") final String login,
+			 final HttpServletRequest request, HttpServletResponse response, final RedirectAttributes redirectAttributes) throws IOException {
+
+		final Locale locale = RequestContextUtils.getLocale(request);
+
+		final User user = this.userService.find(login);
+		League league = this.leagueService.find(leagueId);
+		if (!league.getParticipants().contains(user)) {
+			redirectAttributes.addFlashAttribute("error", "Invalid league");
+			return;
+		}
+		final String separator = ";";
+		final String endLine = "\n";
+		final List<Bet> bets = this.betService.findByLeagueIdAndUserLogin(leagueId, login, locale);
+		StringBuilder csvContent = new StringBuilder("login").append(separator).append("#game").append(separator)
+				.append("team1").append(separator).append("team2").append(separator).append("score1").append(separator).append("score2").append(endLine);
+		for (Bet bet: bets) {
+			csvContent.append(bet.getUser().getName()).append(separator).append(bet.getGame().getOrder()).append(separator)
+					.append(bet.getGameSideA() == null ? "null" : bet.getGameSideA().getName(locale)).append(separator)
+					.append(bet.getGameSideB() == null ? "null" : bet.getGameSideB().getName(locale)).append(separator)
+					.append(bet.getScoreA()).append(separator).append(bet.getScoreB()).append(endLine);
+		}
+
+		response.setContentType("text/plain; charset=utf-8");
+		response.getWriter().print(csvContent);
 
 	}
 

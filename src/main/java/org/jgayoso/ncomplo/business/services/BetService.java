@@ -65,8 +65,16 @@ public class BetService {
     
     public List<Bet> findByLeagueIdAndUserLogin(
             final Integer leagueId, final String login, final Locale locale) {
-        final List<Bet> bets = 
+        final List<Bet> bets =
                 this.betRepository.findByLeagueIdAndUserLogin(leagueId, login);
+        Collections.sort(bets, new BetComparator(locale));
+        return bets;
+    }
+
+    public List<Bet> findByLeagueId(
+            final Integer leagueId, final Locale locale) {
+        final List<Bet> bets =
+                this.betRepository.findByLeagueId(leagueId);
         Collections.sort(bets, new BetComparator(locale));
         return bets;
     }

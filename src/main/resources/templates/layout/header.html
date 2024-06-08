@@ -41,6 +41,9 @@
                 <li class="nav-item" th:if="${user != null and betsAllowed != null and betsAllowed}">
                     <a class="nav-link" th:href="@{'/bets/' + ${league.id} + '/'}" th:text="#{scoreboard.sendbets}">Send bets</a>
                 </li>
+                <li class="nav-item" th:if="${user != null and betsAllowed != null and !betsAllowed}">
+                    <a class="nav-link" th:href="@{'/downloadbets/' + ${league.id} + '/' + ${user.login}}" th:text="#{scoreboard.downloadbets}">Download bets</a>
+                </li>
                 <li class="nav-item" th:if="${user != null}">
                     <a class="nav-link" th:href="@{/password}" th:text="#{nav.changepassword}">Change password</a>
                 </li>
