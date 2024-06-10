@@ -61,7 +61,7 @@ public class UserBetsController {
     	super();
     }
     
-    @RequestMapping("/bets/{leagueId}/")
+    @RequestMapping({"/bets/{leagueId}/", "/bets/{leagueId}"})
     public String manage(
     		@PathVariable(value="leagueId")
             final Integer leagueId,
