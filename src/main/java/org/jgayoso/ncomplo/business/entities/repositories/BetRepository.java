@@ -14,7 +14,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BetRepository 
         extends PagingAndSortingRepository<Bet,Integer> {
-    
+
+    public List<Bet> findByLeagueId(final Integer leagueId);
+
     public List<Bet> findByLeagueIdAndUserLogin(final Integer leagueId, final String login);
     
 	public List<Bet> findByLeagueIdAndUserLoginAndGameIn(final Integer leagueId, final String login,

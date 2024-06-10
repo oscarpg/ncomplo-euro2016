@@ -56,7 +56,7 @@ public class League implements I18nNamedEntity {
 	@Column(name = "BETS_DEADLINE_TIME", nullable = false)
 	private Date betsDeadLine;
 
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.EAGER)
 	private final Set<User> participants = new LinkedHashSet<>();
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "league")

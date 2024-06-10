@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jgayoso.ncomplo.business.entities.ForgotPasswordToken;
 import org.jgayoso.ncomplo.business.entities.Invitation;
+import org.jgayoso.ncomplo.business.entities.League;
 import org.jgayoso.ncomplo.business.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -176,6 +177,26 @@ public class SendGridEmailService implements EmailService {
 		} catch (final IOException e) {
 			logger.error("Error sending invitations", e);
 		}
+	}
+
+	@Override
+	public void sendInvalidBetsWarning(User user, League league) throws IOException {
+		final Context ctx = new Context(Locale.getDefault());
+		ctx.setVariable("userName", user.getName());
+		ctx.setVariable("leagueName", league.getName());
+		ctx.setVariable("url", this.baseUrl+"/bets/" + league.getId() + '/');
+
+		String[] subjectParams = {league.getName()};
+		final String emailSubject = resource.getMessage("emails.betsWarning.subject", subjectParams, Locale.getDefault());
+		final String html = this.templateEngine.process("emails/betsWarning", ctx);
+
+		final Email email = new Email(fromEmail, "NComplo");
+		Email to = new Email(user.getEmail(), user.getName());
+		Content content = new Content("text/html", html);
+
+		Mail mail = new Mail(email, emailSubject, to, content);
+		sendMailRequest(mail);
+		logger.debug("Warning sent to " + user.getEmail());
 	}
 
 	private void sendMailRequest(Mail mail) throws IOException{

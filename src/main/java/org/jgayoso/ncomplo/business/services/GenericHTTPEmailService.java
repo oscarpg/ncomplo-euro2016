@@ -13,8 +13,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
 import org.jgayoso.ncomplo.business.entities.ForgotPasswordToken;
 import org.jgayoso.ncomplo.business.entities.Invitation;
+import org.jgayoso.ncomplo.business.entities.League;
 import org.jgayoso.ncomplo.business.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -25,7 +27,6 @@ import org.thymeleaf.context.Context;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -42,6 +43,9 @@ public class GenericHTTPEmailService implements EmailService {
     private String headers;
 
     private String fromEmail;
+
+    @Value("${ncomplo.server.url}")
+    private String baseUrl;
 
     @Autowired
     private TemplateEngine templateEngine;
@@ -143,6 +147,22 @@ public class GenericHTTPEmailService implements EmailService {
         }
         logger.info("Notification sent");
     }
+
+    @Override
+    public void sendInvalidBetsWarning(User user, League league) throws IOException {
+        final Context ctx = new Context(Locale.getDefault());
+        ctx.setVariable("userName", user.getName());
+        ctx.setVariable("leagueName", league.getName());
+        ctx.setVariable("url", this.baseUrl+"/bets/" + league.getId() + '/');
+
+        String[] subjectParams = {league.getName()};
+        final String emailSubject = resource.getMessage("emails.betsWarning.subject", subjectParams, Locale.getDefault());
+        final String html = this.templateEngine.process("emails/betsWarning", ctx);
+
+        sendMailRequest(Collections.singletonList(new EmailIndividual(user.getEmail(),
+                user.getName())), emailSubject, html);
+    }
+
 
     private void sendMailRequest(List<EmailIndividual> recipients, String subject, String message) throws IOException {
         Email email = new Email();
