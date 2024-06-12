@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -139,9 +140,8 @@ public class GameController {
         model.addAttribute("allGameSides", this.gameSideService.findAll(competitionId, locale));
         
         return VIEW_BASE + "manage";
-        
-    }
 
+    }
     
     
     @RequestMapping("/save")
@@ -156,8 +156,11 @@ public class GameController {
 	        final int hour = localTime.get(ChronoField.CLOCK_HOUR_OF_DAY);
 	        final int minute = localTime.get(ChronoField.MINUTE_OF_HOUR);
 	        
-	        gameBean.getDate().setHours(hour);
-	        gameBean.getDate().setMinutes(minute);
+	        Calendar cal = Calendar.getInstance();
+            cal.setTime(gameBean.getDate());
+            cal.set(Calendar.HOUR_OF_DAY, hour);
+            cal.set(Calendar.MINUTE, minute);
+            gameBean.setDate(cal.getTime());
     	}
     	
         this.gameService.save(
