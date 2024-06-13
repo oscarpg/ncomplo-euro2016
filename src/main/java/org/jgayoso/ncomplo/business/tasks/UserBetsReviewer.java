@@ -93,8 +93,11 @@ public class UserBetsReviewer {
         if (invalidBets) {
             try {
                 emailServiceFactory.getEmailService().sendInvalidBetsWarning(user, league);
+                Thread.sleep(1000);
             } catch (IOException e) {
                 logger.error("Error sending warning", e);
+            } catch (InterruptedException e) {
+                logger.error("InterruptedException sending warnings", e);
             }
         }
 
