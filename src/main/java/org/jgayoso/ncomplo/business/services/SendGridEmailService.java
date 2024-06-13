@@ -1,6 +1,7 @@
 package org.jgayoso.ncomplo.business.services;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 
 import com.sendgrid.helpers.mail.Mail;
@@ -197,6 +198,17 @@ public class SendGridEmailService implements EmailService {
 		Mail mail = new Mail(email, emailSubject, to, content);
 		sendMailRequest(mail);
 		logger.debug("Warning sent to " + user.getEmail());
+	}
+
+	@Override
+	public void sendInvalidBetsWarningToLeagueAdmin(List<User> users, League league) throws IOException {
+		final Email email = new Email(fromEmail, "NComplo");
+		Email to = new Email(league.getAdminEmail(), league.getAdminEmail());
+		StringBuilder emailBody = new StringBuilder("Users with invalid bets: ");
+		users.forEach(user -> emailBody.append(user.getLogin()).append(", "));
+		Content content = new Content("text/html", emailBody.toString());
+		Mail mail = new Mail(email, "Users with invalid bets for league " + league.getName(), to, content);
+		sendMailRequest(mail);
 	}
 
 	private void sendMailRequest(Mail mail) throws IOException{

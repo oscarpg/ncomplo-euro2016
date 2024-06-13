@@ -163,32 +163,41 @@ public class GenericHTTPEmailService implements EmailService {
                 user.getName())), emailSubject, html);
     }
 
+    @Override
+    public void sendInvalidBetsWarningToLeagueAdmin(List<User> users, League league) throws IOException {
+        StringBuilder emailBody = new StringBuilder("Users with invalid bets: ");
+        users.forEach(user -> emailBody.append(user.getLogin()).append(", "));
+        sendMailRequest(Collections.singletonList(new EmailIndividual(league.getAdminEmail(), null)),
+                "Users with invalid bets for league " + league.getName(), emailBody.toString());
+    }
+
 
     private void sendMailRequest(List<EmailIndividual> recipients, String subject, String message) throws IOException {
-        Email email = new Email();
-        email.setSubject(subject);
-        email.setHtml(message);
-        email.setFrom(new EmailIndividual(fromEmail, "NComplo"));
-        email.setTo(recipients.toArray(new EmailIndividual[0]));
+        for (EmailIndividual recipient: recipients) {
+            Email email = new Email();
+            email.setSubject(subject);
+            email.setHtml(message);
+            email.setFrom(new EmailIndividual(fromEmail, "NComplo"));
+            email.setTo(recipients.toArray(new EmailIndividual[0]));
 
-        Gson gson = new GsonBuilder().create();
-        String json = gson.toJson(email);
+            Gson gson = new GsonBuilder().create();
+            String json = gson.toJson(email);
 
+            try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
+                HttpPost httpPost = new HttpPost(emailUrl);
+                addHeaders(httpPost);
 
-        try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
-            HttpPost httpPost = new HttpPost(emailUrl);
-            addHeaders(httpPost);
+                final StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
+                httpPost.setEntity(entity);
 
-            final StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
-            httpPost.setEntity(entity);
-
-            logger.info("Sending email " + subject + " to emails " + recipients + " throw the API " + emailUrl);
-            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-                logOutput(response.getEntity().getContent());
-                StatusLine sl = response.getStatusLine();
-                if (sl.getStatusCode() != HttpStatus.SC_OK && sl.getStatusCode() != HttpStatus.SC_ACCEPTED
-                        && sl.getStatusCode() != HttpStatus.SC_CREATED) {
-                    logger.error("Error sending mail. Status code: " + sl);
+                logger.info("Sending email " + subject + " to " + recipient);
+                try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+                    logOutput(response.getEntity().getContent());
+                    StatusLine sl = response.getStatusLine();
+                    if (sl.getStatusCode() != HttpStatus.SC_OK && sl.getStatusCode() != HttpStatus.SC_ACCEPTED
+                            && sl.getStatusCode() != HttpStatus.SC_CREATED) {
+                        logger.error("Error sending mail. Status code: " + sl);
+                    }
                 }
             }
         }
