@@ -105,9 +105,9 @@ public class UserBetsReviewer {
 
     private boolean isInvalid(Bet bet) {
         BetType betType = bet.getGame().getDefaultBetType();
-        return betType.isSidesMatter() &&
+        return betType.isSidesMatter() && (
                 bet.getGameSideA() == null || bet.getGameSideB() == null
                 || bet.getScoreA() == null || bet.getScoreB() == null
-                || bet.getScoreA().equals(bet.getScoreB());
+                || bet.getScoreA().equals(bet.getScoreB()));
     }
 }
