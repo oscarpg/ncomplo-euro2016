@@ -6,6 +6,7 @@ import org.jgayoso.ncomplo.business.entities.League;
 import org.jgayoso.ncomplo.business.entities.User;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 
 public interface EmailService {
@@ -19,4 +20,5 @@ public interface EmailService {
     void sendNotification(final String subject, final String[] destinations, final String text);
 
     void sendInvalidBetsWarning(final User user, final League league) throws IOException;
+    void sendInvalidBetsWarningToLeagueAdmin(final List<User> users, final League league) throws IOException;
 }

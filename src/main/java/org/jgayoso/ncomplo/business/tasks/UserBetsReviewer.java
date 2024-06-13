@@ -17,6 +17,7 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -53,13 +54,28 @@ public class UserBetsReviewer {
 
         Instant leagueDeadTime = league.getBetsDeadLine().toInstant();
 
+        List<User> usersWithInvalidBets = new ArrayList<>();
         if (leagueDeadTime.isAfter(now) && leagueDeadTime.isBefore(tomorrow)) {
             // League dead time is in 24 hours
-            league.getParticipants().forEach(user -> reviewLeaguesBets(league, user));
+            league.getParticipants().forEach(user -> {
+                boolean invalid = reviewLeaguesBets(league, user);
+                if (invalid) {
+                    usersWithInvalidBets.add(user);
+                }
+            });
         }
+
+        if (!usersWithInvalidBets.isEmpty()) {
+            try {
+                emailServiceFactory.getEmailService().sendInvalidBetsWarningToLeagueAdmin(usersWithInvalidBets, league);
+            } catch (IOException e) {
+                logger.error("Error sending warning to league admin", e);
+            }
+        }
+
     }
 
-    private void reviewLeaguesBets(League league, User user) {
+    private boolean reviewLeaguesBets(League league, User user) {
 
         boolean invalidBets = false;
         List<Bet> bets =  betService.findByLeagueIdAndUserLogin(league.getId(), user.getLogin(), Locale.getDefault());
@@ -81,6 +97,8 @@ public class UserBetsReviewer {
                 logger.error("Error sending warning", e);
             }
         }
+
+        return invalidBets;
 
 
     }
