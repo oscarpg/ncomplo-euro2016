@@ -426,6 +426,45 @@ public class Bet {
         
         
     }
+
+    public static final class BetByLoginComparator implements Comparator<Bet> {
+
+
+        private final Locale locale;
+        private final I18nNamedEntityComparator i18nNamedEntityComparator;
+        private final GameComparator gameComparator;
+        private final UserComparator userComparator;
+
+
+        public BetByLoginComparator(final Locale locale) {
+            super();
+            this.locale = locale;
+            this.i18nNamedEntityComparator = new I18nNamedEntityComparator(this.locale);
+            this.gameComparator = new GameComparator(this.locale);
+            this.userComparator = new UserComparator(this.locale);
+        }
+
+
+
+        @Override
+        public int compare(final Bet o1, final Bet o2) {
+
+            final int leagueComp =
+                    this.i18nNamedEntityComparator.compare(o1.getLeague(), o2.getLeague());
+            if (leagueComp != 0) {
+                return leagueComp;
+            }
+
+            final int userComparator = this.userComparator.compare(o1.getUser(),o2.getUser());
+            if (userComparator != 0) {
+                return userComparator;
+            }
+            return this.gameComparator.compare(o1.getGame(), o2.getGame());
+
+        }
+
+
+    }
     
 	public static final class BetByGameOrderComparator implements Comparator<Bet> {
 
