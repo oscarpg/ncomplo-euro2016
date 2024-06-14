@@ -213,7 +213,8 @@ public class ScoreboardController {
 		}
 		final String separator = ";";
 		final String endLine = "\n";
-		final List<Bet> bets = this.betService.findByLeagueIdAndUserLogin(leagueId, login, locale);
+		final List<Bet> bets = this.betService.findByLeagueId(leagueId, locale);
+		Collections.sort(bets, new Bet.BetByLoginComparator(locale));
 		StringBuilder csvContent = new StringBuilder("login").append(separator).append("#game").append(separator)
 				.append("team1").append(separator).append("team2").append(separator).append("score1").append(separator).append("score2").append(endLine);
 		for (Bet bet: bets) {
