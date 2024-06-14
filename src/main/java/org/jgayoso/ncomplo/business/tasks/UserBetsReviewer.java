@@ -35,7 +35,7 @@ public class UserBetsReviewer {
     @Autowired
     private EmailServiceFactory emailServiceFactory;
 
-    @Scheduled(cron = "0 0 12 * * *")
+    @Scheduled(cron = "0 0 19 * * *")
     public void reviewUserBets() {
         logger.debug("Executing reviewUserBets cron ");
         Iterable<League> leagues = leagueRepository.findAll();
@@ -50,13 +50,13 @@ public class UserBetsReviewer {
         }
 
         Instant now = new Date().toInstant();
-        Instant tomorrow = now.plus( 24 , ChronoUnit.HOURS );
+        Instant twoHours = now.plus( 2 , ChronoUnit.HOURS );
 
         Instant leagueDeadTime = league.getBetsDeadLine().toInstant();
 
         List<User> usersWithInvalidBets = new ArrayList<>();
-        if (leagueDeadTime.isAfter(now) && leagueDeadTime.isBefore(tomorrow)) {
-            // League dead time is in 24 hours
+        if (leagueDeadTime.isAfter(now) && leagueDeadTime.isBefore(twoHours)) {
+            // League dead time is in 2 hours
             league.getParticipants().forEach(user -> {
                 boolean invalid = reviewLeaguesBets(league, user);
                 if (invalid) {
