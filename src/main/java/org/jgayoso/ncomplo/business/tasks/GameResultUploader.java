@@ -45,8 +45,8 @@ public class GameResultUploader {
 		super();
 	}
 	
-	@Scheduled(fixedRate = 60000)
-	@Transactional
+//	@Scheduled(fixedRate = 60000)
+//	@Transactional
 	public void updateCurrentGame(){
 
 		final List<Competition> competitions = this.competitionRepository.findByActiveIsTrueAndUpdaterUriIsNotNull();
