@@ -35,7 +35,7 @@ public class UserBetsReviewer {
     @Autowired
     private EmailServiceFactory emailServiceFactory;
 
-    @Scheduled(cron = "0 0 19 * * *")
+//    @Scheduled(cron = "0 0 19 * * *")
     public void reviewUserBets() {
         logger.debug("Executing reviewUserBets cron ");
         Iterable<League> leagues = leagueRepository.findAll();
