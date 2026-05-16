@@ -17,13 +17,7 @@
         
         <a th:href="@{manage}">Create new</a>
 
-        <section>
-            <form method="POST" enctype="multipart/form-data" th:action="@{upload}">
-                <input type="hidden" th:value="${competition.id}" name="id" />
-                <span><input type="file" name="file" /></span>
-                <p><input type="submit" class="btn btn-primary" value="Upload Games from Excel" /></p>
-            </form>
-        </section>
+
         <table class="table table-striped table-bordered">
           <tr th:each="g : ${allGames}">
             <td th:text="${g.date} ? ${#dates.format(g.date,#messages.msg('dates.format'))} : '-'">date of game</td>

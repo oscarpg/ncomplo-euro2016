@@ -53,8 +53,6 @@ public class Competition implements I18nNamedEntity {
     @OneToMany(cascade=CascadeType.ALL,orphanRemoval=true,mappedBy="competition")
     private final Set<Game> games = new LinkedHashSet<>();
 
-    @OneToOne(mappedBy="competition", orphanRemoval=true)
-    private CompetitionParserProperties competitionParserProperties;
 
     public Competition() {
         super();
@@ -125,14 +123,6 @@ public class Competition implements I18nNamedEntity {
 	public void setUpdaterUri(final String updaterUri) {
 		this.updaterUri = updaterUri;
 	}
-
-    public CompetitionParserProperties getCompetitionParserProperties() {
-        return competitionParserProperties;
-    }
-
-    public void setCompetitionParserProperties(CompetitionParserProperties competitionParserProperties) {
-        this.competitionParserProperties = competitionParserProperties;
-    }
 
     @Override
     public String toString() {

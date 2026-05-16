@@ -50,7 +50,7 @@ public class UserBetsReviewer {
         }
 
         Instant now = new Date().toInstant();
-        Instant twoHours = now.plus( 2 , ChronoUnit.HOURS );
+        Instant twoHours = now.plus(2, ChronoUnit.HOURS);
 
         Instant leagueDeadTime = league.getBetsDeadLine().toInstant();
 
@@ -78,11 +78,11 @@ public class UserBetsReviewer {
     private boolean reviewLeaguesBets(League league, User user) {
 
         boolean invalidBets = false;
-        List<Bet> bets =  betService.findByLeagueIdAndUserLogin(league.getId(), user.getLogin(), Locale.getDefault());
+        List<Bet> bets = betService.findByLeagueIdAndUserLogin(league.getId(), user.getLogin(), Locale.getDefault());
         if (CollectionUtils.isEmpty(bets)) {
             invalidBets = true;
         } else {
-            for (Bet bet: bets) {
+            for (Bet bet : bets) {
                 if (isInvalid(bet)) {
                     invalidBets = true;
                     break;
@@ -103,13 +103,11 @@ public class UserBetsReviewer {
 
         return invalidBets;
 
-
     }
 
     private boolean isInvalid(Bet bet) {
         BetType betType = bet.getGame().getDefaultBetType();
-        return betType.isSidesMatter() && (
-                bet.getGameSideA() == null || bet.getGameSideB() == null
+        return betType.isSidesMatter() && (bet.getGameSideA() == null || bet.getGameSideB() == null
                 || bet.getScoreA() == null || bet.getScoreB() == null
                 || bet.getScoreA().equals(bet.getScoreB()));
     }

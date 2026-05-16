@@ -1,7 +1,5 @@
 package org.jgayoso.ncomplo.web.admin.controller;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -20,10 +18,8 @@ import org.jgayoso.ncomplo.business.services.GameService;
 import org.jgayoso.ncomplo.business.services.GameSideService;
 import org.jgayoso.ncomplo.business.services.RoundService;
 import org.jgayoso.ncomplo.business.util.I18nUtils;
-import org.jgayoso.ncomplo.exceptions.CompetitionParserException;
 import org.jgayoso.ncomplo.web.admin.beans.GameBean;
 import org.jgayoso.ncomplo.web.admin.beans.LangBean;
-import org.jgayoso.ncomplo.web.admin.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -34,7 +30,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
@@ -196,41 +192,7 @@ public class GameController {
         
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/upload")
-    public String uploadGames(@RequestParam("file") final MultipartFile file,
-                                  @RequestParam(value="id") final Integer id,
-                                  final HttpServletRequest request,
-                                  final RedirectAttributes redirectAttributes){
 
-        final Authentication auth = SecurityContextHolder.getContext()
-                .getAuthentication();
-        if (auth instanceof AnonymousAuthenticationToken) {
-            return "error";
-        }
-        final String login = auth.getName();
-
-        File competitionFile = null;
-        try {
-            competitionFile = FileUtils.convert("games", file, login);
-            if (!competitionFile.exists() || competitionFile.length() == 0) {
-                redirectAttributes.addFlashAttribute("error", "Empty file");
-                return "redirect:list";
-            }
-            this.gameService.processFile(id, login, competitionFile);
-        } catch (final IOException e) {
-            redirectAttributes.addFlashAttribute("error", "Error processing games file");
-        } catch (CompetitionParserException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:list";
-        } finally {
-            // delete file
-            if (competitionFile != null) {
-                competitionFile.delete();
-            }
-        }
-        redirectAttributes.addFlashAttribute("message", "Game sides processed successfully");
-        return "redirect:list";
-    }
     
     
 }

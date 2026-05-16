@@ -1,8 +1,6 @@
 package org.jgayoso.ncomplo.web.controller;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -35,7 +33,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
+
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
@@ -190,59 +188,6 @@ public class UserBetsController {
 		return "redirect:/scoreboard";
 	}
     
-    @RequestMapping(method = RequestMethod.POST, value = "/upload")
-    public String uploadBets(@RequestParam("file") final MultipartFile file,
-    		@RequestParam("leagueId") final Integer leagueId,
-            @RequestParam(value = "allLeagues", required = false) final Boolean allLeagues,
-    		final HttpServletRequest request,
-            final RedirectAttributes redirectAttributes){
-        final Authentication auth = SecurityContextHolder.getContext()
-                .getAuthentication();
-        if (auth instanceof AnonymousAuthenticationToken) {
-            /* The user is not logged in */
-            redirectAttributes.addFlashAttribute("message", "Session expired");
-            return "login";
-        }
-        
-        final String login = auth.getName();
-        final Locale locale = RequestContextUtils.getLocale(request);
 
-        final League league = this.leagueService.find(leagueId);
-        if (league.getBetsDeadLine().before(new Date())) {
-            logger.info("User " + login + " trying to edit the bets in league " + league.getId() + " - " + league.getName());
-            return "redirect:/scoreboard";
-        }
-
-        List<String> invalidBets = null;
-        try {
-            final File betsFile = this.convert(file, login);
-            if (!betsFile.exists() || betsFile.length() == 0) {
-                redirectAttributes.addFlashAttribute("error", "Empty file");
-                return "redirect:/bets/"+leagueId+"/";
-            }
-            invalidBets = this.betService.processBetsFile(betsFile, login, leagueId, Boolean.TRUE.equals(allLeagues), locale);
-            betsFile.delete();
-        } catch (final IOException e) {
-            redirectAttributes.addFlashAttribute("error", "Error processing bets file");
-        } finally {
-        	// delete file
-        }
-        if (CollectionUtils.isEmpty(invalidBets)) {
-            redirectAttributes.addFlashAttribute("message", "Bets processed successfully");
-        } else {
-            redirectAttributes.addFlashAttribute("warnings", invalidBets);
-
-        }
-        return "redirect:/bets/"+leagueId+"/";
-    }
-    
-    public File convert(final MultipartFile file, final String login) throws IOException {
-        final File convFile = new File(login);
-        convFile.createNewFile();
-        final FileOutputStream fos = new FileOutputStream(convFile);
-        fos.write(file.getBytes());
-        fos.close();
-        return convFile;
-    }
 
 }

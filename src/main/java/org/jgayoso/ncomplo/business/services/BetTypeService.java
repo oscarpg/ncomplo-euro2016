@@ -116,7 +116,7 @@ public class BetTypeService {
         final Competition competition = this.competitionRepository.findOne(competitionId);
         BetType groupsBetType = new BetType();
         groupsBetType.setCompetition(competition);
-        groupsBetType.setName(competition.getCompetitionParserProperties() != null ? competition.getCompetitionParserProperties().getGroupsName() : "Groups");
+        groupsBetType.setName("Groups");
         groupsBetType.setResultMatter(true);
         groupsBetType.setScoreMatter(true);
         groupsBetType.setSidesMatter(false);
@@ -126,7 +126,7 @@ public class BetTypeService {
 
         BetType roundOf16BetType = new BetType();
         roundOf16BetType.setCompetition(competition);
-        roundOf16BetType.setName(competition.getCompetitionParserProperties() != null ? competition.getCompetitionParserProperties().getRoundOf16Name() : "Round Of 16");
+        roundOf16BetType.setName("Round Of 16");
         roundOf16BetType.setResultMatter(false);
         roundOf16BetType.setScoreMatter(false);
         roundOf16BetType.setSidesMatter(true);
@@ -136,7 +136,7 @@ public class BetTypeService {
 
         BetType quarterFinalsBetType = new BetType();
         quarterFinalsBetType.setCompetition(competition);
-        quarterFinalsBetType.setName(competition.getCompetitionParserProperties() != null ? competition.getCompetitionParserProperties().getQuarterFinalsName() : "Quarter Finals");
+        quarterFinalsBetType.setName("Quarter Finals");
         quarterFinalsBetType.setResultMatter(false);
         quarterFinalsBetType.setScoreMatter(false);
         quarterFinalsBetType.setSidesMatter(true);
@@ -146,7 +146,7 @@ public class BetTypeService {
 
         BetType semiFinalsBetType = new BetType();
         semiFinalsBetType.setCompetition(competition);
-        semiFinalsBetType.setName(competition.getCompetitionParserProperties() != null ? competition.getCompetitionParserProperties().getSemiFinalsName() : "SemiFinals");
+        semiFinalsBetType.setName("SemiFinals");
         semiFinalsBetType.setResultMatter(false);
         semiFinalsBetType.setScoreMatter(false);
         semiFinalsBetType.setSidesMatter(true);
@@ -156,7 +156,7 @@ public class BetTypeService {
 
         BetType finalBetType = new BetType();
         finalBetType.setCompetition(competition);
-        finalBetType.setName(competition.getCompetitionParserProperties() != null ? competition.getCompetitionParserProperties().getFinalName() : "Final");
+        finalBetType.setName("Final");
         finalBetType.setResultMatter(true);
         finalBetType.setScoreMatter(false);
         finalBetType.setSidesMatter(true);
