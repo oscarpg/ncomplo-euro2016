@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+  <head th:substituteby="layout/header :: head"></head>
+
+  <body>
+
+    <header th:substituteby="layout/header :: header"></header>
+
+    <div class="container">
+
+        <header th:substituteby="layout/admin/header :: header"></header>
+
+        <div th:substituteby="layout/messages :: messages"></div>
+
+        <h1>Groups for competition "<span th:text="${competition.getName(#locale)}">competition</span>"</h1>
+
+        <p><a th:href="@{manage}">Create new group</a></p>
+
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Group</th>
+                    <th>Round</th>
+                    <th>Teams qualifying</th>
+                    <th>Teams</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="g : ${allGroups}">
+                    <td th:text="${g.name}">Group A</td>
+                    <td th:text="${g.round != null ? g.round.name : '-'}">Groups</td>
+                    <td th:text="${g.teamsQualifying}">2</td>
+                    <td>
+                        <span th:each="team, stat : ${g.teams}">
+                            <span th:class="(${team.code}?'small-flag fi fi-'+${team.code}:'')"></span>
+                            <span th:text="${team.getName(#locale)}">team</span><span th:if="${!stat.last}">, </span>
+                        </span>
+                    </td>
+                    <td><a th:href="@{manage(id=${g.id})}">Edit</a></td>
+                    <td><a th:href="@{delete(id=${g.id})}" onclick="return confirm('Delete this group?');">Delete</a></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p th:if="${#lists.isEmpty(allGroups)}"><em>No groups defined yet.</em></p>
+
+        <a th:href="@{../../list}">Back to list of Competitions</a>
+
+    </div>
+
+  </body>
+
+</html>

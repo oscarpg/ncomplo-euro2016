@@ -2,51 +2,51 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
   <head th:substituteby="layout/header :: head"></head>
-  
+
   <body>
-  
+
     <header th:substituteby="layout/header :: header"></header>
-  
+
     <div class="container">
-  
+
         <header th:substituteby="layout/admin/header :: header"></header>
 
         <h1>Manage Game in competition "<span th:text="${competition.getName(#locale)}">One Competition</span>"</h1>
-        
+
         <form th:action="@{save}" th:object="${game}" method="post">
-        
+
           <fieldset>
-          
+
             <input type="hidden" th:field="*{id}" />
-            
+
             <div>
               <label for="roundSelect">Round</label>
               <select id="roundSelect" th:field="*{roundId}">
                 <option th:each="r : ${allRounds}" th:value="${r.id}" th:text="${r.getName(#locale)}">One round</option>
               </select>
             </div>
-            
+
             <div>
               <label for="orderInput">Game order</label>
               <input id="orderInput" type="number" th:field="*{order}" />
             </div>
-            
+
             <div>
               <label for="dateInput">Date</label>
               <input id="dateInput" type="date" th:field="*{date}" />
             </div>
-            
+
             <div>
               <label for="timeInput">Time</label>
               <input id="timeInput" type="text" th:field="*{time}" />
             </div>
-            
+
             <div id="name">
               <label for="nameInput">Name</label>
               <input id="nameInput" type="text" th:field="*{name}" required="required" />
               <a href="#" onclick="$.org.jgayoso.ncomplo.lang.add('name');">add language</a>
             </div>
-            
+
             <div class="name-lang-existing lang-element" th:each="nameLang : *{namesByLang}">
               <input class="langInput" type="text" th:field="*{namesByLang[__${nameLangStat.index}__].lang}" />
               <input class="valueInput" type="text" th:field="*{namesByLang[__${nameLangStat.index}__].value}" />
@@ -57,50 +57,130 @@
               <input class="valueInput" type="text" name="namesByLang[$index$].value" id="namesByLang$index$.value" value="" />
               <a href="#" onclick="$.org.jgayoso.ncomplo.lang.remove(this);">delete</a>
             </div>
-            
+
             <div>
               <label for="defaultBetTypeSelect">Bet Type</label>
               <select id="defaultBetTypeSelect" th:field="*{defaultBetTypeId}">
                 <option th:each="b : ${allBetTypes}" th:value="${b.id}" th:text="${b.getName(#locale)}">One bet type</option>
               </select>
             </div>
-            
+
+            <hr/>
+            <h3>Team A</h3>
+
             <div>
+              <label>Source type for Team A</label>
+              <select th:field="*{sideASourceType}" onchange="toggleSourceFields('A', this.value)">
+                <option value="">Fixed team (select below)</option>
+                <option value="GROUP_POSITION">Group position (e.g. 1st of Group A)</option>
+                <option value="GAME_WINNER">Winner of a game</option>
+                <option value="GAME_LOSER">Loser of a game (3rd place)</option>
+              </select>
+            </div>
+
+            <!-- Fixed team -->
+            <div id="sideA-fixed">
               <label for="gameSideASelect">Team/Player A</label>
               <select id="gameSideASelect" th:field="*{gameSideAId}">
                 <option value="">Undefined</option>
                 <option th:each="gs : ${allGameSides}" th:value="${gs.id}" th:text="${gs.getName(#locale)}">One team/player</option>
               </select>
             </div>
-            
+
+            <!-- Group position source -->
+            <div id="sideA-group" style="display:none;">
+              <label>Group</label>
+              <select th:field="*{sideAGroupId}">
+                <option value="">-- select group --</option>
+                <option th:each="g : ${allGroups}" th:value="${g.id}" th:text="${g.name}">Group A</option>
+              </select>
+              <label>Position</label>
+              <input type="number" th:field="*{sideAPosition}" min="1" max="8" placeholder="1" />
+            </div>
+
+            <!-- Game winner/loser source -->
+            <div id="sideA-game" style="display:none;">
+              <label>Source game</label>
+              <select th:field="*{sideASourceGameId}">
+                <option value="">-- select game --</option>
+                <option th:each="g : ${allGames}" th:value="${g.id}"
+                        th:text="${g.order + ': ' + g.getName(#locale)}">Game</option>
+              </select>
+            </div>
+
+            <hr/>
+            <h3>Team B</h3>
+
             <div>
+              <label>Source type for Team B</label>
+              <select th:field="*{sideBSourceType}" onchange="toggleSourceFields('B', this.value)">
+                <option value="">Fixed team (select below)</option>
+                <option value="GROUP_POSITION">Group position (e.g. 2nd of Group B)</option>
+                <option value="GAME_WINNER">Winner of a game</option>
+                <option value="GAME_LOSER">Loser of a game (3rd place)</option>
+              </select>
+            </div>
+
+            <div id="sideB-fixed">
               <label for="gameSideBSelect">Team/Player B</label>
               <select id="gameSideBSelect" th:field="*{gameSideBId}">
                 <option value="">Undefined</option>
                 <option th:each="gs : ${allGameSides}" th:value="${gs.id}" th:text="${gs.getName(#locale)}">One team/player</option>
               </select>
             </div>
-            
+
+            <div id="sideB-group" style="display:none;">
+              <label>Group</label>
+              <select th:field="*{sideBGroupId}">
+                <option value="">-- select group --</option>
+                <option th:each="g : ${allGroups}" th:value="${g.id}" th:text="${g.name}">Group B</option>
+              </select>
+              <label>Position</label>
+              <input type="number" th:field="*{sideBPosition}" min="1" max="8" placeholder="2" />
+            </div>
+
+            <div id="sideB-game" style="display:none;">
+              <label>Source game</label>
+              <select th:field="*{sideBSourceGameId}">
+                <option value="">-- select game --</option>
+                <option th:each="g : ${allGames}" th:value="${g.id}"
+                        th:text="${g.order + ': ' + g.getName(#locale)}">Game</option>
+              </select>
+            </div>
+
+            <hr/>
+
             <div>
               <label for="scoreAInput">Score A</label>
               <input id="scoreAInput" type="number" th:field="*{scoreA}" />
             </div>
-            
+
             <div>
               <label for="scoreBInput">Score B</label>
               <input id="scoreBInput" type="number" th:field="*{scoreB}" />
             </div>
-            
+
           </fieldset>
-          
+
           <input type="submit" />
-          
+
         </form>
-        
+
         <a th:href="@{list}">Back to list of Games</a>
-        
+
     </div>
-    
+
+    <script th:inline="javascript">
+        function toggleSourceFields(side, sourceType) {
+            document.getElementById('side' + side + '-fixed').style.display  = (!sourceType || sourceType === '') ? '' : 'none';
+            document.getElementById('side' + side + '-group').style.display  = (sourceType === 'GROUP_POSITION') ? '' : 'none';
+            document.getElementById('side' + side + '-game').style.display   = (sourceType === 'GAME_WINNER' || sourceType === 'GAME_LOSER') ? '' : 'none';
+        }
+        // Apply on load
+        toggleSourceFields('A', document.querySelector('[name="sideASourceType"]').value);
+        toggleSourceFields('B', document.querySelector('[name="sideBSourceType"]').value);
+    </script>
+
   </body>
-  
+
 </html>

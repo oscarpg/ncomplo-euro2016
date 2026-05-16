@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.jgayoso.ncomplo.business.entities.Bet;
 import org.jgayoso.ncomplo.business.entities.Competition;
+import org.jgayoso.ncomplo.business.entities.CompetitionGroup;
 import org.jgayoso.ncomplo.business.entities.Game;
 import org.jgayoso.ncomplo.business.entities.Game.GameComparator;
 import org.jgayoso.ncomplo.business.entities.GameSide;
@@ -46,6 +47,9 @@ public class UserBetsController {
 
     @Autowired
     private BetService betService;
+
+    @Autowired
+    private CompetitionGroupService competitionGroupService;
 
     public UserBetsController() {
         super();
@@ -132,6 +136,11 @@ public class UserBetsController {
 
         }
         final User user = this.userService.find(login);
+
+        // Build group definitions JSON for client-side standings computation
+        final List<CompetitionGroup> competitionGroups =
+                this.competitionGroupService.findAll(competition.getId());
+
         model.addAttribute("user", user);
         model.addAttribute("participation", participationBean);
         model.addAttribute("league", league);
@@ -141,6 +150,7 @@ public class UserBetsController {
         model.addAttribute("allGameSides", competitionGameSides);
         model.addAttribute("allBets", bets);
         model.addAttribute("multipleLeagues", CollectionUtils.size(userLeagues) > 1);
+        model.addAttribute("competitionGroups", competitionGroups);
 
         return "managebets";
 

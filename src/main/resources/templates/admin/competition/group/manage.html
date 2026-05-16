@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+  <head th:substituteby="layout/header :: head"></head>
+
+  <body>
+
+    <header th:substituteby="layout/header :: header"></header>
+
+    <div class="container">
+
+        <header th:substituteby="layout/admin/header :: header"></header>
+
+        <div th:substituteby="layout/messages :: messages"></div>
+
+        <h1>Manage Group — <span th:text="${competition.getName(#locale)}">competition</span></h1>
+
+        <form th:action="@{save}" th:object="${group}" method="post">
+
+            <input type="hidden" th:field="*{id}" />
+
+            <fieldset>
+
+                <div class="mb-3">
+                    <label for="groupName">Group name (e.g. "Group A")</label>
+                    <input id="groupName" type="text" class="form-control" th:field="*{name}" required="required" placeholder="Group A" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="roundSelect">Round (group-stage round)</label>
+                    <select id="roundSelect" class="form-control" th:field="*{roundId}">
+                        <option value="">— none —</option>
+                        <option th:each="r : ${allRounds}" th:value="${r.id}" th:text="${r.getName(#locale)}">round</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="qualifying">Teams qualifying from this group</label>
+                    <input id="qualifying" type="number" class="form-control" th:field="*{teamsQualifying}" min="1" required="required" />
+                </div>
+
+                <div class="mb-3">
+                    <label>Teams in this group</label>
+                    <div class="teams-checkboxes" style="column-count: 3; column-gap: 1rem;">
+                        <div th:each="team : ${allTeams}" class="form-check">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   th:id="'team_' + ${team.id}"
+                                   name="teamIds"
+                                   th:value="${team.id}"
+                                   th:checked="${#lists.contains(group.teamIds, team.id)}" />
+                            <label class="form-check-label" th:for="'team_' + ${team.id}">
+                                <span th:class="(${team.code}?'small-flag fi fi-'+${team.code}:'')"></span>
+                                <span th:text="${team.getName(#locale)}">team name</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </fieldset>
+
+            <input type="submit" class="btn btn-primary" value="Save" />
+
+        </form>
+
+        <p><a th:href="@{list}">Back to group list</a></p>
+
+    </div>
+
+  </body>
+
+</html>

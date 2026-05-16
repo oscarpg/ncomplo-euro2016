@@ -44,6 +44,18 @@ public class GameBean implements Serializable {
 
     private Integer scoreB;
 
+    // ---- Bracket source for Side A ----
+    private String sideASourceType;  // null, GROUP_POSITION, GAME_WINNER, GAME_LOSER
+    private Integer sideAGroupId;
+    private Integer sideAPosition;
+    private Integer sideASourceGameId;
+
+    // ---- Bracket source for Side B ----
+    private String sideBSourceType;
+    private Integer sideBGroupId;
+    private Integer sideBPosition;
+    private Integer sideBSourceGameId;
+
     public GameBean() {
         super();
     }
@@ -138,6 +150,74 @@ public class GameBean implements Serializable {
 
     public List<LangBean> getNamesByLang() {
         return this.namesByLang;
+    }
+
+    // ---- Bracket source accessors (Side A) ----
+
+    public String getSideASourceType() {
+        return this.sideASourceType;
+    }
+
+    public void setSideASourceType(final String sideASourceType) {
+        this.sideASourceType = sideASourceType;
+    }
+
+    public Integer getSideAGroupId() {
+        return this.sideAGroupId;
+    }
+
+    public void setSideAGroupId(final Integer sideAGroupId) {
+        this.sideAGroupId = sideAGroupId;
+    }
+
+    public Integer getSideAPosition() {
+        return this.sideAPosition;
+    }
+
+    public void setSideAPosition(final Integer sideAPosition) {
+        this.sideAPosition = sideAPosition;
+    }
+
+    public Integer getSideASourceGameId() {
+        return this.sideASourceGameId;
+    }
+
+    public void setSideASourceGameId(final Integer sideASourceGameId) {
+        this.sideASourceGameId = sideASourceGameId;
+    }
+
+    // ---- Bracket source accessors (Side B) ----
+
+    public String getSideBSourceType() {
+        return this.sideBSourceType;
+    }
+
+    public void setSideBSourceType(final String sideBSourceType) {
+        this.sideBSourceType = sideBSourceType;
+    }
+
+    public Integer getSideBGroupId() {
+        return this.sideBGroupId;
+    }
+
+    public void setSideBGroupId(final Integer sideBGroupId) {
+        this.sideBGroupId = sideBGroupId;
+    }
+
+    public Integer getSideBPosition() {
+        return this.sideBPosition;
+    }
+
+    public void setSideBPosition(final Integer sideBPosition) {
+        this.sideBPosition = sideBPosition;
+    }
+
+    public Integer getSideBSourceGameId() {
+        return this.sideBSourceGameId;
+    }
+
+    public void setSideBSourceGameId(final Integer sideBSourceGameId) {
+        this.sideBSourceGameId = sideBSourceGameId;
     }
 
 }

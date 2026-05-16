@@ -40,6 +40,10 @@
                   <span th:text="${c.games.size()}">22</span> games
                   <a th:href="@{${c.id} + '/game/list'}">manage games</a>
                 </td>
+                <td>
+                  <span th:text="${c.groups.size()}">0</span> groups
+                  <a th:href="@{${c.id} + '/group/list'}">manage groups</a>
+                </td>
                 <td><a th:href="@{manage(id=${c.id})}">manage competition</a></td>
                 <td><a th:href="@{delete(id=${c.id})}" onclick="return confirm('Sure?');">delete competition</a></td>
               </tr>

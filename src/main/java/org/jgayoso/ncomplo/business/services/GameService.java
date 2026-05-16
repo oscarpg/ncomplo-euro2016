@@ -2,10 +2,13 @@ package org.jgayoso.ncomplo.business.services;
 
 import org.jgayoso.ncomplo.business.entities.*;
 import org.jgayoso.ncomplo.business.entities.Game.GameComparator;
+import org.jgayoso.ncomplo.business.entities.GameSideSource.SourceType;
 import org.jgayoso.ncomplo.business.entities.repositories.BetTypeRepository;
+import org.jgayoso.ncomplo.business.entities.repositories.CompetitionGroupRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.CompetitionRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.GameRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.GameSideRepository;
+import org.jgayoso.ncomplo.business.entities.repositories.GameSideSourceRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.RoundRepository;
 import org.jgayoso.ncomplo.business.util.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +46,12 @@ public class GameService {
     private GameSideRepository gameSideRepository;
 
     @Autowired
+    private GameSideSourceRepository gameSideSourceRepository;
+
+    @Autowired
+    private CompetitionGroupRepository competitionGroupRepository;
+
+    @Autowired
     private LeagueService leagueService;
 
     public GameService() {
@@ -74,7 +83,15 @@ public class GameService {
             final Integer gameSideAId,
             final Integer gameSideBId,
             final Integer scoreA,
-            final Integer scoreB) {
+            final Integer scoreB,
+            final String sideASourceType,
+            final Integer sideAGroupId,
+            final Integer sideAPosition,
+            final Integer sideASourceGameId,
+            final String sideBSourceType,
+            final Integer sideBGroupId,
+            final Integer sideBPosition,
+            final Integer sideBSourceGameId) {
 
         final Competition competition = this.competitionRepository.findOne(competitionId);
 
@@ -96,6 +113,11 @@ public class GameService {
         game.setScoreA(scoreA);
         game.setScoreB(scoreB);
 
+        // Bracket source for Side A
+        game.setGameSideASource(buildSource(sideASourceType, sideAGroupId, sideAPosition, sideASourceGameId));
+        // Bracket source for Side B
+        game.setGameSideBSource(buildSource(sideBSourceType, sideBGroupId, sideBPosition, sideBSourceGameId));
+
         if (id == null) {
             competition.getGames().add(game);
             return this.gameRepository.save(game);
@@ -103,6 +125,34 @@ public class GameService {
 
         return game;
 
+    }
+
+    private GameSideSource buildSource(
+            final String sourceType,
+            final Integer groupId,
+            final Integer position,
+            final Integer sourceGameId) {
+
+        if (sourceType == null || sourceType.isBlank()) {
+            return null;
+        }
+        final SourceType type = SourceType.valueOf(sourceType);
+        switch (type) {
+            case GROUP_POSITION: {
+                final CompetitionGroup group = (groupId != null ? this.competitionGroupRepository.findOne(groupId) : null);
+                return GameSideSource.groupPosition(group, position != null ? position : 1);
+            }
+            case GAME_WINNER: {
+                final Game src = (sourceGameId != null ? this.gameRepository.findOne(sourceGameId) : null);
+                return GameSideSource.gameWinner(src);
+            }
+            case GAME_LOSER: {
+                final Game src = (sourceGameId != null ? this.gameRepository.findOne(sourceGameId) : null);
+                return GameSideSource.gameLoser(src);
+            }
+            default:
+                return null;
+        }
     }
 
     @Transactional

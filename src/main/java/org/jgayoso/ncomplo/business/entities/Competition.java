@@ -53,6 +53,9 @@ public class Competition implements I18nNamedEntity {
     @OneToMany(cascade=CascadeType.ALL,orphanRemoval=true,mappedBy="competition")
     private final Set<Game> games = new LinkedHashSet<>();
 
+    @OneToMany(cascade=CascadeType.ALL,orphanRemoval=true,mappedBy="competition")
+    private final Set<CompetitionGroup> groups = new LinkedHashSet<>();
+
 
     public Competition() {
         super();
@@ -103,6 +106,10 @@ public class Competition implements I18nNamedEntity {
 
     public Set<Game> getGames() {
         return this.games;
+    }
+
+    public Set<CompetitionGroup> getGroups() {
+        return this.groups;
     }
 
 

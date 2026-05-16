@@ -12,7 +12,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jgayoso.ncomplo.business.entities.Game;
+import org.jgayoso.ncomplo.business.entities.GameSideSource;
 import org.jgayoso.ncomplo.business.services.BetTypeService;
+import org.jgayoso.ncomplo.business.services.CompetitionGroupService;
 import org.jgayoso.ncomplo.business.services.CompetitionService;
 import org.jgayoso.ncomplo.business.services.GameService;
 import org.jgayoso.ncomplo.business.services.GameSideService;
@@ -22,16 +24,12 @@ import org.jgayoso.ncomplo.web.admin.beans.GameBean;
 import org.jgayoso.ncomplo.web.admin.beans.LangBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 @Controller
@@ -55,6 +53,9 @@ public class GameController {
 
     @Autowired
     private BetTypeService betTypeService;
+
+    @Autowired
+    private CompetitionGroupService competitionGroupService;
 
     public GameController() {
         super();
@@ -109,6 +110,26 @@ public class GameController {
                     game.getGameSideB() == null ? null : game.getGameSideB().getId());
             gameBean.setScoreA(game.getScoreA());
             gameBean.setScoreB(game.getScoreB());
+
+            // Populate source fields
+            if (game.getGameSideASource() != null) {
+                final GameSideSource srcA = game.getGameSideASource();
+                gameBean.setSideASourceType(srcA.getSourceType().name());
+                if (srcA.getGroup() != null)
+                    gameBean.setSideAGroupId(srcA.getGroup().getId());
+                gameBean.setSideAPosition(srcA.getPosition());
+                if (srcA.getSourceGame() != null)
+                    gameBean.setSideASourceGameId(srcA.getSourceGame().getId());
+            }
+            if (game.getGameSideBSource() != null) {
+                final GameSideSource srcB = game.getGameSideBSource();
+                gameBean.setSideBSourceType(srcB.getSourceType().name());
+                if (srcB.getGroup() != null)
+                    gameBean.setSideBGroupId(srcB.getGroup().getId());
+                gameBean.setSideBPosition(srcB.getPosition());
+                if (srcB.getSourceGame() != null)
+                    gameBean.setSideBSourceGameId(srcB.getSourceGame().getId());
+            }
         }
 
         model.addAttribute("game", gameBean);
@@ -118,6 +139,8 @@ public class GameController {
         model.addAttribute("allRounds", this.roundService.findAll(competitionId));
         model.addAttribute("allBetTypes", this.betTypeService.findAllOrderByName(competitionId, locale));
         model.addAttribute("allGameSides", this.gameSideService.findAll(competitionId, locale));
+        model.addAttribute("allGroups", this.competitionGroupService.findAll(competitionId));
+        model.addAttribute("allGames", this.gameService.findAll(competitionId, locale));
 
         return VIEW_BASE + "manage";
 
@@ -153,7 +176,15 @@ public class GameController {
                 gameBean.getGameSideAId(),
                 gameBean.getGameSideBId(),
                 gameBean.getScoreA(),
-                gameBean.getScoreB());
+                gameBean.getScoreB(),
+                gameBean.getSideASourceType(),
+                gameBean.getSideAGroupId(),
+                gameBean.getSideAPosition(),
+                gameBean.getSideASourceGameId(),
+                gameBean.getSideBSourceType(),
+                gameBean.getSideBGroupId(),
+                gameBean.getSideBPosition(),
+                gameBean.getSideBSourceGameId());
 
         return "redirect:list";
 
