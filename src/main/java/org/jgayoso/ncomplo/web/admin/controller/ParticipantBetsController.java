@@ -37,8 +37,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 public class ParticipantBetsController {
 
     private static final String VIEW_BASE = "admin/league/participants/";
-    
-    
+
     @Autowired
     private LeagueService leagueService;
 
@@ -47,72 +46,55 @@ public class ParticipantBetsController {
 
     @Autowired
     private BetService betService;
-    
-    
-    
-    
-    
+
     public ParticipantBetsController() {
         super();
     }
-    
 
-
-
-    
-    
     @RequestMapping("/list")
     public String list(
             @PathVariable("leagueId") final Integer leagueId,
             final HttpServletRequest request,
             final ModelMap model) {
-        
+
         final Locale locale = RequestContextUtils.getLocale(request);
-        
-        final List<User> participants =
-                new ArrayList<>(this.leagueService.find(leagueId).getParticipants());
+
+        final List<User> participants = new ArrayList<>(this.leagueService.find(leagueId).getParticipants());
         Collections.sort(participants, new UserComparator(locale));
-        
+
         model.addAttribute("allParticipants", participants);
         model.addAttribute("league", this.leagueService.find(leagueId));
-        
+
         return VIEW_BASE + "list";
-        
+
     }
 
-
-    
-    
     @RequestMapping("/manage")
     public String manage(
-            @RequestParam(value="leagueId",required=true)
-            final Integer leagueId,
-            @RequestParam(value="login",required=true)
-            final String login,
+            @RequestParam(value = "leagueId", required = true) final Integer leagueId,
+            @RequestParam(value = "login", required = true) final String login,
             final ModelMap model,
             final HttpServletRequest request) {
 
         final Locale locale = RequestContextUtils.getLocale(request);
         SecurityContextHolder.getContext().getAuthentication();
-        
+
         final League league = this.leagueService.find(leagueId);
         final Competition competition = league.getCompetition();
         final User participant = this.userService.find(login);
-        
-        final List<GameSide> competitionGameSides =
-                new ArrayList<>(competition.getGameSides());
+
+        final List<GameSide> competitionGameSides = new ArrayList<>(competition.getGameSides());
         Collections.sort(competitionGameSides, new I18nNamedEntityComparator(locale));
-        
-        final List<Bet> bets =
-                this.betService.findByLeagueIdAndUserLogin(leagueId, login, locale);
-        
+
+        final List<Bet> bets = this.betService.findByLeagueIdAndUserLogin(leagueId, login, locale);
+
         final ParticipationBean participationBean = new ParticipationBean();
         participationBean.setLeagueId(leagueId);
         participationBean.setLogin(login);
 
         final List<Game> allGames = new ArrayList<>();
         for (final LeagueGame leagueGame : league.getLeagueGames().values()) {
-            
+
             final BetBean betBean = new BetBean();
             final Game game = leagueGame.getGame();
             betBean.setBetTypeId(leagueGame.getBetType().getId());
@@ -123,22 +105,22 @@ public class ParticipantBetsController {
             if (game.getGameSideB() != null) {
                 betBean.setGameSideBId(game.getGameSideB().getId());
             }
-            
+
             participationBean.getBetsByGame().put(game.getId(), betBean);
-            
+
             allGames.add(game);
-            
+
         }
-        
+
         Collections.sort(allGames, new GameComparator(locale));
-        
+
         if (bets != null && bets.size() > 0) {
 
             for (final Bet bet : bets) {
-                
+
                 final Game game = bet.getGame();
                 final BetBean betBean = participationBean.getBetsByGame().get(game.getId());
-                
+
                 betBean.setId(bet.getId());
                 if (bet.getGameSideA() != null) {
                     betBean.setGameSideAId(bet.getGameSideA().getId());
@@ -148,11 +130,9 @@ public class ParticipantBetsController {
                 }
                 betBean.setScoreA(bet.getScoreA());
                 betBean.setScoreB(bet.getScoreB());
-                
             }
-            
         }
-        
+
         model.addAttribute("participation", participationBean);
         model.addAttribute("league", league);
         model.addAttribute("competition", competition);
@@ -160,22 +140,17 @@ public class ParticipantBetsController {
         model.addAttribute("allGames", allGames);
         model.addAttribute("allGameSides", competitionGameSides);
         model.addAttribute("allBets", bets);
-        
+
         return VIEW_BASE + "manage";
-        
+
     }
 
-
-
-    
     @RequestMapping("/save")
     public String save(
             final ParticipationBean participationBean,
             @SuppressWarnings("unused") final BindingResult bindingResult) {
 
-        
         for (final BetBean betBean : participationBean.getBetsByGame().values()) {
-            
             this.betService.save(
                     betBean.getId(),
                     participationBean.getLeagueId(),
@@ -185,12 +160,11 @@ public class ParticipantBetsController {
                     betBean.getGameSideBId(),
                     betBean.getScoreA(),
                     betBean.getScoreB());
-            
+
         }
-        
+
         return "redirect:list";
-        
+
     }
-    
-    
+
 }

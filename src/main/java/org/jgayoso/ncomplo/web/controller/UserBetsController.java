@@ -1,6 +1,5 @@
 package org.jgayoso.ncomplo.web.controller;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -31,17 +30,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 @Controller
 public class UserBetsController {
-	
-	private static final Logger logger = Logger.getLogger(UserBetsController.class);
-	
+
+    private static final Logger logger = Logger.getLogger(UserBetsController.class);
+
     @Autowired
     private LeagueService leagueService;
     @Autowired
@@ -52,55 +47,51 @@ public class UserBetsController {
     @Autowired
     private BetService betService;
 
-    @Autowired
-    private CompetitionService competitionService;
-    
     public UserBetsController() {
-    	super();
+        super();
     }
-    
-    @RequestMapping({"/bets/{leagueId}/", "/bets/{leagueId}"})
+
+    @RequestMapping({ "/bets/{leagueId}/", "/bets/{leagueId}" })
     public String manage(
-    		@PathVariable(value="leagueId")
-            final Integer leagueId,
+            @PathVariable(value = "leagueId") final Integer leagueId,
             final ModelMap model,
             final HttpServletRequest request) {
 
         final Locale locale = RequestContextUtils.getLocale(request);
         final Authentication auth = SecurityContextHolder.getContext()
-				.getAuthentication();
+                .getAuthentication();
         if (auth instanceof AnonymousAuthenticationToken) {
-			/* The user is not logged in */
-			return "login";
-		}
-		/* The user is logged in */
-		final String login = auth.getName();
-        
+            /* The user is not logged in */
+            return "login";
+        }
+        /* The user is logged in */
+        final String login = auth.getName();
+
         final League league = this.leagueService.find(leagueId);
         if (league.getBetsDeadLine().before(new Date())) {
-        	logger.info("User " + login + " trying to edit the bets in league " + league.getId() + " - " + league.getName());
+            logger.info("User " + login + " trying to edit the bets in league " + league.getId() + " - "
+                    + league.getName());
             return "redirect:/scoreboard";
         }
-        
+
         final Competition competition = league.getCompetition();
         final User participant = this.userService.find(login);
 
-        List<League> userLeagues = this.leagueService.findByCompetitionIdAndUser(competition.getId(), participant, locale);
-        
-        final List<GameSide> competitionGameSides =
-                new ArrayList<>(competition.getGameSides());
+        List<League> userLeagues = this.leagueService.findByCompetitionIdAndUser(competition.getId(), participant,
+                locale);
+
+        final List<GameSide> competitionGameSides = new ArrayList<>(competition.getGameSides());
         Collections.sort(competitionGameSides, new I18nNamedEntityComparator(locale));
-        
-        final List<Bet> bets =
-                this.betService.findByLeagueIdAndUserLogin(leagueId, login, locale);
-        
+
+        final List<Bet> bets = this.betService.findByLeagueIdAndUserLogin(leagueId, login, locale);
+
         final ParticipationBean participationBean = new ParticipationBean();
         participationBean.setLeagueId(leagueId);
         participationBean.setLogin(login);
 
         final List<Game> allGames = new ArrayList<>();
         for (final LeagueGame leagueGame : league.getLeagueGames().values()) {
-            
+
             final BetBean betBean = new BetBean();
             final Game game = leagueGame.getGame();
             betBean.setBetTypeId(leagueGame.getBetType().getId());
@@ -111,22 +102,22 @@ public class UserBetsController {
             if (game.getGameSideB() != null) {
                 betBean.setGameSideBId(game.getGameSideB().getId());
             }
-            
+
             participationBean.getBetsByGame().put(game.getId(), betBean);
-            
+
             allGames.add(game);
-            
+
         }
-        
+
         Collections.sort(allGames, new GameComparator(locale));
-        
+
         if (bets != null && bets.size() > 0) {
 
             for (final Bet bet : bets) {
-                
+
                 final Game game = bet.getGame();
                 final BetBean betBean = participationBean.getBetsByGame().get(game.getId());
-                
+
                 betBean.setId(bet.getId());
                 if (bet.getGameSideA() != null) {
                     betBean.setGameSideAId(bet.getGameSideA().getId());
@@ -136,9 +127,9 @@ public class UserBetsController {
                 }
                 betBean.setScoreA(bet.getScoreA());
                 betBean.setScoreB(bet.getScoreB());
-                
+
             }
-            
+
         }
         final User user = this.userService.find(login);
         model.addAttribute("user", user);
@@ -150,29 +141,30 @@ public class UserBetsController {
         model.addAttribute("allGameSides", competitionGameSides);
         model.addAttribute("allBets", bets);
         model.addAttribute("multipleLeagues", CollectionUtils.size(userLeagues) > 1);
-        
-        return "managebets";
-        
-    }
-    
-    @RequestMapping("/bets/{leagueId}/save")
-    public String save(final ParticipationBean participationBean){
-    	final Authentication auth = SecurityContextHolder.getContext()
-				.getAuthentication();
-        if (auth instanceof AnonymousAuthenticationToken) {
-			/* The user is not logged in */
-			return "login";
-		}
 
-		final String login = participationBean.getLogin();
+        return "managebets";
+
+    }
+
+    @RequestMapping("/bets/{leagueId}/save")
+    public String save(final ParticipationBean participationBean) {
+        final Authentication auth = SecurityContextHolder.getContext()
+                .getAuthentication();
+        if (auth instanceof AnonymousAuthenticationToken) {
+            /* The user is not logged in */
+            return "login";
+        }
+
+        final String login = participationBean.getLogin();
         final Integer leagueId = participationBean.getLeagueId();
         final League league = this.leagueService.find(participationBean.getLeagueId());
         if (league.getBetsDeadLine().before(new Date())) {
-            logger.info("User " + login + " trying to edit the bets in league " + league.getId() + " - " + league.getName());
+            logger.info("User " + login + " trying to edit the bets in league " + league.getId() + " - "
+                    + league.getName());
             return "redirect:/scoreboard";
         }
-        
-    	for (final BetBean betBean : participationBean.getBetsByGame().values()) {
+
+        for (final BetBean betBean : participationBean.getBetsByGame().values()) {
             final Game game = this.gameService.find(betBean.getGameId());
             this.betService.save(
                     betBean.getId(),
@@ -180,14 +172,12 @@ public class UserBetsController {
                     login,
                     betBean.getGameId(),
                     game.getGameSideA() != null ? game.getGameSideA().getId() : betBean.getGameSideAId(),
-            		game.getGameSideB() != null ? game.getGameSideB().getId() : betBean.getGameSideBId(),
+                    game.getGameSideB() != null ? game.getGameSideB().getId() : betBean.getGameSideBId(),
                     betBean.getScoreA(),
                     betBean.getScoreB());
-            
-        }
-		return "redirect:/scoreboard";
-	}
-    
 
+        }
+        return "redirect:/scoreboard";
+    }
 
 }

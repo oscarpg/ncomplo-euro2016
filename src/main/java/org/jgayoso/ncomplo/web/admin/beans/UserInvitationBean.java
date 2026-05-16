@@ -6,33 +6,33 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 public class UserInvitationBean implements Serializable {
-	
+
 	private static final long serialVersionUID = 8123975853250730018L;
 
 	@NotNull
 	private Integer invitationId;
-	
+
 	@NotNull
 	@Pattern(regexp = "^(?!none|others)[a-zA-Z0-9]*$")
-    private String login;
-    
-    @NotNull
-    private String name;
-    
-    private String emailId;
-    
-    @NotNull
-    private String email;
-    
-    @NotNull
-    private String password;
-    
-    @NotNull
-    private String password2;
-    
-    public UserInvitationBean() {
-    	super();
-    }
+	private String login;
+
+	@NotNull
+	private String name;
+
+	private String emailId;
+
+	@NotNull
+	private String email;
+
+	@NotNull
+	private String password;
+
+	@NotNull
+	private String password2;
+
+	public UserInvitationBean() {
+		super();
+	}
 
 	public String getLogin() {
 		return login;
@@ -89,5 +89,5 @@ public class UserInvitationBean implements Serializable {
 	public void setInvitationId(Integer invitationId) {
 		this.invitationId = invitationId;
 	}
-    
+
 }

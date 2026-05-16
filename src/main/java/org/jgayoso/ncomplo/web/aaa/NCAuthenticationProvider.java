@@ -25,27 +25,27 @@ public class NCAuthenticationProvider implements AuthenticationProvider {
     private PasswordEncryptor passwordEncryptor;
     @Autowired
     private UserDetailsService userDetailsService;
-    
+
     @Autowired
     private UserService userService;
-    
 
     @Override
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
         if (logger.isInfoEnabled()) {
             logger.info("Trying to authenticate user " + authentication.getName());
         }
-        
+
         if (authentication.getName().equalsIgnoreCase("FirstUserToCreate") && this.userService.countUsers() == 0) {
-        	this.userService.save("admin", "admin", "oscardelpozog@gmail.com", true, true, new ArrayList<Integer>());
-        	this.userService.resetPassword("admin", true);
-        	throw new BadCredentialsException("Bad credentials for user " + authentication.getName());
+            this.userService.save("admin", "admin", "oscardelpozog@gmail.com", true, true, new ArrayList<Integer>());
+            this.userService.resetPassword("admin", true);
+            throw new BadCredentialsException("Bad credentials for user " + authentication.getName());
         }
-        
+
         final UserDetails userDetails = this.userDetailsService.loadUserByUsername(authentication.getName());
         if (userDetails != null) {
             try {
-                if (this.passwordEncryptor.checkPassword(authentication.getCredentials().toString(), userDetails.getPassword())) {
+                if (this.passwordEncryptor.checkPassword(authentication.getCredentials().toString(),
+                        userDetails.getPassword())) {
                     return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 }
             } catch (final EncryptionOperationNotPossibleException e) {
@@ -54,13 +54,13 @@ public class NCAuthenticationProvider implements AuthenticationProvider {
                 }
             }
         }
-        
+
         throw new BadCredentialsException("Bad credentials for user " + authentication.getName());
     }
 
     @Override
     public boolean supports(final Class<?> authentication) {
-    	return authentication.equals(UsernamePasswordAuthenticationToken.class);
+        return authentication.equals(UsernamePasswordAuthenticationToken.class);
     }
 
 }

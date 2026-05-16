@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 public class UserService {
 
@@ -35,58 +34,54 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private LeagueRepository leagueRepository;
-    
+
     @Autowired
     private InvitationRepository invitationRepository;
 
     @Autowired
     private ForgotPasswordTokenRepository forgotPasswordTokenRepository;
-    
+
     @Autowired
     private PasswordEncryptor passwordEncryptor;
 
     @Autowired
     private EmailServiceFactory emailServiceFactory;
-    
 
     @Value("${ncomplo.server.url}")
     private String baseUrl;
 
     private static final Pattern loginPatter = Pattern.compile("^(?!none|others)[a-zA-Z0-9]*$");
-    
-    
+
     public UserService() {
         super();
     }
-    
-    
+
     @Transactional
     public User find(final String login) {
         return this.userRepository.findOne(login);
     }
-    
+
     public User findByEmail(final String email) {
         return this.userRepository.findByEmail(email);
     }
-    
-    
+
     @Transactional
     public List<User> findAll(final Locale locale) {
-        final List<User> users = 
-                IterableUtils.toList(this.userRepository.findAll());
+        final List<User> users = IterableUtils.toList(this.userRepository.findAll());
         Collections.sort(users, new UserComparator(locale));
         return users;
     }
-    
+
     public long countUsers() {
-    	return this.userRepository.count();
+        return this.userRepository.count();
     }
 
     @Transactional
-    public User registerLoggedUserFromInvitation(final Integer invitationId, final String login, final Integer leagueId) throws LeagueClosedException {
+    public User registerLoggedUserFromInvitation(final Integer invitationId, final String login, final Integer leagueId)
+            throws LeagueClosedException {
         final User existentUser = this.find(login);
         final League league = this.leagueRepository.findOne(leagueId);
         if (league.getBetsDeadLine().before(new Date())) {
@@ -103,31 +98,31 @@ public class UserService {
 
     }
 
-	@Transactional
-	public User registerFromInvitation(final Integer invitationId, final String login, final String name, final String email,
-			final Integer leagueId, final String password) throws LeagueClosedException, InvalidLoginException {
-		
-		final User existentUser = this.find(login);
-		
-		final League league = this.leagueRepository.findOne(leagueId);
-		if (league.getBetsDeadLine().before(new Date())) {
-			throw new LeagueClosedException(leagueId);
-		}
-        
-		if (existentUser != null) {
-			this.acceptInvitation(invitationId, leagueId, existentUser);
-			return existentUser;
-		}
+    @Transactional
+    public User registerFromInvitation(final Integer invitationId, final String login, final String name,
+            final String email,
+            final Integer leagueId, final String password) throws LeagueClosedException, InvalidLoginException {
 
-		if (!loginPatter.matcher(login).matches()) {
-		    logger.warn("Invalid login "+ login);
-		    throw new InvalidLoginException(login);
+        final User existentUser = this.find(login);
+
+        final League league = this.leagueRepository.findOne(leagueId);
+        if (league.getBetsDeadLine().before(new Date())) {
+            throw new LeagueClosedException(leagueId);
         }
 
-		final String hashedNewPassword = 
-				this.passwordEncryptor.encryptPassword(password);
+        if (existentUser != null) {
+            this.acceptInvitation(invitationId, leagueId, existentUser);
+            return existentUser;
+        }
 
-		final User user = new User();
+        if (!loginPatter.matcher(login).matches()) {
+            logger.warn("Invalid login " + login);
+            throw new InvalidLoginException(login);
+        }
+
+        final String hashedNewPassword = this.passwordEncryptor.encryptPassword(password);
+
+        final User user = new User();
         user.setLogin(login);
         user.setName(name);
         user.setEmail(email);
@@ -141,24 +136,24 @@ public class UserService {
 
         final Invitation invitation = this.invitationRepository.findOne(invitationId);
         if (invitation.getToken() == null) {
-        	this.invitationRepository.delete(invitationId);
+            this.invitationRepository.delete(invitationId);
         }
         return newUser;
-	}
+    }
 
-	@Transactional
+    @Transactional
     public void acceptInvitation(final Integer invitationId, final Integer leagueId, final User user) {
-	    
-	    final League league = this.leagueRepository.findOne(leagueId);
-	    user.getLeagues().add(league);
+
+        final League league = this.leagueRepository.findOne(leagueId);
+        user.getLeagues().add(league);
         league.getParticipants().add(user);
-        
+
         final Invitation invitation = this.invitationRepository.findOne(invitationId);
-        if (invitation.getToken() == null) { 
-        	this.invitationRepository.delete(invitationId);
+        if (invitation.getToken() == null) {
+            this.invitationRepository.delete(invitationId);
         }
-	}
-    
+    }
+
     @Transactional
     public User save(
             final String login,
@@ -167,12 +162,11 @@ public class UserService {
             final boolean admin,
             final boolean active,
             final List<Integer> leagueIds) {
-        
+
         final boolean userExists = this.userRepository.exists(login);
-        
-        final User user =
-                (!userExists? new User() : this.userRepository.findOne(login));
-        
+
+        final User user = (!userExists ? new User() : this.userRepository.findOne(login));
+
         user.setLogin(login);
 
         user.setName(name);
@@ -189,15 +183,14 @@ public class UserService {
             user.getLeagues().add(league);
             league.getParticipants().add(user);
         }
-        
+
         if (!userExists) {
             return this.userRepository.save(user);
         }
-        
-        return user;
-        
-    }
 
+        return user;
+
+    }
 
     @Transactional
     public void forgotPassword(final String email) {
@@ -224,7 +217,8 @@ public class UserService {
             forgotPasswordTokenRepository.save(forgotPwdToken);
         }
 
-        String fptUrl = this.baseUrl + "/forgot-password-reset/" + forgotPwdToken.getLogin() + "/" + forgotPwdToken.getToken();
+        String fptUrl = this.baseUrl + "/forgot-password-reset/" + forgotPwdToken.getLogin() + "/"
+                + forgotPwdToken.getToken();
         emailService.sendForgotPassword(user, forgotPwdToken, fptUrl);
 
     }
@@ -232,15 +226,12 @@ public class UserService {
     public ForgotPasswordToken findForgotPasswordToken(User user) {
         return this.forgotPasswordTokenRepository.findByLogin(user.getLogin());
     }
-    
+
     @Transactional
     public String resetPassword(final String login, final boolean sendEmail) {
 
-        
-        final String newPassword = 
-                RandomStringUtils.randomAlphanumeric(10);
-        final String hashedNewPassword = 
-                this.passwordEncryptor.encryptPassword(newPassword);
+        final String newPassword = RandomStringUtils.randomAlphanumeric(10);
+        final String hashedNewPassword = this.passwordEncryptor.encryptPassword(newPassword);
 
         final User user = this.userRepository.findOne(login);
         user.setPassword(hashedNewPassword);
@@ -252,27 +243,26 @@ public class UserService {
             }
             emailService.sendNewPassword(user, newPassword, this.baseUrl);
         }
-        
-        return newPassword;
-        
-    }
 
+        return newPassword;
+
+    }
 
     @Transactional
     public User changePassword(final String login,
-                               final String oldPassword, final String newPassword) {
+            final String oldPassword, final String newPassword) {
         return this.changePassword(login, oldPassword, newPassword, null);
     }
-    
+
     @Transactional
     public User changePassword(final String login, final String newPassword, ForgotPasswordToken forgotPasswordToken) {
         return this.changePassword(login, null, newPassword, forgotPasswordToken);
     }
 
-    private User changePassword(final String login, final String oldPassword, final String newPassword, ForgotPasswordToken forgotPasswordToken) {
-        
-        final User user =
-                this.userRepository.findOne(login);
+    private User changePassword(final String login, final String oldPassword, final String newPassword,
+            ForgotPasswordToken forgotPasswordToken) {
+
+        final User user = this.userRepository.findOne(login);
 
         if (oldPassword != null) {
             final String oldHashedPassword = user.getPassword();
@@ -281,27 +271,21 @@ public class UserService {
                 throw new InternalErrorException("Old password does not match!");
             }
         }
-        
-        final String hashedNewPassword = 
-                this.passwordEncryptor.encryptPassword(newPassword);
+
+        final String hashedNewPassword = this.passwordEncryptor.encryptPassword(newPassword);
         user.setPassword(hashedNewPassword);
 
         if (forgotPasswordToken != null) {
             this.forgotPasswordTokenRepository.delete(forgotPasswordToken.getId());
         }
-        
-        return user;
-        
-    }
-    
 
-    
-    
+        return user;
+
+    }
+
     @Transactional
     public void delete(final String login) {
         this.userRepository.delete(login);
     }
 
-    
-    
 }

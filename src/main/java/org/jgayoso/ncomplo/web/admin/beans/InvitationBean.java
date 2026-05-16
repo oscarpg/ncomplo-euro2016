@@ -5,20 +5,20 @@ import java.io.Serializable;
 import javax.validation.constraints.NotNull;
 
 public class InvitationBean implements Serializable {
-	
+
 	private static final long serialVersionUID = -4659300739087101820L;
 
 	@NotNull
 	private Integer leagueId;
-	
+
 	private String name;
-	
+
 	private String email;
 
 	public InvitationBean() {
 		super();
 	}
-	
+
 	public Integer getLeagueId() {
 		return this.leagueId;
 	}
@@ -42,5 +42,5 @@ public class InvitationBean implements Serializable {
 	public void setEmail(final String email) {
 		this.email = email;
 	}
-	
+
 }

@@ -19,21 +19,19 @@ import org.slf4j.LoggerFactory;
 
 public final class JavaScriptBetEvaluator {
 
-    
     private static final Logger logger = LoggerFactory.getLogger(JavaScriptBetEvaluator.class);
-    
-    
+
     public static BetEvalResult evaluate(final Bet bet, final BetType betType) {
 
         Context ctx = null;
-                
+
         final League league = bet.getLeague();
         final Competition competition = league.getCompetition();
         final Game game = bet.getGame();
         final Round round = game.getRound();
 
         try {
-            
+
             final List<Game> allGames = new ArrayList<>(competition.getGames());
             final List<GameSide> allGameSides = new ArrayList<>(competition.getGameSides());
             final List<Game> allGamesInRound = new ArrayList<>();
@@ -42,39 +40,39 @@ public final class JavaScriptBetEvaluator {
             final List<GameSide> allGameSidesInNextRounds = new ArrayList<>();
             final List<Game> allGamesInPreviousRounds = new ArrayList<>();
             final List<GameSide> allGameSidesInPreviousRounds = new ArrayList<>();
-            
+
             final int roundOrder = round.getOrder().intValue();
-            
+
             for (final Game iGame : allGames) {
-                
+
                 final Round iGameRound = iGame.getRound();
                 final int iGameRoundOrder = iGameRound.getOrder().intValue();
-                
+
                 if (iGameRound.getId().equals(round.getId())) {
                     // Comparation here is made by round id and not order,
                     // because some rounds could be different but have the
                     // same order (e.g. final and third-place match)
-                    
+
                     allGamesInRound.add(iGame);
                     allGameSidesInRound.add(iGame.getGameSideA());
                     allGameSidesInRound.add(iGame.getGameSideB());
-                    
+
                 } else if (iGameRoundOrder < roundOrder) {
-                    
+
                     allGamesInPreviousRounds.add(iGame);
                     allGameSidesInPreviousRounds.add(iGame.getGameSideA());
                     allGameSidesInPreviousRounds.add(iGame.getGameSideB());
-                    
-                } else  if (iGameRoundOrder > roundOrder) {
-                    
+
+                } else if (iGameRoundOrder > roundOrder) {
+
                     allGamesInNextRounds.add(iGame);
                     allGameSidesInNextRounds.add(iGame.getGameSideA());
                     allGameSidesInNextRounds.add(iGame.getGameSideB());
-                    
+
                 }
-                
+
             }
-            
+
             GameSide gameWinner = null;
             Boolean gameDraw = null;
             if (game.getScoreA() != null && game.getScoreB() != null) {
@@ -91,7 +89,6 @@ public final class JavaScriptBetEvaluator {
                 }
             }
 
-            
             GameSide betWinner = null;
             Boolean betDraw = null;
             if (bet.getScoreA() != null && bet.getScoreB() != null) {
@@ -107,23 +104,16 @@ public final class JavaScriptBetEvaluator {
                     betDraw = Boolean.FALSE;
                 }
             }
-            
-            Boolean gameSidesDefined =
-                    Boolean.valueOf(game.getGameSideA() != null && game.getGameSideB() != null);
-            Boolean betSidesDefined =
-                    Boolean.valueOf(bet.getGameSideA() != null && bet.getGameSideB() != null);
-            
-            Boolean gameScoresDefined =
-                    Boolean.valueOf(game.getScoreA() != null && game.getScoreB() != null);
-            Boolean betScoresDefined =
-                    Boolean.valueOf(bet.getScoreA() != null && bet.getScoreB() != null);
-            
 
-            
+            Boolean gameSidesDefined = Boolean.valueOf(game.getGameSideA() != null && game.getGameSideB() != null);
+            Boolean betSidesDefined = Boolean.valueOf(bet.getGameSideA() != null && bet.getGameSideB() != null);
+
+            Boolean gameScoresDefined = Boolean.valueOf(game.getScoreA() != null && game.getScoreB() != null);
+            Boolean betScoresDefined = Boolean.valueOf(bet.getScoreA() != null && bet.getScoreB() != null);
+
             ctx = Context.enter();
             final Scriptable scope = ctx.initStandardObjects();
-            
-            
+
             ScriptableObject.putProperty(scope, "bet", Context.javaToJS(bet, scope));
             ScriptableObject.putProperty(scope, "league", Context.javaToJS(league, scope));
             ScriptableObject.putProperty(scope, "competition", Context.javaToJS(competition, scope));
@@ -135,9 +125,12 @@ public final class JavaScriptBetEvaluator {
             ScriptableObject.putProperty(scope, "allGamesInRound", Context.javaToJS(allGamesInRound, scope));
             ScriptableObject.putProperty(scope, "allGameSidesInRound", Context.javaToJS(allGameSidesInRound, scope));
             ScriptableObject.putProperty(scope, "allGamesInNextRounds", Context.javaToJS(allGamesInNextRounds, scope));
-            ScriptableObject.putProperty(scope, "allGameSidesInNextRounds", Context.javaToJS(allGameSidesInNextRounds, scope));
-            ScriptableObject.putProperty(scope, "allGamesInPreviousRounds", Context.javaToJS(allGamesInPreviousRounds, scope));
-            ScriptableObject.putProperty(scope, "allGameSidesInPreviousRounds", Context.javaToJS(allGameSidesInPreviousRounds, scope));
+            ScriptableObject.putProperty(scope, "allGameSidesInNextRounds",
+                    Context.javaToJS(allGameSidesInNextRounds, scope));
+            ScriptableObject.putProperty(scope, "allGamesInPreviousRounds",
+                    Context.javaToJS(allGamesInPreviousRounds, scope));
+            ScriptableObject.putProperty(scope, "allGameSidesInPreviousRounds",
+                    Context.javaToJS(allGameSidesInPreviousRounds, scope));
             ScriptableObject.putProperty(scope, "betWinner", Context.javaToJS(betWinner, scope));
             ScriptableObject.putProperty(scope, "gameWinner", Context.javaToJS(gameWinner, scope));
             ScriptableObject.putProperty(scope, "betDraw", Context.javaToJS(betDraw, scope));
@@ -152,47 +145,44 @@ public final class JavaScriptBetEvaluator {
             result.setBetDraw(betDraw);
             result.setGameWinner(gameWinner);
             result.setGameDraw(gameDraw);
-            
+
             ScriptableObject.putProperty(scope, "result", Context.javaToJS(result, scope));
-            
+
             ctx.evaluateString(scope, betType.getSpec(), "<beteval>", 1, null);
-            
+
             if (logger.isTraceEnabled()) {
                 logger.trace("[NCOMPLO] SUCCESSFUL EVALUATION. " +
                         "[LEAGUE=\"" + league.getName() + "\" | " +
                         "USER=\"" + bet.getUser().getLogin() + "\" | " +
                         "GAME=\"" + game.getName() + "\" | " +
-                        "BETTYPE=\"" + betType.getName() + "\"] RESULT: " +  result);
+                        "BETTYPE=\"" + betType.getName() + "\"] RESULT: " + result);
             }
 
             return result;
-            
+
         } catch (final Exception e) {
-            
+
             throw new InternalErrorException(
                     "Error evaluating bet of type \"" +
-                    betType.getName() + "\" for user \"" +
-                    bet.getUser().getLogin() + "\" in league \"" +
-                    league.getName() + "\" for game \"" + game.getName() + "\"",e);
-            
+                            betType.getName() + "\" for user \"" +
+                            bet.getUser().getLogin() + "\" in league \"" +
+                            league.getName() + "\" for game \"" + game.getName() + "\"",
+                    e);
+
         } finally {
-            
+
             if (ctx != null) {
                 Context.exit();
             }
-            
-        }
-        
-    }
-    
 
-    
-    
+        }
+
+    }
+
     public static final class BetEvalResult {
-        
-        
+
         private Integer points = null;
-        private Integer winLevel = null; 
+        private Integer winLevel = null;
         private Integer sideAWinLevel = null;
         private Integer sideBWinLevel = null;
         private Integer scoreAWinLevel = null;
@@ -202,8 +192,7 @@ public final class JavaScriptBetEvaluator {
         private Boolean betDraw = null;
         private GameSide gameWinner = null;
         private Boolean gameDraw = null;
-        
-        
+
         public BetEvalResult() {
             super();
         }
@@ -221,7 +210,7 @@ public final class JavaScriptBetEvaluator {
             this.points = pointsEarned;
             this.pointsAssigned = true;
         }
-        
+
         public boolean isPointsAssigned() {
             return this.pointsAssigned;
         }
@@ -298,8 +287,6 @@ public final class JavaScriptBetEvaluator {
             this.gameDraw = gameDraw;
         }
 
-        
-        
         @Override
         public String toString() {
             return "BetEvalResult [points=" + this.points
@@ -308,9 +295,7 @@ public final class JavaScriptBetEvaluator {
                     + this.sideBWinLevel + ", scoreAWinLevel=" + this.scoreAWinLevel
                     + ", scoreBWinLevel=" + this.scoreBWinLevel + "]";
         }
-        
-        
+
     }
-    
-    
+
 }

@@ -5,21 +5,15 @@ import java.util.Locale;
 
 import org.jgayoso.ncomplo.business.entities.I18nNamedEntity;
 
+public final class I18nNamedEntityComparator implements Comparator<I18nNamedEntity> {
 
-
-
-public final class I18nNamedEntityComparator implements Comparator<I18nNamedEntity>{
-    
-    
     private final Locale locale;
-    
+
     public I18nNamedEntityComparator(final Locale locale) {
         super();
         this.locale = locale;
     }
-    
-    
-    
+
     @Override
     public int compare(final I18nNamedEntity o1, final I18nNamedEntity o2) {
         final String o1Name = o1.getName(this.locale);
@@ -32,6 +26,5 @@ public final class I18nNamedEntityComparator implements Comparator<I18nNamedEnti
         }
         return o1Name.compareTo(o2Name);
     }
-    
-    
+
 }

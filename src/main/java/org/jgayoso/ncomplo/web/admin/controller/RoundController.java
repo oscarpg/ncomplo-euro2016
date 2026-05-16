@@ -20,11 +20,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class RoundController {
 
     private static final String VIEW_BASE = "admin/competition/round/";
-    
-    
+
     @Autowired
     private CompetitionService competitionService;
-    
+
     @Autowired
     private RoundService roundService;
 
@@ -34,28 +33,26 @@ public class RoundController {
 
     @RequestMapping("/list")
     public String list(
-            @PathVariable("competitionId") final Integer competitionId, 
+            @PathVariable("competitionId") final Integer competitionId,
             final ModelMap model) {
-        
+
         final List<Round> rounds = this.roundService.findAll(competitionId);
-        
+
         model.addAttribute("allRounds", rounds);
         model.addAttribute("competition", this.competitionService.find(competitionId));
-        
+
         return VIEW_BASE + "list";
-        
+
     }
 
     @RequestMapping("/manage")
     public String manage(
-            @RequestParam(value="id",required=false)
-            final Integer id,
-            @PathVariable("competitionId")
-            final Integer competitionId,
+            @RequestParam(value = "id", required = false) final Integer id,
+            @PathVariable("competitionId") final Integer competitionId,
             final ModelMap model) {
 
         final RoundBean roundBean = new RoundBean();
-        
+
         if (id != null) {
             final Round round = this.roundService.find(id);
             roundBean.setId(round.getId());
@@ -64,30 +61,28 @@ public class RoundController {
             roundBean.getNamesByLang().addAll(LangBean.listFromMap(round.getNamesByLang()));
             roundBean.setOrder(round.getOrder());
         }
-        
+
         model.addAttribute("round", roundBean);
         model.addAttribute("competition", this.competitionService.find(competitionId));
-        
+
         return VIEW_BASE + "manage";
-        
+
     }
 
     @RequestMapping("/createDefaults")
-    public String createDefaults(@PathVariable("competitionId")
-                                 final Integer competitionId, final ModelMap model) {
+    public String createDefaults(@PathVariable("competitionId") final Integer competitionId, final ModelMap model) {
 
         this.roundService.createDefaults(competitionId);
 
         return "redirect:list";
 
     }
-    
+
     @RequestMapping("/save")
     public String save(
             final RoundBean roundBean,
             @SuppressWarnings("unused") final BindingResult bindingResult,
-            @PathVariable("competitionId")
-            final Integer competitionId) {
+            @PathVariable("competitionId") final Integer competitionId) {
 
         this.roundService.save(
                 roundBean.getId(),
@@ -95,22 +90,18 @@ public class RoundController {
                 roundBean.getName(),
                 LangBean.mapFromList(roundBean.getNamesByLang()),
                 roundBean.getOrder());
-        
+
         return "redirect:list";
-        
+
     }
 
-    
-    
     @RequestMapping("/delete")
     public String delete(
-            @RequestParam(value="id")
-            final Integer id) {
+            @RequestParam(value = "id") final Integer id) {
 
         this.roundService.delete(id);
         return "redirect:list";
-        
+
     }
-    
-    
+
 }

@@ -27,10 +27,10 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 public class GameResultUploader {
-	
+
 	private static final Logger logger = Logger.getLogger(GameResultUploader.class);
-	private static final RestTemplate restTemplate = new RestTemplate(); 
-	
+	private static final RestTemplate restTemplate = new RestTemplate();
+
 	@Autowired
 	private GameRepository gameRepository;
 	@Autowired
@@ -40,14 +40,14 @@ public class GameResultUploader {
 
 	@Autowired
 	private CompetitionRepository competitionRepository;
-	
+
 	public GameResultUploader() {
 		super();
 	}
-	
+
 	@Scheduled(fixedRate = 60000)
 	@Transactional
-	public void updateCurrentGame(){
+	public void updateCurrentGame() {
 
 		final List<Competition> competitions = this.competitionRepository.findByActiveIsTrueAndUpdaterUriIsNotNull();
 		if (CollectionUtils.isEmpty(competitions)) {
@@ -59,7 +59,7 @@ public class GameResultUploader {
 			if (StringUtils.isBlank(uri)) {
 				continue;
 			}
-			
+
 			final List<League> leagues = this.leagueRepository.findByCompetitionId(competitionId);
 			if (CollectionUtils.isEmpty(leagues)) {
 				continue;
@@ -99,9 +99,11 @@ public class GameResultUploader {
 							final String sideACode = game.getGameSideA().getCode();
 							final String sideBCode = game.getGameSideB().getCode();
 
-							if ((homeTeamCode.equalsIgnoreCase(sideACode) || awayTeamCode.equalsIgnoreCase(sideACode)) &&
-									(homeTeamCode.equalsIgnoreCase(sideBCode) || awayTeamCode.equalsIgnoreCase(sideBCode))) {
-								
+							if ((homeTeamCode.equalsIgnoreCase(sideACode) || awayTeamCode.equalsIgnoreCase(sideACode))
+									&&
+									(homeTeamCode.equalsIgnoreCase(sideBCode)
+											|| awayTeamCode.equalsIgnoreCase(sideBCode))) {
+
 								Integer sideAGoals = null;
 								Integer sideBGoals = null;
 								if (homeTeamCode.equalsIgnoreCase(sideACode)) {
@@ -139,7 +141,7 @@ public class GameResultUploader {
 						+ (ArrayUtils.isEmpty(e.getStackTrace()) ? "" : e.getStackTrace()[0]));
 			}
 		}
-		
+
 	}
 
 }

@@ -15,33 +15,28 @@ import org.jgayoso.ncomplo.exceptions.InternalErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
-
 @Component
 public class SQLAccessor {
-    
+
     @Autowired
     private DataSource dataSource;
 
-    
     public SQLAccessor() {
         super();
     }
 
-    
-    
     @SuppressWarnings("resource")
     public int executeUpdate(final String sql) {
-        
+
         Connection con = null;
         PreparedStatement st = null;
         try {
-            
+
             con = this.dataSource.getConnection();
             st = con.prepareStatement(sql);
-            
+
             return st.executeUpdate();
-            
+
         } catch (final Exception e) {
             throw new InternalErrorException(e);
         } finally {
@@ -60,30 +55,26 @@ public class SQLAccessor {
                 }
             }
         }
-        
+
     }
 
-    
-
-    
-    
     @SuppressWarnings("resource")
     public SQLQueryResult executeQuery(final String sql) {
-        
+
         Connection con = null;
         PreparedStatement st = null;
         ResultSet rs = null;
         try {
-            
+
             con = this.dataSource.getConnection();
             st = con.prepareStatement(sql);
-            
+
             rs = st.executeQuery();
-            
+
             final SQLQueryResult result = new SQLQueryResult();
-            
+
             while (rs.next()) {
-                
+
                 if (!result.hasMetaData()) {
                     retrieveMetaData(result, rs);
                 }
@@ -93,13 +84,13 @@ public class SQLAccessor {
                 for (int i = 1; i <= result.getColumnCount(); i++) {
                     dataRow.add(rs.getObject(i));
                 }
-                
+
                 result.addDataRow(dataRow);
-                
+
             }
-            
+
             return result;
-            
+
         } catch (final Exception e) {
             throw new InternalErrorException(e);
         } finally {
@@ -125,26 +116,23 @@ public class SQLAccessor {
                 }
             }
         }
-        
+
     }
 
-    
-    
-    private void retrieveMetaData(final SQLQueryResult result, final ResultSet rs) 
+    private void retrieveMetaData(final SQLQueryResult result, final ResultSet rs)
             throws SQLException {
-        
+
         final ResultSetMetaData metaData = rs.getMetaData();
         final int columnCount = metaData.getColumnCount();
-        
+
         final List<String> columnNames = new ArrayList<>();
-        
-        for (int i = 1; i <= columnCount;i++) {
+
+        for (int i = 1; i <= columnCount; i++) {
             columnNames.add(metaData.getColumnLabel(i));
         }
 
         result.setColumnNames(columnNames);
-        
+
     }
-    
+
 }
-    

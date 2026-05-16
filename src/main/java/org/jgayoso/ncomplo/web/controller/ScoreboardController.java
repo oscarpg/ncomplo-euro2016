@@ -22,10 +22,8 @@ import org.jgayoso.ncomplo.business.services.UserService;
 import org.jgayoso.ncomplo.business.util.I18nNamedEntityComparator;
 import org.jgayoso.ncomplo.business.views.ScoreboardEntry;
 import org.jgayoso.ncomplo.business.views.TodayEventsView;
-import org.jgayoso.ncomplo.exceptions.InternalErrorException;
 import org.jgayoso.ncomplo.web.beans.LeagueSelectorBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -147,7 +145,7 @@ public class ScoreboardController {
 
 		final List<ScoreboardEntry> scoreboardEntries = this.scoreboardService.computeScoreboard(leagueId, roundId,
 				locale);
-		
+
 		final TodayEventsView todayEvents = this.leagueService.getTodayInformation(leagueId);
 		model.addAttribute("todayEvents", todayEvents);
 
@@ -200,8 +198,10 @@ public class ScoreboardController {
 	}
 
 	@RequestMapping(value = { "/downloadbets/{leagueId}/{login}" })
-	public void downloadbets(@PathVariable("leagueId") final Integer leagueId, @PathVariable("login") final String login,
-			 final HttpServletRequest request, HttpServletResponse response, final RedirectAttributes redirectAttributes) throws IOException {
+	public void downloadbets(@PathVariable("leagueId") final Integer leagueId,
+			@PathVariable("login") final String login,
+			final HttpServletRequest request, HttpServletResponse response, final RedirectAttributes redirectAttributes)
+			throws IOException {
 
 		final Locale locale = RequestContextUtils.getLocale(request);
 
@@ -216,9 +216,11 @@ public class ScoreboardController {
 		final List<Bet> bets = this.betService.findByLeagueId(leagueId, locale);
 		Collections.sort(bets, new Bet.BetByLoginComparator(locale));
 		StringBuilder csvContent = new StringBuilder("login").append(separator).append("#game").append(separator)
-				.append("team1").append(separator).append("team2").append(separator).append("score1").append(separator).append("score2").append(endLine);
-		for (Bet bet: bets) {
-			csvContent.append(bet.getUser().getName()).append(separator).append(bet.getGame().getOrder()).append(separator)
+				.append("team1").append(separator).append("team2").append(separator).append("score1").append(separator)
+				.append("score2").append(endLine);
+		for (Bet bet : bets) {
+			csvContent.append(bet.getUser().getName()).append(separator).append(bet.getGame().getOrder())
+					.append(separator)
 					.append(bet.getGameSideA() == null ? "null" : bet.getGameSideA().getName(locale)).append(separator)
 					.append(bet.getGameSideB() == null ? "null" : bet.getGameSideB().getName(locale)).append(separator)
 					.append(bet.getScoreA()).append(separator).append(bet.getScoreB()).append(endLine);

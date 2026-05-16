@@ -11,7 +11,7 @@ import org.jgayoso.ncomplo.business.entities.Round;
 public class TodayRoundGamesAndBetsView implements Serializable, Comparable<TodayRoundGamesAndBetsView> {
 
 	private static final long serialVersionUID = -8509945906238964450L;
-	
+
 	private final Round round;
 	private final List<Game> games;
 	private int maxSideMattersBets;
@@ -36,7 +36,7 @@ public class TodayRoundGamesAndBetsView implements Serializable, Comparable<Toda
 	public Round getRound() {
 		return this.round;
 	}
-	
+
 	public List<Game> getGames() {
 		return games;
 	}
@@ -65,6 +65,5 @@ public class TodayRoundGamesAndBetsView implements Serializable, Comparable<Toda
 	public int compareTo(TodayRoundGamesAndBetsView o) {
 		return this.getRound().compareTo(o.getRound());
 	}
-
 
 }

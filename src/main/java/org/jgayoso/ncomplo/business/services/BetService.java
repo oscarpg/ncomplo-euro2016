@@ -2,7 +2,6 @@ package org.jgayoso.ncomplo.business.services;
 
 import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jgayoso.ncomplo.business.entities.*;
 import org.jgayoso.ncomplo.business.entities.Bet.BetComparator;
 import org.jgayoso.ncomplo.business.entities.repositories.BetRepository;
@@ -10,114 +9,88 @@ import org.jgayoso.ncomplo.business.entities.repositories.GameRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.GameSideRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.LeagueRepository;
 import org.jgayoso.ncomplo.business.entities.repositories.UserRepository;
-import org.jgayoso.ncomplo.exceptions.InternalErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-
-
 
 @Service
 public class BetService {
-    
-    
-    @Autowired
-    private LeagueRepository leagueRepository;
-    
-    
-    @Autowired
-    private LeagueService leagueService;
-    
-    @Autowired
-    private BetRepository betRepository;
-    
-    @Autowired
-    private GameRepository gameRepository;
-    
-    @Autowired
-    private GameSideRepository gameSideRepository;
-    
-    @Autowired
-    private UserRepository userRepository;
-    
-    
-    public BetService() {
-        super();
-    }
-    
-    
-    public Bet find(final Integer id) {
-        return this.betRepository.findOne(id);
-    }
-    
-    public List<Bet> findByLeagueIdAndUserLogin(
-            final Integer leagueId, final String login, final Locale locale) {
-        final List<Bet> bets =
-                this.betRepository.findByLeagueIdAndUserLogin(leagueId, login);
-        Collections.sort(bets, new BetComparator(locale));
-        return bets;
-    }
 
-    public List<Bet> findByLeagueId(
-            final Integer leagueId, final Locale locale) {
-        final List<Bet> bets =
-                this.betRepository.findByLeagueId(leagueId);
-        Collections.sort(bets, new BetComparator(locale));
-        return bets;
-    }
-    
+        @Autowired
+        private LeagueRepository leagueRepository;
 
+        @Autowired
+        private BetRepository betRepository;
 
-    @Transactional
-    public Bet save(
-            final Integer id,
-            final Integer leagueId,
-            final String login,
-            final Integer gameId,
-            final Integer gameSideAId,
-            final Integer gameSideBId,
-            final Integer scoreA,
-            final Integer scoreB) {
+        @Autowired
+        private GameRepository gameRepository;
 
-        final League league = 
-                this.leagueRepository.findOne(leagueId);
-        final User user = 
-                this.userRepository.findOne(login);
-        final Game game = 
-                this.gameRepository.findOne(gameId);
-        
-        final GameSide gameSideA = 
-                (gameSideAId == null? null : this.gameSideRepository.findOne(gameSideAId));
-        final GameSide gameSideB = 
-                (gameSideBId == null? null : this.gameSideRepository.findOne(gameSideBId));
-        
-        final Bet bet =
-                (id == null? new Bet() : this.betRepository.findOne(id));
+        @Autowired
+        private GameSideRepository gameSideRepository;
 
-        bet.setLeague(league);
-        bet.setGame(game);
-        bet.setUser(user);
-        bet.setGameSideA(gameSideA);
-        bet.setGameSideB(gameSideB);
-        bet.setScoreA(scoreA);
-        bet.setScoreB(scoreB);
-        
-        if (id == null) {
-            return this.betRepository.save(bet);
+        @Autowired
+        private UserRepository userRepository;
+
+        public BetService() {
+                super();
         }
-        return bet;
-        
-    }
-    
 
-    
-    @Transactional
-    public void delete(final Integer betId) {
-        this.betRepository.delete(betId);
-    }
+        public Bet find(final Integer id) {
+                return this.betRepository.findOne(id);
+        }
 
-    
-    
-    
+        public List<Bet> findByLeagueIdAndUserLogin(
+                        final Integer leagueId, final String login, final Locale locale) {
+                final List<Bet> bets = this.betRepository.findByLeagueIdAndUserLogin(leagueId, login);
+                Collections.sort(bets, new BetComparator(locale));
+                return bets;
+        }
+
+        public List<Bet> findByLeagueId(
+                        final Integer leagueId, final Locale locale) {
+                final List<Bet> bets = this.betRepository.findByLeagueId(leagueId);
+                Collections.sort(bets, new BetComparator(locale));
+                return bets;
+        }
+
+        @Transactional
+        public Bet save(
+                        final Integer id,
+                        final Integer leagueId,
+                        final String login,
+                        final Integer gameId,
+                        final Integer gameSideAId,
+                        final Integer gameSideBId,
+                        final Integer scoreA,
+                        final Integer scoreB) {
+
+                final League league = this.leagueRepository.findOne(leagueId);
+                final User user = this.userRepository.findOne(login);
+                final Game game = this.gameRepository.findOne(gameId);
+
+                final GameSide gameSideA = (gameSideAId == null ? null : this.gameSideRepository.findOne(gameSideAId));
+                final GameSide gameSideB = (gameSideBId == null ? null : this.gameSideRepository.findOne(gameSideBId));
+
+                final Bet bet = (id == null ? new Bet() : this.betRepository.findOne(id));
+
+                bet.setLeague(league);
+                bet.setGame(game);
+                bet.setUser(user);
+                bet.setGameSideA(gameSideA);
+                bet.setGameSideB(gameSideB);
+                bet.setScoreA(scoreA);
+                bet.setScoreB(scoreB);
+
+                if (id == null) {
+                        return this.betRepository.save(bet);
+                }
+                return bet;
+
+        }
+
+        @Transactional
+        public void delete(final Integer betId) {
+                this.betRepository.delete(betId);
+        }
+
 }

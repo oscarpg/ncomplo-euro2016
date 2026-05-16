@@ -8,22 +8,13 @@ public class AdminController {
 
     private static final String VIEW_BASE = "admin/";
 
-    
-    
-    
     public AdminController() {
         super();
     }
-    
 
-
-
-    
-    
     @RequestMapping("/admin")
     public String index() {
         return VIEW_BASE + "index";
     }
-    
-    
+
 }

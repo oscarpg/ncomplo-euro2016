@@ -3,7 +3,7 @@ package org.jgayoso.ncomplo.web.admin.controller;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -40,30 +40,25 @@ public class GameController {
 
     private static final String VIEW_BASE = "admin/competition/game/";
     private static final SimpleDateFormat timeDateFormat = new SimpleDateFormat("HH:mm");
-    
-    
+
     @Autowired
     private CompetitionService competitionService;
-    
+
     @Autowired
     private GameService gameService;
-    
+
     @Autowired
     private RoundService roundService;
-    
+
     @Autowired
     private GameSideService gameSideService;
-    
+
     @Autowired
     private BetTypeService betTypeService;
 
-    
-    
-    
     public GameController() {
         super();
     }
-    
 
     @InitBinder
     public void initDateBinder(final WebDataBinder dataBinder) {
@@ -71,39 +66,31 @@ public class GameController {
         sdf.setLenient(false);
         dataBinder.registerCustomEditor(Date.class, new CustomDateEditor(sdf, false));
     }
-    
-    
-    
-    
+
     @RequestMapping("/list")
     public String list(
-            @PathVariable("competitionId") final Integer competitionId, 
-            final HttpServletRequest request, 
+            @PathVariable("competitionId") final Integer competitionId,
+            final HttpServletRequest request,
             final ModelMap model) {
-        
-        final List<Game> games =
-                this.gameService.findAll(competitionId,RequestContextUtils.getLocale(request));
-        
+
+        final List<Game> games = this.gameService.findAll(competitionId, RequestContextUtils.getLocale(request));
+
         model.addAttribute("allGames", games);
         model.addAttribute("competition", this.competitionService.find(competitionId));
-        
+
         return VIEW_BASE + "list";
-        
+
     }
 
-    
-    
     @RequestMapping("/manage")
     public String manage(
-            @RequestParam(value="id",required=false)
-            final Integer id,
-            @PathVariable("competitionId")
-            final Integer competitionId,
+            @RequestParam(value = "id", required = false) final Integer id,
+            @PathVariable("competitionId") final Integer competitionId,
             final ModelMap model,
             final HttpServletRequest request) {
 
         final GameBean gameBean = new GameBean();
-        
+
         if (id != null) {
             final Game game = this.gameService.find(id);
             gameBean.setId(game.getId());
@@ -117,45 +104,43 @@ public class GameController {
             gameBean.setRoundId(game.getRound().getId());
             gameBean.setOrder(game.getOrder());
             gameBean.setGameSideAId(
-                    game.getGameSideA() == null?
-                            null : game.getGameSideA().getId());
+                    game.getGameSideA() == null ? null : game.getGameSideA().getId());
             gameBean.setGameSideBId(
-                    game.getGameSideB() == null?
-                            null : game.getGameSideB().getId());
+                    game.getGameSideB() == null ? null : game.getGameSideB().getId());
             gameBean.setScoreA(game.getScoreA());
             gameBean.setScoreB(game.getScoreB());
         }
-        
+
         model.addAttribute("game", gameBean);
         model.addAttribute("competition", this.competitionService.find(competitionId));
-        
+
         final Locale locale = RequestContextUtils.getLocale(request);
         model.addAttribute("allRounds", this.roundService.findAll(competitionId));
         model.addAttribute("allBetTypes", this.betTypeService.findAllOrderByName(competitionId, locale));
         model.addAttribute("allGameSides", this.gameSideService.findAll(competitionId, locale));
-        
+
         return VIEW_BASE + "manage";
-        
+
     }
 
-    
-    
     @RequestMapping("/save")
     public String save(
             final GameBean gameBean,
             final BindingResult bindingResult,
-            @PathVariable("competitionId")
-            final Integer competitionId) {
+            @PathVariable("competitionId") final Integer competitionId) {
 
-    	if (StringUtils.isNotBlank(gameBean.getTime()) && gameBean.getDate() != null) {
-	    	final LocalTime localTime = LocalTime.parse(gameBean.getTime(), DateTimeFormatter.ofPattern("HH:mm"));
-	        final int hour = localTime.get(ChronoField.CLOCK_HOUR_OF_DAY);
-	        final int minute = localTime.get(ChronoField.MINUTE_OF_HOUR);
-	        
-	        gameBean.getDate().setHours(hour);
-	        gameBean.getDate().setMinutes(minute);
-    	}
-    	
+        if (StringUtils.isNotBlank(gameBean.getTime()) && gameBean.getDate() != null) {
+            final LocalTime localTime = LocalTime.parse(gameBean.getTime(), DateTimeFormatter.ofPattern("HH:mm"));
+
+            final Calendar cal = Calendar.getInstance();
+            cal.setTime(gameBean.getDate());
+            cal.set(Calendar.HOUR_OF_DAY, localTime.getHour());
+            cal.set(Calendar.MINUTE, localTime.getMinute());
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            gameBean.setDate(cal.getTime());
+        }
+
         this.gameService.save(
                 gameBean.getId(),
                 competitionId,
@@ -169,30 +154,26 @@ public class GameController {
                 gameBean.getGameSideBId(),
                 gameBean.getScoreA(),
                 gameBean.getScoreB());
-        
+
         return "redirect:list";
-        
+
     }
 
     @RequestMapping("/deleteAll")
-    public String deleteAll(@RequestParam(value="competitionId") final Integer competitionId) {
+    public String deleteAll(@RequestParam(value = "competitionId") final Integer competitionId) {
 
         this.gameService.deleteAll(competitionId);
         return "redirect:list";
 
     }
-    
+
     @RequestMapping("/delete")
     public String delete(
-            @RequestParam(value="id")
-            final Integer id) {
+            @RequestParam(value = "id") final Integer id) {
 
         this.gameService.delete(id);
         return "redirect:list";
-        
+
     }
 
-
-    
-    
 }

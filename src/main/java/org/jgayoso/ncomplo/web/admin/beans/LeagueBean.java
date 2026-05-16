@@ -1,20 +1,15 @@
 package org.jgayoso.ncomplo.web.admin.beans;
 
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
-import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.Length;
 
 public class LeagueBean implements Serializable {
 
 	private static final long serialVersionUID = 2981813244600985282L;
-
 
 	@NotNull
 	private Integer id;

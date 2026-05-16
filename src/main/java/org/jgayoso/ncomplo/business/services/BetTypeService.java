@@ -41,8 +41,7 @@ public class BetTypeService {
     public BetTypeService() {
         super();
     }
-    
-    
+
     @Transactional
     public BetType find(final Integer id) {
         return this.betTypeRepository.findOne(id);
@@ -51,34 +50,29 @@ public class BetTypeService {
     public BetType findByName(final Integer competitionId, String name) {
         return this.betTypeRepository.findByCompetitionIdAndName(competitionId, name);
     }
-    
-    
+
     @Transactional
     public List<BetType> findAllOrderByName(final Integer competitionId, final Locale locale) {
-        final List<BetType> betTypes = 
-                IterableUtils.toList(this.betTypeRepository.findByCompetitionId(competitionId));
+        final List<BetType> betTypes = IterableUtils.toList(this.betTypeRepository.findByCompetitionId(competitionId));
         Collections.sort(betTypes, new I18nNamedEntityComparator(locale));
         return betTypes;
     }
 
-    
     @Transactional
     public BetType save(
             final Integer id,
             final Integer competitionId,
             final String name,
-            final Map<String,String> namesByLang,
+            final Map<String, String> namesByLang,
             final String spec,
             final boolean sidesMatter,
             final boolean scoreMatter,
             final boolean resultMatter) {
 
-        final Competition competition = 
-                this.competitionRepository.findOne(competitionId);
-                
-        final BetType betType =
-                (id == null? new BetType() : this.betTypeRepository.findOne(id));
-        
+        final Competition competition = this.competitionRepository.findOne(competitionId);
+
+        final BetType betType = (id == null ? new BetType() : this.betTypeRepository.findOne(id));
+
         betType.setCompetition(competition);
         betType.setName(name);
         betType.getNamesByLang().clear();
@@ -87,28 +81,24 @@ public class BetTypeService {
         betType.setSidesMatter(sidesMatter);
         betType.setScoreMatter(scoreMatter);
         betType.setResultMatter(resultMatter);
-        
+
         if (id == null) {
             competition.getBetTypes().add(betType);
             return this.betTypeRepository.save(betType);
         }
         return betType;
-        
-    }
-    
-    
-    
-    @Transactional
-    public void delete(final Integer betTypeId) {
-        
-        final BetType betType = 
-                this.betTypeRepository.findOne(betTypeId);
-        final Competition competition = betType.getCompetition();
-        
-        competition.getBetTypes().remove(betType);
-        
+
     }
 
+    @Transactional
+    public void delete(final Integer betTypeId) {
+
+        final BetType betType = this.betTypeRepository.findOne(betTypeId);
+        final Competition competition = betType.getCompetition();
+
+        competition.getBetTypes().remove(betType);
+
+    }
 
     @Transactional
     public void createDefaults(Integer competitionId) {

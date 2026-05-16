@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 public class NotificationBean implements Serializable {
 
 	private static final long serialVersionUID = 5206428672026881880L;
-	
+
 	@NotNull
 	private Integer leagueId;
 
@@ -20,7 +20,7 @@ public class NotificationBean implements Serializable {
 	public NotificationBean() {
 		super();
 	}
-	
+
 	public NotificationBean(final Integer leagueId) {
 		super();
 		this.leagueId = leagueId;
